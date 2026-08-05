@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--color-primario:#A9705F;--color-acento:#C9A227;--color-secundario:#8A9A7B;--color-fondo:#FDF6F3;--color-superficie:#FFFFFF;--color-texto:#4A322B;--color-texto-suave:#8A6A5E;--estado-exito:#2F9E5B;--estado-advertencia:#D9A441;--estado-error:#C1443A;--fuente-cuerpo:'Inter',system-ui,sans-serif;--fuente-titulos:'Playfair Display',Georgia,serif}
+body{margin:0;background:var(--color-fondo)}
+@keyframes brillo{0%,100%{opacity:.45}50%{opacity:1}}
+a{color:var(--color-primario)}a:hover{color:#8F5A4B}
+</style>
+</helmet>
+<div style="font-family:var(--fuente-cuerpo);color:var(--color-texto);background:var(--color-fondo);width:100%;display:flex;align-items:stretch;flex-direction:var(--dir,row)">
+<sc-if value="{{ conChrome }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:none;--nav-agenda-bg:color-mix(in srgb,var(--color-primario) 10%, white);--nav-agenda-c:var(--color-primario);--nav-agenda-w:500"><dc-import name="Chrome" formato="{{ formato }}" hint-size="232px,700px"></dc-import></div>
+</sc-if>
+<div style="flex:1;min-width:0;padding:var(--pad,24px 28px);box-sizing:border-box">
+<sc-if value="{{ noEsFicha }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="display:inline-flex;background:#F4E9E3;border-radius:9px;padding:3px;flex:none">
+      <sc-if value="{{ tabDia }}" hint-placeholder-val="{{ true }}"><a href="#" style="padding:7px 14px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Día</a></sc-if>
+      <sc-if value="{{ noTabDia }}" hint-placeholder-val="{{ false }}"><a href="#" style="padding:7px 14px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Día</a></sc-if>
+      <sc-if value="{{ tabSemana }}" hint-placeholder-val="{{ false }}"><a href="#" style="padding:7px 14px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Semana</a></sc-if>
+      <sc-if value="{{ noTabSemana }}" hint-placeholder-val="{{ true }}"><a href="#" style="padding:7px 14px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Semana</a></sc-if>
+      <sc-if value="{{ tabMes }}" hint-placeholder-val="{{ false }}"><a href="#" style="padding:7px 14px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Mes</a></sc-if>
+      <sc-if value="{{ noTabMes }}" hint-placeholder-val="{{ true }}"><a href="#" style="padding:7px 14px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Mes</a></sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <a href="#" aria-label="Periodo anterior" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--color-superficie);box-shadow:0 1px 2px rgba(74,50,43,.1);color:var(--color-texto-suave)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6 8.5 12l6 6"></path></svg></a>
+      <a href="#" aria-label="Periodo siguiente" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--color-superficie);box-shadow:0 1px 2px rgba(74,50,43,.1);color:var(--color-texto-suave)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9.5 6 6 6-6 6"></path></svg></a>
+      <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16px;margin-left:4px;white-space:nowrap">{{ tituloPeriodo }}</div>
+    </div>
+    <div style="flex:1"></div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 16px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Agendar cita</a>
+  </div>
+  <sc-if value="{{ esDia }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ estadoNormal }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:16px;align-items:flex-start;margin-top:16px">
+        <div style="flex:1;min-width:0;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);overflow:hidden">
+          <sc-if value="{{ mostrarEmpleadas }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;border-bottom:1px solid #F1E4DE">
+              <div style="width:52px;flex:none"></div>
+              <sc-for list="{{ columnas }}" as="col" hint-placeholder-count="3">
+                <div style="flex:1;text-align:center;padding:10px 6px;font-size:13px;font-weight:500;border-left:1px solid #F3E7E1;min-width:0">{{ col.nombre }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex">
+            <div style="width:52px;flex:none;padding-top:0">
+              <sc-for list="{{ horas }}" as="h" hint-placeholder-count="12">
+                <div style="height:56px;font-size:11px;color:var(--color-texto-suave);text-align:right;padding:4px 8px 0 0;box-sizing:border-box">{{ h }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ columnas }}" as="col" hint-placeholder-count="1">
+              <div style="flex:1;position:relative;border-left:1px solid #F3E7E1;min-width:0">
+                <sc-for list="{{ horas }}" as="h" hint-placeholder-count="12">
+                  <div style="height:56px;border-top:1px solid #F7EDE7;box-sizing:border-box"></div>
+                </sc-for>
+                <sc-for list="{{ col.citas }}" as="c" hint-placeholder-count="4">
+                  <div style="position:absolute;left:6px;right:6px;top:{{ c.top }};height:{{ c.alto }};background:{{ c.bg }};border-radius:8px;padding:6px 9px;box-sizing:border-box;overflow:hidden">
+                    <div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span style="font-size:11.5px;font-weight:500;color:{{ c.color }}">{{ c.hora }}</span><span style="font-size:10.5px;font-weight:500;color:{{ c.color }};text-transform:uppercase;letter-spacing:.04em">{{ c.estadoTxt }}</span></div>
+                    <div style="font-size:13px;font-weight:500;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.nombre }}</div>
+                    <div style="font-size:11.5px;color:var(--color-texto-suave);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.servicio }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ conFicha }}" hint-placeholder-val="{{ false }}">
+          <div style="width:340px;flex:none;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:18px 20px;box-sizing:border-box">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">Confirmada</span>
+              <a href="#" aria-label="Cerrar" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:var(--color-texto-suave)" style-hover="background:#FAF3EF"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg></a>
+            </div>
+            <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:18px;margin-top:12px">Hoy · 4:00 – 5:30 pm</div>
+            <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:2px">90 min · Atiende Chio</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px;background:var(--color-fondo);border-radius:10px">
+              <div style="width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex:none">M</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:500">Mariana López</div>
+                <div style="font-size:12.5px;color:var(--color-texto-suave)">722 345 6789</div>
+              </div>
+              <a href="#" style="display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1.5px solid var(--color-secundario);border-radius:8px;font-size:12.5px;font-weight:500;color:var(--color-texto);text-decoration:none;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#68785B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-7.8 13.4L3 21l4.7-1.2A9 9 0 1 0 12 3z"></path></svg>WhatsApp</a>
+            </div>
+            <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:18px">Servicios</div>
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-top:8px"><span>Escultura acrílica</span><span style="color:var(--color-texto-suave)">$450 · 90 min</span></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-top:10px;padding-top:10px;border-top:1px solid #F3E7E1;font-weight:500"><span>Total</span><span>$450</span></div>
+            <div style="display:flex;gap:24px;margin-top:16px">
+              <div><div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Forma de uña</div><div style="font-size:13.5px;margin-top:4px">Almendrada</div></div>
+              <div><div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Estado</div><div style="font-size:13.5px;margin-top:4px">Confirmada</div></div>
+            </div>
+            <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:16px">Notas</div>
+            <div style="font-size:13px;color:var(--color-texto-suave);margin-top:5px;line-height:1.45">Prefiere largo corto. Trae diseño de referencia en el teléfono.</div>
+            <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:16px">Historial</div>
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-top:7px;color:var(--color-texto-suave)"><span>12 jul · Escultura acrílica</span><span>$450</span></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-top:5px;color:var(--color-texto-suave)"><span>28 jun · Gelish manos</span><span>$300</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">
+              <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Finalizar servicio</a>
+              <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#C1443A;color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Cancelar cita</a>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ estadoVacio }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M3.5 9.5h17"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>
+        <div style="font-size:14.5px;font-weight:500;margin-top:12px">Sin citas este día</div>
+        <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:240px">Toca «Agendar cita» para ocupar este día.</div>
+        <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Agendar cita</a>
+      </div>
+    </sc-if>
+    <sc-if value="{{ estadoCargando }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;padding:18px 20px">
+        <sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px">
+            <div style="width:44px;height:12px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;flex:none"></div>
+            <div style="flex:1;height:52px;border-radius:8px;background:#F6EAE4;animation:brillo 1.4s ease-in-out infinite"></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ estadoError }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C1443A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5"></path><path d="M12 16.5h.01"></path></svg>
+        <div style="font-size:15px;font-weight:500;margin-top:12px">No pudimos cargar la agenda</div>
+        <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:260px">Revisa tu conexión e inténtalo de nuevo.</div>
+        <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border:1.5px solid var(--color-secundario);color:var(--color-texto);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Reintentar</a>
+      </div>
+    </sc-if>
+  </sc-if>
+  <sc-if value="{{ esSemana }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;overflow:hidden">
+      <sc-for list="{{ semana }}" as="d" hint-placeholder-count="7">
+        <div style="flex:1;min-width:0;border-left:1px solid #F3E7E1;padding:0 0 14px">
+          <div style="text-align:center;padding:12px 4px 10px;border-bottom:1px solid #F3E7E1">
+            <div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-texto-suave)">{{ d.dia }}</div>
+            <sc-if value="{{ d.hoy }}" hint-placeholder-val="{{ false }}"><div style="width:28px;height:28px;border-radius:50%;background:var(--color-primario);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:500;margin-top:4px">{{ d.n }}</div></sc-if>
+            <sc-if value="{{ d.noHoy }}" hint-placeholder-val="{{ true }}"><div style="font-size:14.5px;font-weight:500;margin-top:8px">{{ d.n }}</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;padding:8px 6px 0">
+            <sc-for list="{{ d.citas }}" as="c" hint-placeholder-count="2">
+              <div style="background:{{ c.bg }};border-radius:6px;padding:5px 7px;overflow:hidden">
+                <div style="font-size:10.5px;font-weight:500;color:{{ c.color }}">{{ c.hora }}</div>
+                <div style="font-size:11.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.nombre }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{ esMes }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F1E4DE">
+        <sc-for list="{{ diasSemana }}" as="ds" hint-placeholder-count="7">
+          <div style="text-align:center;padding:10px 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-texto-suave)">{{ ds }}</div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+        <sc-for list="{{ mes }}" as="d" hint-placeholder-count="42">
+          <div style="min-height:88px;border-top:1px solid #F7EDE7;border-left:1px solid #F7EDE7;padding:8px;box-sizing:border-box">
+            <sc-if value="{{ d.hoy }}" hint-placeholder-val="{{ false }}"><div style="width:26px;height:26px;border-radius:50%;background:var(--color-primario);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:500">{{ d.n }}</div></sc-if>
+            <sc-if value="{{ d.noHoy }}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;font-weight:500;color:{{ d.col }};padding:5px 0 0 4px">{{ d.n }}</div></sc-if>
+            <div style="display:flex;gap:3px;margin-top:8px;padding-left:4px">
+              <sc-for list="{{ d.puntos }}" as="p" hint-placeholder-count="0">
+                <div style="width:6px;height:6px;border-radius:50%;background:{{ p }}"></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</sc-if>
+<sc-if value="{{ esFicha }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="#" aria-label="Volver" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;color:var(--color-texto)" style-hover="background:#FAF3EF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6 8.5 12l6 6"></path></svg></a>
+    <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:18px;flex:1">Cita</div>
+    <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-advertencia) 15%, white);color:#9A7420">Pendiente</span>
+  </div>
+  <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:18px;margin-top:14px">
+    <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:18px">Hoy · 6:30 – 8:15 pm</div>
+    <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:2px">105 min · Atiende Chio</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px;background:var(--color-fondo);border-radius:10px">
+      <div style="width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex:none">F</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:500">Fernanda Ruiz</div>
+        <div style="font-size:12.5px;color:var(--color-texto-suave)">Instagram · @fer.ruizz</div>
+      </div>
+    </div>
+    <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:16px">Servicios</div>
+    <div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-top:8px"><span>Retiro de acrílico</span><span style="color:var(--color-texto-suave)">$150 · 30 min</span></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-top:6px"><span>Rubber gel</span><span style="color:var(--color-texto-suave)">$380 · 75 min</span></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-top:10px;padding-top:10px;border-top:1px solid #F3E7E1;font-weight:500"><span>Total</span><span>$530</span></div>
+    <div style="display:flex;gap:24px;margin-top:14px">
+      <div><div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Forma de uña</div><div style="font-size:13.5px;margin-top:4px">Cuadrada</div></div>
+      <div><div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Estado</div><div style="font-size:13.5px;margin-top:4px">Pendiente</div></div>
+    </div>
+    <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:14px">Notas</div>
+    <div style="font-size:13px;color:var(--color-texto-suave);margin-top:5px;line-height:1.45">Se contactó por Instagram; confirmar un día antes por DM.</div>
+    <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:14px">Historial</div>
+    <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-top:7px;color:var(--color-texto-suave)"><span>19 jul · Rubber gel</span><span>$380</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+    <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Finalizar servicio</a>
+    <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;background:#C1443A;color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Cancelar cita</a>
+  </div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:780},&quot;formato&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;escritorio&quot;,&quot;tablet&quot;,&quot;celular&quot;],&quot;default&quot;:&quot;escritorio&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dia&quot;,&quot;semana&quot;,&quot;mes&quot;,&quot;ficha&quot;],&quot;default&quot;:&quot;dia&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;conFicha&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;empleadas&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;1&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.formato ?? 'escritorio';
+    const v = this.props.vista ?? 'dia';
+    const est = this.props.estado ?? 'normal';
+    const emp = String(this.props.empleadas ?? '1');
+    const ex = 'var(--estado-exito)', ad = 'var(--estado-advertencia)', er = 'var(--estado-error)';
+    const tinte = c => 'color-mix(in srgb, ' + c + ' 13%, white)';
+    const chip = (h, dur, hora, estT, c, nombre, servicio) => ({
+      top: ((h - 9) * 56 + 2) + 'px', alto: (dur / 60 * 56 - 6) + 'px',
+      hora, estadoTxt: estT, nombre, servicio, bg: tinte(c), color: c
+    });
+    const chio = [
+      chip(10, 60, '10:00', 'Completada', ex, 'Alejandra Torres', 'Gelish manos'),
+      chip(12, 75, '12:00', 'Completada', ex, 'Paola Gutiérrez', 'Mantenimiento acrílico'),
+      chip(13.5, 60, '1:30', 'Cancelada', er, 'Sofía Herrera', 'Escultura acrílica'),
+      chip(16, 90, '4:00', 'Confirmada', ex, 'Mariana López', 'Escultura acrílica · Almendrada'),
+      chip(18.5, 105, '6:30', 'Pendiente', ad, 'Fernanda Ruiz', 'Retiro + Rubber gel')
+    ];
+    const columnas = emp === '3' ? [
+      { nombre: 'Chio', citas: [chio[0], chio[3], chio[4]] },
+      { nombre: 'Dani', citas: [chip(11, 90, '11:00', 'Confirmada', ex, 'Regina Salas', 'Escultura acrílica'), chip(15, 60, '3:00', 'Pendiente', ad, 'Lucía Peña', 'Gelish pies')] },
+      { nombre: 'Vale', citas: [chip(12, 75, '12:00', 'Completada', ex, 'Carmen Díaz', 'Retiro de acrílico'), chip(17, 105, '5:00', 'Confirmada', ex, 'Ana Robles', 'Escultura + diseño')] }
+    ] : [{ nombre: 'Chio', citas: chio }];
+    const mini = (hora, nombre, c) => ({ hora, nombre, bg: tinte(c), color: c });
+    const semana = [
+      { dia: 'Lun', n: '3', hoy: true, noHoy: false, citas: [mini('10:00', 'Alejandra', ex), mini('12:00', 'Paola', ex), mini('4:00', 'Mariana', ex), mini('6:30', 'Fernanda', ad)] },
+      { dia: 'Mar', n: '4', hoy: false, noHoy: true, citas: [mini('11:00', 'Brenda', ex), mini('5:00', 'Ivonne', ad)] },
+      { dia: 'Mié', n: '5', hoy: false, noHoy: true, citas: [] },
+      { dia: 'Jue', n: '6', hoy: false, noHoy: true, citas: [mini('5:00', 'Karla', ex), mini('7:00', 'Diana', ad)] },
+      { dia: 'Vie', n: '7', hoy: false, noHoy: true, citas: [mini('10:00', 'Rocío', ex), mini('1:00', 'Montse', ex), mini('4:30', 'Gaby', ad)] },
+      { dia: 'Sáb', n: '8', hoy: false, noHoy: true, citas: [mini('9:00', 'Ale P.', ex), mini('11:00', 'Vero', ex), mini('2:00', 'Cinthia', ex), mini('5:00', 'Majo', ad)] },
+      { dia: 'Dom', n: '9', hoy: false, noHoy: true, citas: [mini('12:00', 'Lupita', ad)] }
+    ];
+    const puntosDia = { 3: [ex, ad, er], 4: [ex, ad], 6: [ex, ad], 7: [ex, ad], 8: [ex], 9: [ad], 11: [ex], 13: [ex, ad], 15: [ex], 18: [ad], 20: [ex], 22: [ex, ad], 26: [ex], 28: [ex], 29: [ex, ad] };
+    const mes = [];
+    for (let i = 27; i <= 31; i++) mes.push({ n: String(i), col: '#C9B4AA', hoy: false, noHoy: true, puntos: [] });
+    for (let i = 1; i <= 31; i++) mes.push({ n: String(i), col: 'var(--color-texto)', hoy: i === 3, noHoy: i !== 3, puntos: puntosDia[i] || [] });
+    for (let i = 1; i <= 6; i++) mes.push({ n: String(i), col: '#C9B4AA', hoy: false, noHoy: true, puntos: [] });
+    return {
+      formato: f,
+      conChrome: true,
+      esDia: v === 'dia', esSemana: v === 'semana', esMes: v === 'mes',
+      esFicha: v === 'ficha', noEsFicha: v !== 'ficha',
+      tabDia: v === 'dia', noTabDia: v !== 'dia',
+      tabSemana: v === 'semana', noTabSemana: v !== 'semana',
+      tabMes: v === 'mes', noTabMes: v !== 'mes',
+      estadoNormal: est === 'normal', estadoVacio: est === 'vacio', estadoCargando: est === 'cargando', estadoError: est === 'error',
+      conFicha: this.props.conFicha === true || this.props.conFicha === 'true',
+      mostrarEmpleadas: emp === '3',
+      columnas, semana, mes,
+      horas: ['9 am', '10 am', '11 am', '12 pm', '1 pm', '2 pm', '3 pm', '4 pm', '5 pm', '6 pm', '7 pm', '8 pm'],
+      diasSemana: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+      tituloPeriodo: v === 'semana' ? '3 – 9 de agosto' : v === 'mes' ? 'Agosto 2026' : 'Lunes 3 de agosto',
+      skel: [1, 2, 3, 4, 5]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Nexo — sistema de diseño. Los temas son datos del negocio
+   (negocios.tema), nunca condicionales por nombre de negocio en
+   el código. Un tema nuevo solo necesita sus variables aquí.
+   ============================================================ */
+
+/* Tipografía: uniforme entre temas (no varía con el negocio activo). */
+:root {
+  --fuente-titulos: 'Playfair Display', Georgia, serif;
+  --fuente-cuerpo: 'Inter', system-ui, sans-serif;
+}
+
+/* Además de :root[data-tema], estas mismas reglas aplican sin el
+   prefijo :root para poder previsualizar el tema de un negocio dentro
+   de un elemento anidado (ej. tarjetas del selector) sin cambiar el
+   tema de toda la página. */
+:root,
+:root[data-tema="neutro"],
+[data-tema="neutro"] {
+  --color-primario: #1f3357;
+  --color-acento: #2e8c82;
+  --color-secundario: #4c6b8a;
+  --color-fondo: #f5f7fa;
+  --color-superficie: #ffffff;
+  --color-texto: #22262e;
+  --color-texto-suave: #4c6b8a;
+  --color-hairline: #dfe5ec;
+  --color-divisor: #dfe5ec;
+  --color-divisor-fuerte: #dfe5ec;
+  --color-borde-campo: #dfe5ec;
+  --color-track-segmentado: color-mix(in srgb, var(--color-fondo) 60%, white);
+  --color-hover-nav: color-mix(in srgb, var(--color-primario) 5%, white);
+  --color-esqueleto: color-mix(in srgb, var(--color-hairline) 70%, var(--color-fondo));
+}
+
+:root[data-tema="boutique"],
+[data-tema="boutique"] {
+  --color-primario: #a9705f;
+  --color-acento: #c9a227;
+  --color-secundario: #8a9a7b;
+  --color-fondo: #fdf6f3;
+  --color-superficie: #ffffff;
+  --color-texto: #4a322b;
+  --color-texto-suave: #8a6a5e;
+  --color-hairline: #f1e4de;
+  --color-divisor: #f7ede7;
+  --color-divisor-fuerte: #f3e7e1;
+  --color-borde-campo: #e8d8cf;
+  --color-track-segmentado: #f4e9e3;
+  --color-hover-nav: #faf3ef;
+  --color-esqueleto: #f0e2db;
+}
+
+:root[data-tema="sastreria"],
+[data-tema="sastreria"] {
+  --color-primario: #2c3e50;
+  --color-acento: #b08d57;
+  --color-secundario: #7a8b9a;
+  --color-fondo: #f4f6f8;
+  --color-superficie: #ffffff;
+  --color-texto: #1e2a36;
+  --color-texto-suave: #5a6b7b;
+  /* Don camisa está en pausa; este negocio no tiene handoff de diseño
+     todavía, así que estos se derivan con la misma fórmula que neutro
+     en vez de inventar valores fijos sin aprobación de diseño. */
+  --color-hairline: color-mix(in srgb, var(--color-secundario) 18%, white);
+  --color-divisor: color-mix(in srgb, var(--color-secundario) 10%, white);
+  --color-divisor-fuerte: color-mix(in srgb, var(--color-secundario) 14%, white);
+  --color-borde-campo: color-mix(in srgb, var(--color-secundario) 22%, white);
+  --color-track-segmentado: color-mix(in srgb, var(--color-fondo) 55%, white);
+  --color-hover-nav: color-mix(in srgb, var(--color-primario) 5%, white);
+  --color-esqueleto: color-mix(in srgb, var(--color-hairline) 70%, var(--color-fondo));
+}
+
+/* Colores de estado — iguales en todos los temas, su significado
+   debe ser inequívoco sin importar el negocio activo. */
+:root {
+  --color-exito: #2f9e5b;
+  --color-advertencia: #d9a441;
+  --color-error: #c1443a;
+  --color-deshabilitado-fondo: #e4e4e1;
+  --color-deshabilitado-texto: #9c9c97;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente-cuerpo);
+}
+
+@keyframes brillo {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animar-brillo {
+  animation: brillo 1.4s ease-in-out infinite;
+}

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--color-primario:#A9705F;--color-acento:#C9A227;--color-secundario:#8A9A7B;--color-fondo:#FDF6F3;--color-superficie:#FFFFFF;--color-texto:#4A322B;--color-texto-suave:#8A6A5E;--estado-exito:#2F9E5B;--estado-advertencia:#D9A441;--estado-error:#C1443A;--fuente-cuerpo:'Inter',system-ui,sans-serif;--fuente-titulos:'Inter',system-ui,sans-serif}
+body{margin:0;background:#f0eee9;font-family:system-ui,sans-serif}
+a{color:#A9705F}a:hover{color:#8F5A4B}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-note{margin:0 0 20px;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5);max-width:760px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:12px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-cap{font:500 10.5px ui-monospace,Menlo,monospace;color:rgba(0,0,0,.4);margin-bottom:6px}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:24px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+<section class="dv-turn" id="t16" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t16">16</a><span class="dv-tname">Cierre — tipografía B confirmada en todo el sistema, tablets faltantes y micro-flujos</span></div>
+<p class="dv-note">Playfair Display quedó como valor por defecto de <em>--fuente-titulos</em> en todos los componentes (cambiarla sigue siendo una sola variable). Tablet: menú de íconos y máximo dos columnas.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="16a">
+    <div class="dv-olabel"><a class="dv-oid" href="#16a">16a</a>Tablet · 800 — Catálogo, Clientes, Ventas, Gastos y Reportes</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="--pad:22px;--cols-tarjetas:1fr 1fr" class="dv-card"><div style="width:800px"><dc-import name="Catalogo" formato="tablet" hint-size="800px,1000px"></dc-import></div></div>
+      <div style="--pad:22px" class="dv-card"><div style="width:800px"><dc-import name="Clientes" formato="tablet" hint-size="800px,720px"></dc-import></div></div>
+      <div style="--pad:22px" class="dv-card"><div style="width:800px"><dc-import name="Ventas" formato="tablet" hint-size="800px,700px"></dc-import></div></div>
+      <div style="--pad:22px" class="dv-card"><div style="width:800px"><dc-import name="Gastos" formato="tablet" hint-size="800px,680px"></dc-import></div></div>
+      <div style="--pad:22px" class="dv-card"><div style="width:800px"><dc-import name="Reportes" formato="tablet" hint-size="800px,1060px"></dc-import></div></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="16b">
+    <div class="dv-olabel"><a class="dv-oid" href="#16b">16b</a>Restablecer contraseña — modal sobre Usuarios (<a class="dv-oid" href="#15a">15a</a>)</div>
+    <div class="dv-card" style="width:1200px;background:linear-gradient(rgba(74,50,43,.32),rgba(74,50,43,.32)),#FDF6F3">
+      <div style="display:flex;justify-content:center;padding:56px 0">
+        <div style="width:440px;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(74,50,43,.3)"><dc-import name="AdminUsuarios" pantalla="restablecer" hint-size="440px,460px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+  <div class="dv-opt" id="16c">
+    <div class="dv-olabel"><a class="dv-oid" href="#16c">16c</a>Editar servicio · celular (con desactivar, como <a class="dv-oid" href="#6b">6b</a>)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="Catalogo" pantalla="alta" modo="editar" hint-size="390px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="16d">
+    <div class="dv-olabel"><a class="dv-oid" href="#16d">16d</a>Editar clienta · celular (teléfono o red, notas, desactivar)</div>
+    <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Clientes" formato="celular" pantalla="editar" hint-size="390px,880px"></dc-import></div></div>
+  </div>
+</div>
+<p class="dv-next">Sistema cerrado. Siguientes pasos posibles: «tema neutro aplicado a una pantalla (demo Don camisa)» · «prototipo navegable» · «exportar especificación para desarrollo».</p>
+</section>
+<section class="dv-turn" id="t15" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t15">15</a><span class="dv-tname">Administración de usuarios y Ajustes — cierre del sistema</span></div>
+<p class="dv-note">Solo el dueño crea usuarios y restablece contraseñas · revocar acceso (×) no borra nada · Ajustes con perfil, cambio de contraseña, datos del negocio y tema por variables CSS.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="15a">
+    <div class="dv-olabel"><a class="dv-oid" href="#15a">15a</a>Usuarios · escritorio (negocios asignados con revocar)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="AdminUsuarios" formato="escritorio" hint-size="1200px,640px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="15b">
+    <div class="dv-olabel"><a class="dv-oid" href="#15b">15b</a>Crear usuario · celular (contraseña inicial + negocios)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="AdminUsuarios" pantalla="crear" hint-size="390px,760px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="15c">
+    <div class="dv-olabel"><a class="dv-oid" href="#15c">15c</a>Ajustes · escritorio (perfil, negocio, tema, sesión)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Ajustes" formato="escritorio" hint-size="1200px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="15d">
+    <div class="dv-olabel"><a class="dv-oid" href="#15d">15d</a>Ajustes · celular</div>
+    <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Ajustes" formato="celular" hint-size="390px,900px"></dc-import></div></div>
+  </div>
+</div>
+<p class="dv-next">Sistema completo. Pendientes: «confirmar tipografía (A sans / B Playfair)» · «tablet de las pantallas restantes» · «modal de restablecer contraseña».</p>
+</section>
+<section class="dv-turn" id="t14">
+<div class="dv-thd"><a class="dv-tid" href="#t14">14</a><span class="dv-tname">Login y selector de negocio — marca Nexo, tema neutro</span></div>
+<p class="dv-note">Usuario (no correo), sin registro ni «olvidé mi contraseña» · error de credenciales diseñado · el selector solo lo ve quien tiene 2+ negocios (Joel); al elegir se aplica el tema del negocio y se puede cambiar sin cerrar sesión.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="14a">
+    <div class="dv-olabel"><a class="dv-oid" href="#14a">14a</a>Login · escritorio</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="LoginNexo" hint-size="1200px,640px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="14b">
+    <div class="dv-olabel"><a class="dv-oid" href="#14b">14b</a>Login · celular, con error de credenciales</div>
+    <div class="dv-card" style="width:390px;--alto:720px"><dc-import name="LoginNexo" error="{{ true }}" hint-size="390px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="14c">
+    <div class="dv-olabel"><a class="dv-oid" href="#14c">14c</a>Selector de negocio · escritorio (Glam Nails activo, Don camisa en pausa)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="LoginNexo" pantalla="selector" hint-size="1200px,640px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="14d">
+    <div class="dv-olabel"><a class="dv-oid" href="#14d">14d</a>Selector · celular</div>
+    <div class="dv-card" style="width:390px;--alto:780px"><dc-import name="LoginNexo" pantalla="selector" hint-size="390px,780px"></dc-import></div>
+  </div>
+</div>
+<p class="dv-next">Último bloque: «Administración de usuarios y Ajustes» · «login con foto de fondo» · «selector con último negocio usado primero».</p>
+</section>
+<section class="dv-turn" id="t13" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t13">13</a><span class="dv-tname">Reportes final — <a class="dv-oid" href="#12a">12a</a> + <a class="dv-oid" href="#12b">12b</a> con conmutador Gráfica / Documento</span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="13a">
+    <div class="dv-olabel"><a class="dv-oid" href="#13a">13a</a>Vista Gráfica (predeterminada)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" acomodo="cascada" hint-size="1200px,1000px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="13b">
+    <div class="dv-olabel"><a class="dv-oid" href="#13b">13b</a>Vista Documento (mismo conmutador, exporta lo que ves)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" acomodo="documento" hint-size="1200px,1240px"></dc-import></div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Login y selector de negocio» · «el conmutador también en celular» · «recuerda la última vista elegida».</p>
+</section>
+<section class="dv-turn" id="t12" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t12">12</a><span class="dv-tname">Reportes — acomodos alternativos a <a class="dv-oid" href="#11a">11a</a></span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="12a">
+    <div class="dv-olabel"><a class="dv-oid" href="#12a">12a</a>Cascada — el Estado de Resultados como gráfica de barras, operativos abajo</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" acomodo="cascada" hint-size="1200px,1000px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="12b">
+    <div class="dv-olabel"><a class="dv-oid" href="#12b">12b</a>Documento — formato de estado financiero impreso, listo para exportar</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" acomodo="documento" hint-size="1200px,1240px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="12c">
+    <div class="dv-olabel"><a class="dv-oid" href="#12c">12c</a>Maestro-detalle — lista de reportes a la izquierda, uno a la vez (exportas lo que ves)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" acomodo="maestro" hint-size="1200px,660px"></dc-import></div>
+  </div>
+</div>
+<p class="dv-next">Elige: «usa <a class="dv-oid" href="#12a">12a</a>» · «<a class="dv-oid" href="#12c">12c</a> pero con la cascada de <a class="dv-oid" href="#12a">12a</a> dentro» · o me quedo con <a class="dv-oid" href="#11a">11a</a> y sigo con Login.</p>
+</section>
+<section class="dv-turn" id="t11" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t11">11</a><span class="dv-tname">Reportes — Estado de Resultados + operativos</span></div>
+<p class="dv-note">Formato financiero legible con utilidad neta protagonista (cuadra con Inicio: $12,480) · alternancia Resumen/Detalle dentro de la misma tarjeta · exportar PDF/Excel respeta el nivel visible · periodo con accesos rápidos y rango libre.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="11a">
+    <div class="dv-olabel"><a class="dv-oid" href="#11a">11a</a>Resumen · escritorio</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" formato="escritorio" hint-size="1200px,820px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="11b">
+    <div class="dv-olabel"><a class="dv-oid" href="#11b">11b</a>Detalle transacción por transacción · escritorio</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Reportes" formato="escritorio" nivel="detalle" hint-size="1200px,860px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="11c">
+    <div class="dv-olabel"><a class="dv-oid" href="#11c">11c</a>Celular — una columna</div>
+    <div style="--dir:column;--pad:16px;--cols-rep:1fr;--cols-ops:1fr" class="dv-card"><div style="width:390px"><dc-import name="Reportes" formato="celular" hint-size="390px,1400px"></dc-import></div></div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Login y selector de negocio» · «detalle con subtotales por día» · «comparativo vs julio en el ER».</p>
+</section>
+<section class="dv-turn" id="t10" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t10">10</a><span class="dv-tname">Gastos — lista con filtros + alta + tipos de gasto</span></div>
+<p class="dv-note">Fecha del gasto distinta de la fecha de captura (visible en la lista) · alta con tipo recurrente de catálogo o extraordinario en «Otros» · tipos con alta/baja, nunca se eliminan.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="10a">
+    <div class="dv-olabel"><a class="dv-oid" href="#10a">10a</a>Lista · escritorio (filtro por periodo y categoría)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Gastos" formato="escritorio" hint-size="1200px,660px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="10b">
+    <div class="dv-olabel"><a class="dv-oid" href="#10b">10b</a>Nuevo gasto · celular — tipo recurrente / extraordinario</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div class="dv-card" style="width:390px"><dc-import name="Gastos" pantalla="alta" hint-size="390px,760px"></dc-import></div>
+      <div class="dv-card" style="width:390px"><dc-import name="Gastos" pantalla="alta" tipo-alta="otro" hint-size="390px,620px"></dc-import></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="10c">
+    <div class="dv-olabel"><a class="dv-oid" href="#10c">10c</a>Tipos de gasto · celular (alta/baja)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="Gastos" pantalla="tipos" hint-size="390px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="10d">
+    <div class="dv-olabel"><a class="dv-oid" href="#10d">10d</a>Estado vacío · celular</div>
+    <div style="--dir:column;--pad:16px;--col-captura:none" class="dv-card"><div style="width:390px"><dc-import name="Gastos" formato="celular" estado="vacio" hint-size="390px,560px"></dc-import></div></div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Reportes (Estado de Resultados)» · «lista de gastos agrupada por categoría» · «alta con foto del ticket».</p>
+</section>
+<section class="dv-turn" id="t9" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t9">9</a><span class="dv-tname">Ventas — lista del periodo + detalle</span></div>
+<p class="dv-note">Cliente, total, forma de pago y estado por fila · la cancelada permanece visible, tachada y distinguida · el detalle solo permite cancelar, nunca editar ni borrar.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="9a">
+    <div class="dv-olabel"><a class="dv-oid" href="#9a">9a</a>Lista · escritorio (con venta cancelada visible)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Ventas" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="9b">
+    <div class="dv-olabel"><a class="dv-oid" href="#9b">9b</a>Detalle · escritorio — confirmada / cancelada</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div class="dv-card" style="width:1200px"><dc-import name="Ventas" formato="escritorio" pantalla="detalle" hint-size="1200px,700px"></dc-import></div>
+      <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Ventas" formato="celular" pantalla="detalle" cancelada="{{ true }}" hint-size="390px,720px"></dc-import></div></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="9c">
+    <div class="dv-olabel"><a class="dv-oid" href="#9c">9c</a>Celular + estado vacío</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="--dir:column;--pad:16px;--col-pago:none;--col-flecha:none;--pill-min:0;--col-total:56px" class="dv-card"><div style="width:390px"><dc-import name="Ventas" formato="celular" hint-size="390px,820px"></dc-import></div></div>
+      <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Ventas" formato="celular" estado="vacio" hint-size="390px,500px"></dc-import></div></div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Gastos» · «lista con totales por día» · «filtro por forma de pago».</p>
+</section>
+<section class="dv-turn" id="t8" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t8">8</a><span class="dv-tname">Clientes — lista con búsqueda + ficha</span></div>
+<p class="dv-note">Ficha con contacto, notas libres (preferencias, alergias), historial y gasto acumulado · «Desactivar», nunca eliminar · WhatsApp solo con teléfono.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="8a">
+    <div class="dv-olabel"><a class="dv-oid" href="#8a">8a</a>Lista · escritorio (con clienta desactivada visible)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Clientes" formato="escritorio" hint-size="1200px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="8b">
+    <div class="dv-olabel"><a class="dv-oid" href="#8b">8b</a>Ficha · escritorio</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Clientes" formato="escritorio" pantalla="ficha" hint-size="1200px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="8c">
+    <div class="dv-olabel"><a class="dv-oid" href="#8c">8c</a>Celular — lista y ficha (una columna)</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Clientes" formato="celular" hint-size="390px,760px"></dc-import></div></div>
+      <div style="--dir:column;--pad:16px;--cols-ficha:1fr" class="dv-card"><div style="width:390px"><dc-import name="Clientes" formato="celular" pantalla="ficha" hint-size="390px,1050px"></dc-import></div></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="8d">
+    <div class="dv-olabel"><a class="dv-oid" href="#8d">8d</a>Estados — sin clientas / búsqueda sin resultados</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Clientes" formato="celular" estado="vacio" hint-size="390px,520px"></dc-import></div></div>
+      <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Clientes" formato="celular" estado="sinresultados" hint-size="390px,500px"></dc-import></div></div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Ventas» · «ficha con botón Agendar cita» · «lista ordenada por última visita».</p>
+</section>
+<section class="dv-turn" id="t7" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t7">7</a><span class="dv-tname">Catálogo — acomodos alternativos (mismas categorías que <a class="dv-oid" href="#6a">6a</a>)</span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="7a">
+    <div class="dv-olabel"><a class="dv-oid" href="#7a">7a</a>Tarjetas — cuadrícula de 3 por categoría, precio protagonista</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Catalogo" acomodo="tarjetas" hint-size="1200px,900px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="7b">
+    <div class="dv-olabel"><a class="dv-oid" href="#7b">7b</a>Panel — categorías a la izquierda, servicios de la seleccionada a la derecha</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Catalogo" acomodo="panel" hint-size="1200px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="7c">
+    <div class="dv-olabel"><a class="dv-oid" href="#7c">7c</a>Tabla — columnas alineadas, subencabezado por categoría (más denso)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Catalogo" acomodo="tabla" hint-size="1200px,880px"></dc-import></div>
+  </div>
+</div>
+<p class="dv-next">Elige acomodo: «usa <a class="dv-oid" href="#7a">7a</a>» · «<a class="dv-oid" href="#7b">7b</a> pero con tarjetas a la derecha» · o me quedo con <a class="dv-oid" href="#6a">6a</a> y sigo con Clientes.</p>
+</section>
+<section class="dv-turn" id="t6" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t6">6</a><span class="dv-tname">Catálogo — servicios por categoría + gestión de categorías</span></div>
+<p class="dv-note">Editar por fila · «Inactivo» en lugar de eliminar · categorías con reordenar/renombrar/desactivar · el layout de lista por secciones admite la futura vista de productos con variantes (Don camisa) sin rehacerse.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="6a">
+    <div class="dv-olabel"><a class="dv-oid" href="#6a">6a</a>Lista · escritorio (con un servicio desactivado)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Catalogo" formato="escritorio" acomodo="lista" hint-size="1200px,820px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="6b">
+    <div class="dv-olabel"><a class="dv-oid" href="#6b">6b</a>Alta de servicio · celular</div>
+    <div class="dv-card" style="width:390px"><dc-import name="Catalogo" pantalla="alta" hint-size="390px,600px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="6c">
+    <div class="dv-olabel"><a class="dv-oid" href="#6c">6c</a>Gestionar categorías · celular (reordenar, renombrar, desactivar)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="Catalogo" pantalla="categorias" hint-size="390px,620px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="6d">
+    <div class="dv-olabel"><a class="dv-oid" href="#6d">6d</a>Estado vacío · celular</div>
+    <div style="--dir:column;--pad:16px" class="dv-card"><div style="width:390px"><dc-import name="Catalogo" formato="celular" estado="vacio" hint-size="390px,480px"></dc-import></div></div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Clientes» · «alta de servicio en escritorio» · «catálogo con búsqueda».</p>
+</section>
+<section class="dv-turn" id="t5" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t5">5</a><span class="dv-tname">Finalizar servicio — abre desde la ficha de cita (<a class="dv-oid" href="#3a">3a</a>)</span></div>
+<p class="dv-note">Un campo de costo obligatorio por servicio (precio de catálogo sugerido) · productos opcionales para venta cruzada · el recibo genera una sola venta con forma de pago.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="5a">
+    <div class="dv-olabel"><a class="dv-oid" href="#5a">5a</a>Paso 1 · Costos — con 1 y con 3 servicios</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div class="dv-card" style="width:390px"><dc-import name="FinalizarServicio" paso="1" servicios="1" hint-size="390px,560px"></dc-import></div>
+      <div class="dv-card" style="width:390px"><dc-import name="FinalizarServicio" paso="1" servicios="3" hint-size="390px,660px"></dc-import></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="5b">
+    <div class="dv-olabel"><a class="dv-oid" href="#5b">5b</a>Paso 2 · Agregar productos (opcional)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="FinalizarServicio" paso="2" hint-size="390px,620px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="5c">
+    <div class="dv-olabel"><a class="dv-oid" href="#5c">5c</a>Paso 3 · Recibo y forma de pago</div>
+    <div class="dv-card" style="width:390px"><dc-import name="FinalizarServicio" paso="3" hint-size="390px,720px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="5d">
+    <div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>Escritorio — panel centrado, igual que <a class="dv-oid" href="#4f">4f</a></div>
+    <div class="dv-card" style="width:1200px;background:linear-gradient(rgba(74,50,43,.32),rgba(74,50,43,.32)),#FDF6F3">
+      <div style="display:flex;justify-content:center;padding:48px 0">
+        <div style="width:560px;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(74,50,43,.3)"><dc-import name="FinalizarServicio" paso="3" hint-size="560px,720px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Catálogo» · «recibo con propina» · «paso 2 con más productos».</p>
+</section>
+<section class="dv-turn" id="t4" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t4">4</a><span class="dv-tname">Agendar cita — flujo en 5 pasos (mobile-first)</span></div>
+<p class="dv-note">Selección múltiple de servicios con secciones generadas del catálogo · forma de uña opcional y única · selector de empleada oculto (solo Chio activa) · clienta existente o nueva sin salir del flujo (teléfono <em>o</em> red social) · error de traslape con «Continuar» deshabilitado.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="4a">
+    <div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>Paso 1 · Servicios (multi-selección)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="1" hint-size="390px,760px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="4b">
+    <div class="dv-olabel"><a class="dv-oid" href="#4b">4b</a>Paso 2 · Forma de uña (opcional)</div>
+    <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="2" hint-size="390px,640px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="4c">
+    <div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>Paso 3 · Fecha y hora — normal / error de traslape</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="3" hint-size="390px,680px"></dc-import></div>
+      <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="3" traslape="{{ true }}" hint-size="390px,740px"></dc-import></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="4d">
+    <div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>Paso 4 · Clienta — existente / nueva</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="4" clienta="existente" hint-size="390px,700px"></dc-import></div>
+      <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="4" clienta="nueva" hint-size="390px,660px"></dc-import></div>
+    </div>
+  </div>
+  <div class="dv-opt" id="4e">
+    <div class="dv-olabel"><a class="dv-oid" href="#4e">4e</a>Paso 5 · Resumen y confirmación</div>
+    <div class="dv-card" style="width:390px"><dc-import name="AgendarCita" paso="5" hint-size="390px,680px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="4f">
+    <div class="dv-olabel"><a class="dv-oid" href="#4f">4f</a>Escritorio — mismo flujo como panel centrado sobre la Agenda</div>
+    <div class="dv-card" style="width:1200px;background:linear-gradient(rgba(74,50,43,.32),rgba(74,50,43,.32)),#FDF6F3">
+      <div style="display:flex;justify-content:center;padding:48px 0">
+        <div style="width:560px;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(74,50,43,.3)"><dc-import name="AgendarCita" paso="1" hint-size="560px,760px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «Finalizar servicio» · «horas como timeline en vez de chips» · «paso 4 con error de guardado».</p>
+</section>
+<section class="dv-turn" id="t3" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Agenda — Día / Semana / Mes + ficha de cita (tipografía <a class="dv-oid" href="#1b">1b</a> mientras eliges)</span></div>
+<p class="dv-note">Color del bloque = estado de la cita (verde confirmada/completada, ámbar pendiente, rojo cancelada), nunca tipo de servicio. WhatsApp solo aparece si hay teléfono: la ficha de escritorio (Mariana, tel.) lo muestra; la de celular (Fernanda, Instagram) lo oculta.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="3a">
+    <div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Día · escritorio, con ficha de cita abierta</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Agenda" formato="escritorio" vista="dia" con-ficha="{{ true }}" hint-size="1200px,820px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="3b">
+    <div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Día · escritorio con 3 empleadas (columnas paralelas, mismo diseño)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Agenda" formato="escritorio" vista="dia" empleadas="3" hint-size="1200px,820px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="3c">
+    <div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Semana · escritorio</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Agenda" formato="escritorio" vista="semana" hint-size="1200px,560px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="3d">
+    <div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>Mes · escritorio (punto = cita, color = estado; tocar un día abre su detalle)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Agenda" formato="escritorio" vista="mes" hint-size="1200px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="3e">
+    <div class="dv-olabel"><a class="dv-oid" href="#3e">3e</a>Responsive — tablet (rail de íconos) y celular (día + ficha pantalla completa)</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="dv-cap">tablet · 800 · día</div>
+        <div class="dv-card" style="width:800px"><dc-import name="Agenda" formato="tablet" vista="dia" hint-size="800px,800px"></dc-import></div>
+      </div>
+      <div style="--dir:column;--pad:16px">
+        <div class="dv-cap">celular · 390 · día</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Agenda" formato="celular" vista="dia" hint-size="390px,860px"></dc-import></div>
+      </div>
+      <div style="--dir:column;--pad:16px">
+        <div class="dv-cap">celular · 390 · ficha (sin teléfono → sin WhatsApp)</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Agenda" formato="celular" vista="ficha" hint-size="390px,780px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+  <div class="dv-opt" id="3f">
+    <div class="dv-olabel"><a class="dv-oid" href="#3f">3f</a>Estados del día (celular)</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="--dir:column;--pad:16px">
+        <div class="dv-cap">vacío</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Agenda" formato="celular" vista="dia" estado="vacio" hint-size="390px,480px"></dc-import></div>
+      </div>
+      <div style="--dir:column;--pad:16px">
+        <div class="dv-cap">cargando</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Agenda" formato="celular" vista="dia" estado="cargando" hint-size="390px,560px"></dc-import></div>
+      </div>
+      <div style="--dir:column;--pad:16px">
+        <div class="dv-cap">error</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Agenda" formato="celular" vista="dia" estado="error" hint-size="390px,480px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «el flujo Agendar cita» · «bloques del día con más contraste» · «la semana con horas visibles».</p>
+</section>
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Riffs sobre <a class="dv-oid" href="#1b">1b</a> — ¿cuánto serif? (Playfair Display, escritorio)</span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="2a" style="--fuente-titulos:'Playfair Display',Georgia,serif;--fuente-valores-sec:'Playfair Display',Georgia,serif">
+    <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Serif en todos los números — también los KPI secundarios</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="2b" style="--fuente-titulos:'Playfair Display',Georgia,serif;--fuente-numeros:'Inter',system-ui,sans-serif">
+    <div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Serif solo en encabezados — números siempre en sans</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+  </div>
+  <div class="dv-opt" id="2c" style="--fuente-titulos:'Playfair Display',Georgia,serif;--tam-saludo:30px;--tam-util:44px">
+    <div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Display más grande — saludo 30px, utilidad 44px (como <a class="dv-oid" href="#1b">1b</a> pero con más jerarquía)</div>
+    <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «quédate con <a class="dv-oid" href="#2c">2c</a> y sigue con Agenda» · «<a class="dv-oid" href="#2b">2b</a> pero con la utilidad de <a class="dv-oid" href="#2c">2c</a>» · «muéstrame 2c en celular».</p>
+</section>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Inicio — decisión de tipografía: A (todo sans) vs B (títulos serif display)</span></div>
+<p class="dv-note">Supuestos: datos de ejemplo inventados (MXN) · tema «boutique» expresado 100% en variables CSS (cambiar de negocio = reasignar variables) · la pérdida no usa el rojo de error · estados cargando/vacío/error abajo, aplican a cualquier versión.</p>
+<div class="dv-opts">
+  <div class="dv-opt" id="1a" style="--fuente-titulos:'Inter',system-ui,sans-serif">
+    <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>A — Todo sans (Inter)</div>
+    <div>
+      <div class="dv-cap">escritorio · 1200</div>
+      <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+      <div>
+        <div class="dv-cap">tablet · 800</div>
+        <div class="dv-card" style="width:800px"><dc-import name="Inicio" formato="tablet" hint-size="800px,820px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">celular · 390</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" hint-size="390px,980px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+  <div class="dv-opt" id="1b" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+    <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>B — Títulos Playfair Display + cuerpo sans</div>
+    <div>
+      <div class="dv-cap">escritorio · 1200</div>
+      <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+      <div>
+        <div class="dv-cap">tablet · 800</div>
+        <div class="dv-card" style="width:800px"><dc-import name="Inicio" formato="tablet" hint-size="800px,820px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">celular · 390</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" hint-size="390px,980px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+  <div class="dv-opt" id="1c" style="--fuente-titulos:'Cormorant Garamond',Georgia,serif;--peso-titulos:600">
+    <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>B2 — Títulos Cormorant Garamond + cuerpo sans</div>
+    <div>
+      <div class="dv-cap">escritorio · 1200</div>
+      <div class="dv-card" style="width:1200px"><dc-import name="Inicio" formato="escritorio" hint-size="1200px,700px"></dc-import></div>
+    </div>
+    <div style="display:flex;gap:20px;align-items:flex-start">
+      <div>
+        <div class="dv-cap">tablet · 800</div>
+        <div class="dv-card" style="width:800px"><dc-import name="Inicio" formato="tablet" hint-size="800px,820px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">celular · 390</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" hint-size="390px,980px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="dv-opts" style="margin-top:36px">
+  <div class="dv-opt" id="1d" style="--fuente-titulos:'Playfair Display',Georgia,serif">
+    <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Estados obligatorios + caso de pérdida (celular · tipografía B)</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div class="dv-cap">cargando (esqueleto)</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" estado="cargando" hint-size="390px,700px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">vacío (negocio sin movimientos)</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" estado="vacio" hint-size="390px,700px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">error de carga</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" estado="error" hint-size="390px,500px"></dc-import></div>
+      </div>
+      <div>
+        <div class="dv-cap">utilidad negativa (pérdida)</div>
+        <div class="dv-card" style="width:390px"><dc-import name="Inicio" formato="celular" util-neg="{{ true }}" hint-size="390px,980px"></dc-import></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="dv-next">Siguiente: «usa <a class="dv-oid" href="#1b">1b</a> para todo el sistema» · «más contraste en la utilidad de <a class="dv-oid" href="#1a">1a</a>» · sigo con Agenda (Día/Semana/Mes + ficha de cita) usando la tipografía que elijas.</p>
+</section>
+</x-dc>
+</body>
+</html>

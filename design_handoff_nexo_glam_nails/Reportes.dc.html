@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--color-primario:#A9705F;--color-acento:#C9A227;--color-secundario:#8A9A7B;--color-fondo:#FDF6F3;--color-superficie:#FFFFFF;--color-texto:#4A322B;--color-texto-suave:#8A6A5E;--estado-exito:#2F9E5B;--estado-advertencia:#D9A441;--estado-error:#C1443A;--fuente-cuerpo:'Inter',system-ui,sans-serif;--fuente-titulos:'Playfair Display',Georgia,serif}
+body{margin:0;background:var(--color-fondo)}
+a{color:var(--color-primario)}a:hover{color:#8F5A4B}
+</style>
+</helmet>
+<div style="font-family:var(--fuente-cuerpo);color:var(--color-texto);background:var(--color-fondo);width:100%;display:flex;align-items:stretch;flex-direction:var(--dir,row)">
+<div style="flex:none;--nav-reportes-bg:color-mix(in srgb,var(--color-primario) 10%, white);--nav-reportes-c:var(--color-primario);--nav-reportes-w:500"><dc-import name="Chrome" formato="{{ formato }}" hint-size="232px,700px"></dc-import></div>
+<div style="flex:1;min-width:0;padding:var(--pad,24px 28px);box-sizing:border-box">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px;flex:1">Reportes</div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 13px;border:1.5px solid var(--color-secundario);border-radius:8px;font-size:12.5px;font-weight:500;color:var(--color-texto);text-decoration:none;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#68785B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"></path><path d="m7.5 11 4.5 4.5L16.5 11"></path><path d="M4.5 19.5h15"></path></svg>PDF</a>
+    <a href="#" style="display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 13px;border:1.5px solid var(--color-secundario);border-radius:8px;font-size:12.5px;font-weight:500;color:var(--color-texto);text-decoration:none;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#68785B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"></path><path d="m7.5 11 4.5 4.5L16.5 11"></path><path d="M4.5 19.5h15"></path></svg>Excel</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap">
+    <div style="display:inline-flex;background:#F4E9E3;border-radius:9px;padding:3px;flex:none">
+      <a href="#" style="padding:7px 13px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Hoy</a>
+      <a href="#" style="padding:7px 13px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Semana</a>
+      <a href="#" style="padding:7px 13px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Mes</a>
+      <a href="#" style="padding:7px 13px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none">Año</a>
+    </div>
+    <div style="display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1px solid #E8D8CF;border-radius:999px;background:var(--color-superficie);font-size:12.5px;font-weight:500;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M3.5 9.5h17"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>Rango libre</div>
+    <div style="font-size:12.5px;color:var(--color-texto-suave)">Agosto 2026 · al día 3</div>
+    <sc-if value="{{ conVista }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1"></div>
+      <div style="display:inline-flex;background:#F4E9E3;border-radius:9px;padding:3px;flex:none">
+        <sc-if value="{{ acCascada }}" hint-placeholder-val="{{ true }}"><a href="#" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 21h16"></path><path d="M6 18v-6"></path><path d="M12 18V6.5"></path><path d="M18 18v-9"></path></svg>Gráfica</a><a href="#" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7L18.5 8v12.5h-11.5z"></path><path d="M14 3.5V8h4.5"></path></svg>Documento</a></sc-if>
+        <sc-if value="{{ acDocumento }}" hint-placeholder-val="{{ false }}"><a href="#" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;font-size:13px;color:var(--color-texto-suave);text-decoration:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 21h16"></path><path d="M6 18v-6"></path><path d="M12 18V6.5"></path><path d="M18 18v-9"></path></svg>Gráfica</a><a href="#" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:7px;background:var(--color-superficie);font-weight:500;font-size:13px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7L18.5 8v12.5h-11.5z"></path><path d="M14 3.5V8h4.5"></path></svg>Documento</a></sc-if>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ acPanel }}" hint-placeholder-val="{{ true }}">
+  <div style="display:grid;grid-template-columns:var(--cols-rep,440px 1fr);gap:16px;align-items:start;margin-top:16px">
+    <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:18px 20px;min-width:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16.5px">Estado de Resultados</div>
+        <div style="display:inline-flex;background:#F4E9E3;border-radius:8px;padding:2px">
+          <sc-if value="{{ esResumen }}" hint-placeholder-val="{{ true }}"><a href="#" style="padding:5px 11px;border-radius:6px;background:var(--color-superficie);font-weight:500;font-size:12px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Resumen</a><a href="#" style="padding:5px 11px;border-radius:6px;font-size:12px;color:var(--color-texto-suave);text-decoration:none">Detalle</a></sc-if>
+          <sc-if value="{{ esDetalle }}" hint-placeholder-val="{{ false }}"><a href="#" style="padding:5px 11px;border-radius:6px;font-size:12px;color:var(--color-texto-suave);text-decoration:none">Resumen</a><a href="#" style="padding:5px 11px;border-radius:6px;background:var(--color-superficie);font-weight:500;font-size:12px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Detalle</a></sc-if>
+        </div>
+      </div>
+      <sc-if value="{{ esResumen }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px"><span>Ingresos</span><span style="font-weight:500">$23,900</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Costo de ventas</span><span>$4,100</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:10px 0;font-size:14px;font-weight:500;border-top:1px solid #F1E4DE"><span>= Utilidad bruta</span><span>$19,800</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Gastos de operación</span><span>$7,320</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 0 2px;border-top:2px solid var(--color-texto);margin-top:2px"><span style="font-size:14.5px;font-weight:500">= Utilidad neta</span><span style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:24px;color:var(--color-primario)">$12,480</span></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:6px"><span style="display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">margen 52%</span></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ esDetalle }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:16px">Ingresos · venta por venta</div>
+        <sc-for list="{{ detVentas }}" as="v" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F7EDE7">
+            <div style="width:48px;font-size:12px;color:var(--color-texto-suave);flex:none">{{ v.fecha }}</div>
+            <div style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ v.clienta }}</div>
+            <div style="font-size:13px;font-weight:500;flex:none">{{ v.total }}</div>
+            <div style="width:92px;text-align:right;font-size:12px;color:var(--estado-exito);flex:none">margen {{ v.margen }}</div>
+          </div>
+        </sc-for>
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);margin-top:16px">Gastos · uno por uno</div>
+        <sc-for list="{{ detGastos }}" as="g" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F7EDE7">
+            <div style="width:48px;font-size:12px;color:var(--color-texto-suave);flex:none">{{ g.fecha }}</div>
+            <div style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ g.nombre }}</div>
+            <div style="font-size:12px;color:var(--color-texto-suave);flex:none">{{ g.categoria }}</div>
+            <div style="width:70px;text-align:right;font-size:13px;font-weight:500;flex:none">{{ g.monto }}</div>
+          </div>
+        </sc-for>
+        <a href="#" style="display:inline-flex;font-size:12.5px;font-weight:500;margin-top:12px;text-decoration:none">Ver las 34 transacciones restantes</a>
+      </sc-if>
+    </div>
+    <div style="display:grid;grid-template-columns:var(--cols-ops,1fr 1fr);gap:16px;min-width:0">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:16px 18px;min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Ventas por forma de pago</div>
+        <sc-for list="{{ pagos }}" as="p" hint-placeholder-count="3">
+          <div style="margin-top:11px">
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px"><span>{{ p.nombre }}</span><span style="font-weight:500">{{ p.monto }}</span></div>
+            <div style="height:6px;border-radius:3px;background:#F4E9E3;margin-top:5px;overflow:hidden"><div style="height:100%;width:{{ p.pct }};background:var(--color-primario);border-radius:3px"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:16px 18px;min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Servicios más vendidos</div>
+        <sc-for list="{{ topServicios }}" as="s" hint-placeholder-count="4">
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:10px">
+            <span style="font-size:12px;font-weight:500;color:var(--color-acento);width:12px;flex:none">{{ s.rango }}</span>
+            <span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.nombre }}</span>
+            <span style="font-size:12.5px;font-weight:500;color:var(--color-texto-suave);flex:none">{{ s.n }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:16px 18px;min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Clientas más frecuentes</div>
+        <sc-for list="{{ topClientas }}" as="c" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+            <div style="width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:500;flex:none">{{ c.ini }}</div>
+            <span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.nombre }}</span>
+            <span style="font-size:12.5px;color:var(--color-texto-suave);flex:none">{{ c.visitas }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:16px 18px;min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Gastos por categoría</div>
+        <sc-for list="{{ gastosCat }}" as="g" hint-placeholder-count="4">
+          <div style="margin-top:11px">
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px"><span>{{ g.nombre }}</span><span style="font-weight:500">{{ g.monto }}</span></div>
+            <div style="height:6px;border-radius:3px;background:#F4E9E3;margin-top:5px;overflow:hidden"><div style="height:100%;width:{{ g.pct }};background:var(--color-secundario);border-radius:3px"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:16px 18px;min-width:0;grid-column:1 / -1">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Citas completadas vs. canceladas</div>
+        <div style="display:flex;align-items:baseline;gap:16px;margin-top:10px;flex-wrap:wrap">
+          <div><span style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px">33</span> <span style="font-size:12.5px;color:var(--estado-exito);font-weight:500">completadas</span></div>
+          <div><span style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px">3</span> <span style="font-size:12.5px;color:var(--estado-error);font-weight:500">canceladas</span></div>
+          <div style="font-size:12px;color:var(--color-texto-suave)">tasa de cancelación 8%</div>
+        </div>
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:10px">
+          <div style="width:92%;background:color-mix(in srgb,var(--estado-exito) 55%, white)"></div>
+          <div style="flex:1;background:color-mix(in srgb,var(--estado-error) 55%, white)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ acCascada }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:22px 26px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16.5px">Estado de Resultados</div>
+        <span style="display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">margen 52%</span>
+      </div>
+      <div style="display:flex;align-items:stretch;gap:14px;margin-top:18px;height:200px">
+        <sc-for list="{{ cascada }}" as="b" hint-placeholder-count="5">
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0">
+            <div style="font-size:14px;font-weight:500;color:{{ b.colorTxt }};white-space:nowrap">{{ b.monto }}</div>
+            <div style="width:72%;height:{{ b.alto }};background:{{ b.color }};border-radius:6px 6px 0 0;margin-top:6px"></div>
+            <div style="font-size:11.5px;color:var(--color-texto-suave);margin-top:8px;text-align:center;line-height:1.3">{{ b.nombre }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="margin-top:16px;--cols-ops:repeat(2,1fr)"><dc-import name="ReportesOperativos" hint-size="100%,620px"></dc-import></div>
+  </sc-if>
+  <sc-if value="{{ acDocumento }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:640px;margin:16px auto 0;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:36px 44px;box-sizing:border-box">
+      <div style="text-align:center">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Glam Nails by Chio</div>
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:26px;margin-top:6px">Estado de Resultados</div>
+        <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:4px">Del 1 al 3 de agosto de 2026</div>
+      </div>
+      <div style="margin-top:26px">
+        <div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;font-size:14px"><span>Ingresos</span><span style="flex:1;border-bottom:1px dotted #D8C4BA"></span><span style="font-weight:500">$23,900</span></div>
+        <div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Costo de ventas</span><span style="flex:1;border-bottom:1px dotted #E4D3C9"></span><span>$4,100</span></div>
+        <div style="display:flex;align-items:baseline;gap:10px;padding:10px 0;font-size:14px;font-weight:500"><span>= Utilidad bruta</span><span style="flex:1;border-bottom:1px dotted #D8C4BA"></span><span>$19,800</span></div>
+        <div style="display:flex;align-items:baseline;gap:10px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Gastos de operación</span><span style="flex:1;border-bottom:1px dotted #E4D3C9"></span><span>$7,320</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:16px 0 0;border-top:3px double var(--color-texto);margin-top:10px"><span style="font-size:15px;font-weight:500">= Utilidad neta</span><span style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:28px;color:var(--color-primario)">$12,480</span></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px"><span style="display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">margen 52%</span></div>
+      </div>
+    </div>
+    <div style="max-width:640px;margin:16px auto 0"><dc-import name="ReportesOperativos" hint-size="100%,720px"></dc-import></div>
+  </sc-if>
+  <sc-if value="{{ acMaestro }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-top:16px">
+      <div style="width:256px;flex:none;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:10px">
+        <sc-for list="{{ reportesLista }}" as="r" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:8px;background:{{ r.bg }};color:{{ r.color }};font-size:13px;font-weight:{{ r.peso }}">{{ r.nombre }}</div>
+        </sc-for>
+      </div>
+      <div style="flex:1;min-width:0;max-width:560px;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:18px 22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16.5px">Estado de Resultados</div>
+          <div style="display:inline-flex;background:#F4E9E3;border-radius:8px;padding:2px">
+            <a href="#" style="padding:5px 11px;border-radius:6px;background:var(--color-superficie);font-weight:500;font-size:12px;color:var(--color-texto);box-shadow:0 1px 2px rgba(74,50,43,.1);text-decoration:none">Resumen</a>
+            <a href="#" style="padding:5px 11px;border-radius:6px;font-size:12px;color:var(--color-texto-suave);text-decoration:none">Detalle</a>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px"><span>Ingresos</span><span style="font-weight:500">$23,900</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Costo de ventas</span><span>$4,100</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:10px 0;font-size:14px;font-weight:500;border-top:1px solid #F1E4DE"><span>= Utilidad bruta</span><span>$19,800</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;font-size:14px;color:var(--color-texto-suave)"><span>(−) Gastos de operación</span><span>$7,320</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 0 2px;border-top:2px solid var(--color-texto);margin-top:2px"><span style="font-size:14.5px;font-weight:500">= Utilidad neta</span><span style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:24px;color:var(--color-primario)">$12,480</span></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:1000},&quot;formato&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;escritorio&quot;,&quot;tablet&quot;,&quot;celular&quot;],&quot;default&quot;:&quot;escritorio&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;nivel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resumen&quot;,&quot;detalle&quot;],&quot;default&quot;:&quot;resumen&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;acomodo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cascada&quot;,&quot;documento&quot;,&quot;panel&quot;,&quot;maestro&quot;],&quot;default&quot;:&quot;cascada&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.formato ?? 'escritorio';
+    const niv = this.props.nivel ?? 'resumen';
+    const ac = this.props.acomodo ?? 'cascada';
+    const barra = (nombre, monto, v, tipo) => ({
+      nombre, monto, alto: Math.round(v / 23900 * 130) + 'px',
+      color: tipo === 'neta' ? 'var(--color-primario)' : tipo === 'resta' ? '#EBDCD3' : 'color-mix(in srgb,var(--color-primario) 45%, white)',
+      colorTxt: tipo === 'neta' ? 'var(--color-primario)' : tipo === 'resta' ? 'var(--color-texto-suave)' : 'var(--color-texto)'
+    });
+    const rep = (nombre, sel) => ({ nombre, bg: sel ? 'color-mix(in srgb,var(--color-primario) 10%, white)' : 'transparent', color: sel ? 'var(--color-primario)' : 'var(--color-texto-suave)', peso: sel ? '500' : '400' });
+    return {
+      formato: f,
+      acPanel: ac === 'panel', acCascada: ac === 'cascada', acDocumento: ac === 'documento', acMaestro: ac === 'maestro',
+      conVista: ac === 'cascada' || ac === 'documento',
+      cascada: [
+        barra('Ingresos', '$23,900', 23900, 'pos'),
+        barra('(−) Costo de ventas', '$4,100', 4100, 'resta'),
+        barra('= Utilidad bruta', '$19,800', 19800, 'pos'),
+        barra('(−) Gastos de operación', '$7,320', 7320, 'resta'),
+        barra('= Utilidad neta', '$12,480', 12480, 'neta')
+      ],
+      reportesLista: [rep('Estado de Resultados', true), rep('Ventas por forma de pago', false), rep('Servicios más vendidos', false), rep('Clientas más frecuentes', false), rep('Gastos por categoría', false), rep('Citas completadas vs. canceladas', false)],
+      esResumen: niv === 'resumen', esDetalle: niv === 'detalle',
+      detVentas: [
+        { fecha: '3 ago', clienta: 'Mariana López', total: '$840', margen: '$612' },
+        { fecha: '3 ago', clienta: 'Paola Gutiérrez', total: '$350', margen: '$264' },
+        { fecha: '1 ago', clienta: 'Vero Sánchez', total: '$550', margen: '$395' },
+        { fecha: '1 ago', clienta: 'Alejandra Torres', total: '$580', margen: '$430' }
+      ],
+      detGastos: [
+        { fecha: '3 ago', nombre: 'Luz (CFE)', categoria: 'Servicios', monto: '$640' },
+        { fecha: '3 ago', nombre: 'Café y galletas', categoria: 'Otros', monto: '$180' },
+        { fecha: '2 ago', nombre: 'Acrílicos y tips', categoria: 'Insumos', monto: '$1,280' },
+        { fecha: '1 ago', nombre: 'Renta del local', categoria: 'Renta', monto: '$4,500' },
+        { fecha: '1 ago', nombre: 'Monómero', categoria: 'Insumos', monto: '$850' }
+      ],
+      pagos: [
+        { nombre: 'Efectivo', monto: '$12,400', pct: '52%' },
+        { nombre: 'Transferencia', monto: '$7,200', pct: '30%' },
+        { nombre: 'Tarjeta', monto: '$4,300', pct: '18%' }
+      ],
+      topServicios: [
+        { rango: '1', nombre: 'Escultura acrílica', n: '14' },
+        { rango: '2', nombre: 'Gelish manos', n: '9' },
+        { rango: '3', nombre: 'Retiro + escultura', n: '7' },
+        { rango: '4', nombre: 'Rubber gel', n: '5' }
+      ],
+      topClientas: [
+        { ini: 'M', nombre: 'Mariana López', visitas: '3 visitas' },
+        { ini: 'A', nombre: 'Alejandra Torres', visitas: '2 visitas' },
+        { ini: 'F', nombre: 'Fernanda Ruiz', visitas: '2 visitas' },
+        { ini: 'P', nombre: 'Paola Gutiérrez', visitas: '2 visitas' }
+      ],
+      gastosCat: [
+        { nombre: 'Renta', monto: '$4,500', pct: '100%' },
+        { nombre: 'Insumos', monto: '$2,130', pct: '47%' },
+        { nombre: 'Servicios', monto: '$640', pct: '14%' },
+        { nombre: 'Otros', monto: '$180', pct: '4%' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

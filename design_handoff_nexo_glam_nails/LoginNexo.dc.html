@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--nx-primario:#1F3357;--nx-acento:#2E8C82;--nx-fondo:#F5F7FA;--nx-superficie:#FFFFFF;--nx-texto:#242E3C;--nx-suave:#5C6B7E;--nx-borde:#DFE5EC;--estado-error:#C1443A;--estado-advertencia:#D9A441}
+body{margin:0;background:var(--nx-fondo)}
+a{color:#1F3357}a:hover{color:#2E8C82}
+</style>
+</helmet>
+<div style="font-family:'Inter',system-ui,sans-serif;color:var(--nx-texto);background:var(--nx-fondo);width:100%;min-height:var(--alto,640px);display:flex;align-items:center;justify-content:center;padding:32px 16px;box-sizing:border-box">
+<sc-if value="{{ esLogin }}" hint-placeholder-val="{{ true }}">
+  <div style="width:100%;max-width:380px;background:var(--nx-superficie);border-radius:14px;box-shadow:0 4px 24px rgba(31,51,87,.08);padding:32px;box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+      <div style="width:48px;height:48px;border-radius:12px;background:var(--nx-primario);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500">N</div>
+      <div style="font-size:21px;font-weight:500;margin-top:12px;letter-spacing:.01em">Nexo</div>
+      <div style="font-size:12.5px;color:var(--nx-suave);margin-top:3px">Administración de negocios</div>
+    </div>
+    <sc-if value="{{ conError }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:10px;align-items:flex-start;margin-top:20px;padding:11px 13px;border-radius:10px;background:color-mix(in srgb,var(--estado-error) 9%, white)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C1443A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5"></path><path d="M12 16.5h.01"></path></svg>
+        <div style="font-size:12.5px;line-height:1.45;color:#A03A31">Usuario o contraseña incorrectos. Si olvidaste tu contraseña, pídele al dueño que la restablezca.</div>
+      </div>
+    </sc-if>
+    <div style="margin-top:20px">
+      <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Usuario</div>
+      <div style="display:flex;align-items:center;padding:0 12px;min-height:46px;border:1px solid {{ bordeCampo }};border-radius:10px;font-size:14px">chio</div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Contraseña</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:0 12px;min-height:46px;border:1px solid {{ bordeCampo }};border-radius:10px;font-size:16px;letter-spacing:.2em">••••••••<div style="flex:1"></div><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9AA7B6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="2.8"></circle></svg></div>
+    </div>
+    <a href="#" style="display:flex;align-items:center;justify-content:center;min-height:48px;background:var(--nx-primario);color:#FFFFFF;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;margin-top:22px">Entrar</a>
+    <div style="font-size:12px;color:var(--nx-suave);text-align:center;margin-top:16px;line-height:1.5">Las cuentas las crea el dueño del negocio.</div>
+  </div>
+</sc-if>
+<sc-if value="{{ esSelector }}" hint-placeholder-val="{{ false }}">
+  <div style="width:100%;max-width:620px;display:flex;flex-direction:column;align-items:center;text-align:center">
+    <div style="width:40px;height:40px;border-radius:10px;background:var(--nx-primario);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500">N</div>
+    <div style="font-size:22px;font-weight:500;margin-top:14px">Hola, Joel</div>
+    <div style="font-size:13.5px;color:var(--nx-suave);margin-top:4px">¿Con qué negocio quieres trabajar hoy?</div>
+    <div style="display:flex;gap:16px;margin-top:26px;flex-wrap:wrap;justify-content:center">
+      <a href="#" style="width:260px;background:var(--nx-superficie);border:1px solid var(--nx-borde);border-radius:14px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--nx-texto);box-sizing:border-box" style-hover="border-color:#2E8C82;box-shadow:0 4px 18px rgba(31,51,87,.1)">
+        <img src="assets/logo.jpeg" alt="Glam Nails by Chio" style="width:64px;height:64px;border-radius:50%;object-fit:cover">
+        <div style="font-size:15.5px;font-weight:500;margin-top:12px">Glam Nails by Chio</div>
+        <div style="font-size:12.5px;color:var(--nx-suave);margin-top:3px">Salón de uñas</div>
+        <div style="display:flex;gap:5px;margin-top:12px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#A9705F"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#C9A227"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#8A9A7B"></div>
+        </div>
+      </a>
+      <a href="#" style="width:260px;background:var(--nx-superficie);border:1px solid var(--nx-borde);border-radius:14px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--nx-texto);box-sizing:border-box" style-hover="border-color:#2E8C82;box-shadow:0 4px 18px rgba(31,51,87,.1)">
+        <div style="width:64px;height:64px;border-radius:50%;background:#EAEEF4;color:var(--nx-primario);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500">D</div>
+        <div style="font-size:15.5px;font-weight:500;margin-top:12px">Don camisa</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:12.5px;color:var(--nx-suave)">Ropa</span><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;background:color-mix(in srgb,var(--estado-advertencia) 16%, white);color:#9A7420">En pausa</span></div>
+        <div style="display:flex;gap:5px;margin-top:12px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#1F3357"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#2E8C82"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#B9C4D2"></div>
+        </div>
+      </a>
+    </div>
+    <div style="font-size:12px;color:var(--nx-suave);margin-top:22px;max-width:380px;line-height:1.5">Al elegir se aplica el tema del negocio. Puedes cambiar de negocio en cualquier momento desde el menú, sin cerrar sesión.</div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;margin-top:18px;text-decoration:none;color:var(--nx-suave)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4.5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H14"></path><path d="M4 12h10"></path><path d="M8 8l-4 4 4 4"></path></svg>Cerrar sesión</a>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:640},&quot;pantalla&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;selector&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;error&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const pan = this.props.pantalla ?? 'login';
+    const err = this.props.error === true || this.props.error === 'true';
+    return {
+      esLogin: pan === 'login', esSelector: pan === 'selector',
+      conError: err,
+      bordeCampo: err ? 'var(--estado-error)' : '#D6DEE8'
+    };
+  }
+}
+</script>
+</body>
+</html>

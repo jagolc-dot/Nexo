@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--color-primario:#A9705F;--color-acento:#C9A227;--color-secundario:#8A9A7B;--color-fondo:#FDF6F3;--color-superficie:#FFFFFF;--color-texto:#4A322B;--color-texto-suave:#8A6A5E;--estado-exito:#2F9E5B;--estado-advertencia:#D9A441;--estado-error:#C1443A;--fuente-cuerpo:'Inter',system-ui,sans-serif;--fuente-titulos:'Playfair Display',Georgia,serif}
+body{margin:0;background:var(--color-fondo)}
+@keyframes brillo{0%,100%{opacity:.45}50%{opacity:1}}
+a{color:var(--color-primario)}a:hover{color:#8F5A4B}
+</style>
+</helmet>
+<div style="font-family:var(--fuente-cuerpo);color:var(--color-texto);background:var(--color-fondo);padding:var(--pad,28px);box-sizing:border-box;width:100%">
+<sc-if value="{{ esNormal }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:var(--tam-saludo,26px);line-height:1.15;color:var(--color-texto)">Hola, Chio</div>
+      <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px">lunes 3 de agosto · Glam Nails by Chio</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:var(--cols-main,1fr);gap:16px;align-items:start;margin-top:18px">
+    <div style="min-width:0">
+      <div style="display:grid;grid-template-columns:var(--cols-hero,1.35fr 1fr 1fr);gap:14px">
+        <div style="grid-column:var(--span-util,auto);background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Utilidad del mes</div>
+          <div style="font-family:var(--fuente-numeros,var(--fuente-titulos));font-weight:var(--peso-titulos,500);font-size:var(--tam-util,32px);line-height:1.1;color:var(--color-primario);margin-top:8px;white-space:nowrap">{{ utilidadValor }}</div>
+          <sc-if value="{{ utilPos }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <span style="display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">+18% vs julio</span>
+              <span style="font-size:12.5px;color:var(--color-texto-suave)">Ingresos $23,900 − Gastos $11,420</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ utilNeg }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <span style="display:inline-flex;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;background:color-mix(in srgb,var(--estado-advertencia) 15%, white);color:#9A7420">Mes con pérdida</span>
+              <span style="font-size:12.5px;color:var(--color-texto-suave)">Los gastos superaron a los ingresos por $2,340</span>
+            </div>
+          </sc-if>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Ingresos de hoy</div>
+          <div style="font-family:var(--fuente-numeros,var(--fuente-titulos));font-weight:var(--peso-titulos,500);font-size:24px;line-height:1.15;margin-top:8px">$1,150</div>
+          <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:8px">3 servicios cobrados</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Citas de hoy</div>
+          <div style="font-family:var(--fuente-numeros,var(--fuente-titulos));font-weight:var(--peso-titulos,500);font-size:24px;line-height:1.15;margin-top:8px">4</div>
+          <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:8px">2 completadas · 2 pendientes</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:var(--cols-sec,repeat(3,1fr));gap:14px;margin-top:14px">
+        <div style="background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Clientes activos</div>
+          <div style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500;margin-top:6px">38</div>
+          <div style="font-size:12px;color:var(--color-texto-suave);margin-top:4px">últimos 2 meses</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Ticket promedio</div>
+          <div style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500;margin-top:6px">$485</div>
+          <div style="font-size:12px;color:var(--color-texto-suave);margin-top:4px">por venta del mes</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Ingresos del mes</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500">$23,900</span>
+            <span style="display:inline-flex;padding:2px 7px;border-radius:999px;font-size:11.5px;font-weight:500;background:color-mix(in srgb,var(--estado-exito) 12%, white);color:var(--estado-exito)">+12%</span>
+          </div>
+          <div style="font-size:12px;color:var(--color-texto-suave);margin-top:4px">julio: $21,300</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Clientas del mes</div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <span style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500">6</span><span style="font-size:12px;color:var(--color-texto-suave)">nuevas</span>
+            <span style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500;margin-left:8px">22</span><span style="font-size:12px;color:var(--color-texto-suave)">recurrentes</span>
+          </div>
+          <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:10px">
+            <div style="width:21%;background:var(--color-primario)"></div>
+            <div style="flex:1;background:color-mix(in srgb,var(--color-secundario) 40%, white)"></div>
+          </div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Tasa de cancelación</div>
+          <div style="font-family:var(--fuente-valores-sec,var(--fuente-cuerpo));font-size:21px;font-weight:500;margin-top:6px">8%</div>
+          <div style="font-size:12px;color:var(--color-texto-suave);margin-top:4px">3 de 36 citas</div>
+        </div>
+        <div style="grid-column:var(--span-top3,auto);background:var(--color-superficie);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Top 3 servicios del mes</div>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-top:9px">
+            <sc-for list="{{ top3 }}" as="s" hint-placeholder-count="3">
+              <div style="display:flex;align-items:baseline;gap:8px">
+                <span style="font-size:12px;font-weight:500;color:var(--color-acento);width:12px">{{ s.rango }}</span>
+                <span style="flex:1;font-size:13px">{{ s.nombre }}</span>
+                <span style="font-size:12.5px;font-weight:500;color:var(--color-texto-suave)">{{ s.n }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--color-superficie);border-radius:12px;padding:16px 20px 8px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px">
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16.5px">Próximas citas</div>
+        <a href="#" style="font-size:13px;font-weight:500;text-decoration:none">Ver todas</a>
+      </div>
+      <sc-for list="{{ citas }}" as="c" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #F3E7E1">
+          <div style="width:36px;height:36px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex:none">{{ c.ini }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:500">{{ c.nombre }}</div>
+            <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.servicios }}</div>
+          </div>
+          <div style="text-align:right;flex:none">
+            <div style="font-size:13px;font-weight:500">{{ c.hora }}</div>
+            <div style="font-size:12px;color:var(--color-texto-suave);margin-top:2px">{{ c.dia }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ esCargando }}" hint-placeholder-val="{{ false }}">
+  <div style="width:150px;height:26px;border-radius:6px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite"></div>
+  <div style="width:220px;height:13px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;margin-top:9px"></div>
+  <div style="display:grid;grid-template-columns:var(--cols-main,1fr);gap:16px;align-items:start;margin-top:18px">
+    <div style="display:grid;grid-template-columns:var(--cols-hero,1.35fr 1fr 1fr);gap:14px;min-width:0">
+      <sc-for list="{{ skel3 }}" as="s" hint-placeholder-count="3">
+        <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+          <div style="width:96px;height:11px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite"></div>
+          <div style="width:120px;height:26px;border-radius:6px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;margin-top:12px"></div>
+          <div style="width:140px;height:12px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;margin-top:12px"></div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+      <div style="width:120px;height:15px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite"></div>
+      <sc-for list="{{ skel4 }}" as="s" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:12px;margin-top:18px">
+          <div style="width:36px;height:36px;border-radius:50%;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;flex:none"></div>
+          <div style="flex:1">
+            <div style="width:60%;height:12px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite"></div>
+            <div style="width:80%;height:10px;border-radius:4px;background:#F0E2DB;animation:brillo 1.4s ease-in-out infinite;margin-top:7px"></div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ esVacio }}" hint-placeholder-val="{{ false }}">
+  <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:var(--tam-saludo,26px);line-height:1.15">Hola, Chio</div>
+  <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px">lunes 3 de agosto · Glam Nails by Chio</div>
+  <div style="display:grid;grid-template-columns:var(--cols-main,1fr);gap:16px;align-items:start;margin-top:18px">
+    <div style="display:grid;grid-template-columns:var(--cols-hero,1.35fr 1fr 1fr);gap:14px;min-width:0">
+      <div style="grid-column:var(--span-util,auto);background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Utilidad del mes</div>
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:32px;line-height:1.1;color:var(--color-texto-suave);margin-top:8px">—</div>
+        <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:8px">Sin movimientos registrados este mes</div>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Ingresos de hoy</div>
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:24px;margin-top:8px">$0</div>
+        <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:8px">Sin ventas registradas hoy</div>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Citas de hoy</div>
+        <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:24px;margin-top:8px">0</div>
+        <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:8px">Nada agendado para hoy</div>
+      </div>
+    </div>
+    <div style="background:var(--color-superficie);border-radius:12px;padding:16px 20px;box-shadow:0 1px 3px rgba(74,50,43,.07);min-width:0">
+      <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:16.5px">Próximas citas</div>
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 12px 22px">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M3.5 9.5h17"></path><path d="M8 3v4"></path><path d="M16 3v4"></path></svg>
+        <div style="font-size:14.5px;font-weight:500;margin-top:12px">Sin citas próximas</div>
+        <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:230px">Cuando agendes una cita aparecerá aquí.</div>
+        <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Ir a Agenda</a>
+      </div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ esError }}" hint-placeholder-val="{{ false }}">
+  <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:var(--tam-saludo,26px);line-height:1.15">Hola, Chio</div>
+  <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px">lunes 3 de agosto · Glam Nails by Chio</div>
+  <div style="background:var(--color-superficie);border-radius:12px;padding:40px 24px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:18px;display:flex;flex-direction:column;align-items:center;text-align:center">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C1443A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5"></path><path d="M12 16.5h.01"></path></svg>
+    <div style="font-size:15px;font-weight:500;margin-top:12px">No pudimos cargar tu resumen</div>
+    <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:260px">Revisa tu conexión e inténtalo de nuevo.</div>
+    <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border:1.5px solid var(--color-secundario);color:var(--color-texto);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Reintentar</a>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160,&quot;height&quot;:700},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;utilNeg&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const estado = this.props.estado ?? 'normal';
+    const neg = this.props.utilNeg === true || this.props.utilNeg === 'true';
+    return {
+      esNormal: estado === 'normal',
+      esCargando: estado === 'cargando',
+      esVacio: estado === 'vacio',
+      esError: estado === 'error',
+      utilPos: !neg,
+      utilNeg: neg,
+      utilidadValor: neg ? '−$2,340' : '$12,480',
+      citas: [
+        {ini:'M',nombre:'Mariana López',servicios:'Escultura acrílica · Almendrada',hora:'4:00 pm',dia:'Hoy'},
+        {ini:'F',nombre:'Fernanda Ruiz',servicios:'Retiro + Rubber gel',hora:'6:30 pm',dia:'Hoy'},
+        {ini:'A',nombre:'Alejandra Torres',servicios:'Gelish manos',hora:'11:00 am',dia:'Mañana'},
+        {ini:'P',nombre:'Paola Gutiérrez',servicios:'Mantenimiento acrílico · Cuadrada',hora:'1:00 pm',dia:'Mañana'},
+        {ini:'K',nombre:'Karla Medina',servicios:'Escultura + diseño',hora:'5:00 pm',dia:'Jue 6 ago'}
+      ],
+      top3: [
+        {rango:'1',nombre:'Escultura acrílica',n:'14'},
+        {rango:'2',nombre:'Gelish manos',n:'9'},
+        {rango:'3',nombre:'Retiro + escultura',n:'7'}
+      ],
+      skel3: [1,2,3],
+      skel4: [1,2,3,4]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:wght@500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+:root{--color-primario:#A9705F;--color-acento:#C9A227;--color-secundario:#8A9A7B;--color-fondo:#FDF6F3;--color-superficie:#FFFFFF;--color-texto:#4A322B;--color-texto-suave:#8A6A5E;--estado-exito:#2F9E5B;--estado-advertencia:#D9A441;--estado-error:#C1443A;--fuente-cuerpo:'Inter',system-ui,sans-serif;--fuente-titulos:'Playfair Display',Georgia,serif}
+body{margin:0;background:var(--color-fondo)}
+a{color:var(--color-primario)}a:hover{color:#8F5A4B}
+</style>
+</helmet>
+<div style="font-family:var(--fuente-cuerpo);color:var(--color-texto);background:var(--color-fondo);width:100%;display:flex;align-items:stretch;flex-direction:var(--dir,row)">
+<div style="flex:none;--nav-clientes-bg:color-mix(in srgb,var(--color-primario) 10%, white);--nav-clientes-c:var(--color-primario);--nav-clientes-w:500"><dc-import name="Chrome" formato="{{ formato }}" hint-size="232px,700px"></dc-import></div>
+<div style="flex:1;min-width:0;padding:var(--pad,24px 28px);box-sizing:border-box">
+<sc-if value="{{ esLista }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px;flex:1">Clientes</div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 16px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Nueva clienta</a>
+  </div>
+  <div style="max-width:760px">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 12px;min-height:44px;border:1px solid #E8D8CF;border-radius:10px;background:var(--color-superficie);margin-top:16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+      <div style="font-size:13.5px;color:var(--color-texto-suave)">{{ textoBusqueda }}</div>
+    </div>
+    <sc-if value="{{ estadoNormal }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:12px;color:var(--color-texto-suave);margin-top:12px">38 clientas activas · 2 desactivadas</div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:2px 16px;margin-top:10px">
+        <sc-for list="{{ clientas }}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #F7EDE7">
+            <div style="width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex:none;opacity:{{ c.op }}">{{ c.ini }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:500;color:{{ c.colorNombre }}">{{ c.nombre }}</span><sc-if value="{{ c.inactiva }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500;background:#F0EDEA;color:#9C9C97">Desactivada</span></sc-if></div>
+              <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.contacto }}</div>
+            </div>
+            <div style="text-align:right;flex:none">
+              <div style="font-size:13px;font-weight:500">{{ c.gasto }}</div>
+              <div style="font-size:12px;color:var(--color-texto-suave);margin-top:2px">{{ c.visitas }}</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9B4AA" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9.5 6 6 6-6 6"></path></svg>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ estadoVacio }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.25"></circle><path d="M3.5 19c.6-3 2.8-4.75 5.5-4.75s4.9 1.75 5.5 4.75"></path><circle cx="16.75" cy="9.75" r="2.5"></circle><path d="M17.6 14.6c1.8.55 2.7 1.85 3.1 3.9"></path></svg>
+        <div style="font-size:14.5px;font-weight:500;margin-top:12px">Aún no hay clientas</div>
+        <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:260px">Se crean aquí o directamente al agendar una cita.</div>
+        <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Nueva clienta</a>
+      </div>
+    </sc-if>
+    <sc-if value="{{ estadoSinResultados }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);margin-top:16px;padding:40px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B99A8D" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg>
+        <div style="font-size:14.5px;font-weight:500;margin-top:12px">Sin resultados para «Renata»</div>
+        <div style="font-size:13px;color:var(--color-texto-suave);margin-top:4px;max-width:280px">Revisa la escritura o créala como nueva clienta.</div>
+        <a href="#" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border:1.5px solid var(--color-secundario);color:var(--color-texto);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:16px">Crear «Renata»</a>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+<sc-if value="{{ esFicha }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="#" aria-label="Volver" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;color:var(--color-texto)" style-hover="background:#FAF3EF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6 8.5 12l6 6"></path></svg></a>
+    <div style="font-size:13px;color:var(--color-texto-suave)">Clientes</div>
+  </div>
+  <div style="display:grid;grid-template-columns:var(--cols-ficha,340px 1fr);gap:16px;align-items:start;margin-top:14px;max-width:980px">
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:20px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,var(--color-secundario) 18%, white);color:#68785B;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;flex:none">M</div>
+          <div style="min-width:0">
+            <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:19px">Mariana López</div>
+            <div style="font-size:12.5px;color:var(--color-texto-suave);margin-top:2px">Clienta desde feb 2026</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:11px 12px;background:var(--color-fondo);border-radius:10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Teléfono</div>
+            <div style="font-size:13.5px;margin-top:2px">722 345 6789</div>
+          </div>
+          <a href="#" style="display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border:1.5px solid var(--color-secundario);border-radius:8px;font-size:12.5px;font-weight:500;color:var(--color-texto);text-decoration:none;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#68785B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 0 0-7.8 13.4L3 21l4.7-1.2A9 9 0 1 0 12 3z"></path></svg>WhatsApp</a>
+        </div>
+        <div style="padding:11px 12px;background:var(--color-fondo);border-radius:10px;margin-top:8px">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Instagram</div>
+          <div style="font-size:13.5px;margin-top:2px">@marianalpz</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <a href="#" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1.5px solid var(--color-secundario);color:var(--color-texto);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Editar</a>
+          <a href="#" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1.5px solid #E0CCC2;color:var(--color-texto-suave);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none">Desactivar</a>
+        </div>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:18px 20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Notas</div>
+          <a href="#" aria-label="Editar notas" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;color:var(--color-texto-suave)" style-hover="background:#FAF3EF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 16 11.5-11.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"></path></svg></a>
+        </div>
+        <div style="font-size:13px;line-height:1.55;margin-top:6px">Prefiere almendrada corta. <strong>Alergia al esmalte con formaldehído.</strong> Suele venir con su hermana; le gusta agendar sábados por la mañana.</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:14px 16px;min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Visitas</div>
+          <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px;margin-top:4px">8</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:14px 16px;min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Gasto acumulado</div>
+          <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px;color:var(--color-primario);margin-top:4px">$3,450</div>
+        </div>
+        <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:14px 16px;min-width:0">
+          <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave)">Última visita</div>
+          <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:22px;margin-top:4px">12 jul</div>
+        </div>
+      </div>
+      <div style="background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);padding:6px 20px 8px">
+        <div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:500;color:var(--color-texto-suave);padding:12px 0 4px">Historial de visitas</div>
+        <sc-for list="{{ historial }}" as="h" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #F7EDE7">
+            <div style="width:64px;font-size:12.5px;color:var(--color-texto-suave);flex:none">{{ h.fecha }}</div>
+            <div style="flex:1;min-width:0;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.servicios }}</div>
+            <div style="font-size:13px;font-weight:500;flex:none">{{ h.monto }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ esEditar }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:480px;background:var(--color-superficie);border-radius:12px;box-shadow:0 1px 3px rgba(74,50,43,.07);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #F3E7E1">
+      <a href="#" aria-label="Volver" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;color:var(--color-texto)" style-hover="background:#FAF3EF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6 8.5 12l6 6"></path></svg></a>
+      <div style="font-family:var(--fuente-titulos);font-weight:var(--peso-titulos,500);font-size:17px">Editar clienta</div>
+    </div>
+    <div style="padding:18px 16px;display:flex;flex-direction:column;gap:14px">
+      <div>
+        <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Nombre <span style="color:var(--estado-error)">*</span></div>
+        <div style="display:flex;align-items:center;padding:0 12px;min-height:44px;border:1px solid #E8D8CF;border-radius:10px;font-size:14px">Mariana López</div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1">
+          <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Teléfono</div>
+          <div style="display:flex;align-items:center;padding:0 12px;min-height:44px;border:1px solid #E8D8CF;border-radius:10px;font-size:14px">722 345 6789</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Red social</div>
+          <div style="display:flex;align-items:center;padding:0 12px;min-height:44px;border:1px solid #E8D8CF;border-radius:10px;font-size:14px">@marianalpz</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--color-texto-suave);margin-top:-6px">Teléfono o red social — con uno basta.</div>
+      <div>
+        <div style="font-size:12.5px;font-weight:500;margin-bottom:6px">Notas</div>
+        <div style="display:flex;align-items:flex-start;padding:12px;min-height:88px;border:1px solid #E8D8CF;border-radius:10px;font-size:13.5px;line-height:1.5;box-sizing:border-box">Prefiere almendrada corta. Alergia al esmalte con formaldehído. Suele venir con su hermana; le gusta agendar sábados por la mañana.</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px 16px;border-top:1px solid #F3E7E1">
+      <a href="#" style="display:flex;align-items:center;justify-content:center;min-height:48px;background:var(--color-primario);color:#FFFFFF;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none">Guardar cambios</a>
+      <a href="#" style="display:flex;align-items:center;justify-content:center;min-height:44px;border:1.5px solid #E0CCC2;color:var(--color-texto-suave);border-radius:8px;font-size:13.5px;font-weight:500;text-decoration:none;margin-top:8px">Desactivar clienta</a>
+      <div style="font-size:12px;color:var(--color-texto-suave);margin-top:8px;text-align:center">Desactivar la oculta de búsquedas y agendado; su historial permanece.</div>
+    </div>
+  </div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:760},&quot;formato&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;escritorio&quot;,&quot;tablet&quot;,&quot;celular&quot;],&quot;default&quot;:&quot;escritorio&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pantalla&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;ficha&quot;,&quot;editar&quot;],&quot;default&quot;:&quot;lista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;sinresultados&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const f = this.props.formato ?? 'escritorio';
+    const pan = this.props.pantalla ?? 'lista';
+    const est = this.props.estado ?? 'normal';
+    const cl = (ini, nombre, contacto, gasto, visitas, inactiva) => ({ ini, nombre, contacto, gasto, visitas, inactiva, op: inactiva ? '.45' : '1', colorNombre: inactiva ? '#9C9C97' : 'var(--color-texto)' });
+    return {
+      formato: f,
+      esLista: pan === 'lista', esFicha: pan === 'ficha', esEditar: pan === 'editar',
+      estadoNormal: est === 'normal', estadoVacio: est === 'vacio', estadoSinResultados: est === 'sinresultados',
+      textoBusqueda: est === 'sinresultados' ? 'Renata' : 'Buscar por nombre, teléfono o red',
+      clientas: [
+        cl('M', 'Mariana López', '722 345 6789 · @marianalpz', '$3,450', '8 visitas', false),
+        cl('F', 'Fernanda Ruiz', 'Instagram · @fer.ruizz', '$2,150', '5 visitas', false),
+        cl('A', 'Alejandra Torres', '722 518 0921', '$1,800', '6 visitas', false),
+        cl('P', 'Paola Gutiérrez', '722 903 4417 · @pau.gtz', '$1,400', '4 visitas', false),
+        cl('K', 'Karla Medina', 'Facebook · Karla Medina', '$950', '2 visitas', false),
+        cl('S', 'Sofía Herrera', '722 664 4102', '$600', '2 visitas', true)
+      ],
+      historial: [
+        { fecha: '12 jul', servicios: 'Escultura acrílica · Almendrada', monto: '$450' },
+        { fecha: '28 jun', servicios: 'Gelish manos', monto: '$300' },
+        { fecha: '14 jun', servicios: 'Retiro + Escultura acrílica', monto: '$600' },
+        { fecha: '24 may', servicios: 'Escultura + diseño · Coffin', monto: '$550' },
+        { fecha: '9 may', servicios: 'Gelish manos y pies', monto: '$580' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
