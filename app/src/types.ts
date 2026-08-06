@@ -32,6 +32,7 @@ export interface Item {
   tiene_variantes: boolean
   precio_base: number | null
   duracion_minutos: number | null
+  costo: number | null
   costo_promedio: number
   stock: number
   activo: boolean

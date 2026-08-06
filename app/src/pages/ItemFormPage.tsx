@@ -29,6 +29,7 @@ export function ItemFormPage() {
   const [categoriaId, setCategoriaId] = useState('')
   const [precioBase, setPrecioBase] = useState('')
   const [duracionMinutos, setDuracionMinutos] = useState('')
+  const [costo, setCosto] = useState('')
   const [manejaVariantes, setManejaVariantes] = useState(false)
   const [piezasIniciales, setPiezasIniciales] = useState('')
   const [costoInicial, setCostoInicial] = useState('')
@@ -56,6 +57,7 @@ export function ItemFormPage() {
         setCategoriaId(item.categoria_id ?? '')
         setPrecioBase(item.precio_base != null ? String(item.precio_base) : '')
         setDuracionMinutos(item.duracion_minutos != null ? String(item.duracion_minutos) : '')
+        setCosto(item.costo != null ? String(item.costo) : '')
         setTipoEdicion(item.tipo)
       })
       .catch(() => setError('No se pudo cargar el ítem.'))
@@ -85,6 +87,10 @@ export function ItemFormPage() {
       setError('La duración es obligatoria para un servicio.')
       return
     }
+    if (esServicio && !esEdicion && !costo) {
+      setError('El costo es obligatorio.')
+      return
+    }
     if (!esServicio && !manejaVariantes && (Boolean(piezasIniciales) !== Boolean(costoInicial))) {
       setError('Captura piezas y costo total juntos, o deja ambos vacíos.')
       return
@@ -98,6 +104,7 @@ export function ItemFormPage() {
           categoria_id: categoriaId || null,
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionMinutos ? Number(duracionMinutos) : null,
+          costo: esServicio && costo ? Number(costo) : null,
         })
         navigate('/catalogo', { replace: true })
         return
@@ -111,6 +118,7 @@ export function ItemFormPage() {
           categoria_id: categoriaId || null,
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionMinutos ? Number(duracionMinutos) : null,
+          costo: esServicio && costo ? Number(costo) : null,
         },
         manejaVariantes,
       )
@@ -226,6 +234,26 @@ export function ItemFormPage() {
             </label>
           )}
         </div>
+
+        {esServicio && (
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+            Costo {!esEdicion && <span style={{ color: 'var(--color-error)' }}>*</span>}
+            <div className={CAMPO} style={ESTILO_CAMPO}>
+              <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={costo}
+                onChange={(e) => setCosto(e.target.value)}
+                className="min-w-0 flex-1 bg-transparent font-medium outline-none"
+              />
+            </div>
+            <p className="font-normal text-[var(--color-texto-suave)]">
+              Costo estándar de insumos para este servicio. Información interna — nunca se le muestra a la clienta.
+            </p>
+          </label>
+        )}
 
         {!esServicio && !esEdicion && (
           <>

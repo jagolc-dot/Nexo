@@ -1,0 +1,11 @@
+-- ============================================================
+-- Etapa 13 A — Costo estándar por servicio en el catálogo.
+-- Reemplaza el costeo real capturado a mano en cada venta por un
+-- costo estándar definido al dar de alta el servicio (NIF C-4 lo
+-- admite si se revisa cuando cambian los precios de insumos).
+-- Nullable para no romper los servicios existentes: deben llenarse
+-- todos antes de aplicar esta migración en producción (ver A.4).
+-- Los productos siguen usando costo_promedio (costeo promedio
+-- ponderado vía entradas de inventario) — no se mezcla con este campo.
+-- ============================================================
+alter table items add column costo numeric(12,4);

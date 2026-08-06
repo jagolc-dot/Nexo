@@ -29,6 +29,7 @@ export interface DatosNuevoItem {
   categoria_id: string | null
   precio_base: number | null
   duracion_minutos: number | null
+  costo: number | null
 }
 
 export async function crearItem(datos: DatosNuevoItem, manejaVariantes = false): Promise<Item> {
@@ -52,7 +53,7 @@ export async function crearItem(datos: DatosNuevoItem, manejaVariantes = false):
 
 export async function actualizarItem(
   itemId: string,
-  cambios: Partial<Pick<Item, 'nombre' | 'categoria_id' | 'precio_base' | 'duracion_minutos'>>,
+  cambios: Partial<Pick<Item, 'nombre' | 'categoria_id' | 'precio_base' | 'duracion_minutos' | 'costo'>>,
 ): Promise<void> {
   const { error } = await supabase.from('items').update(cambios).eq('id', itemId)
   if (error) throw error

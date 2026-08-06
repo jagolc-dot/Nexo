@@ -86,11 +86,21 @@ export function CatalogoPage() {
                       <div className="text-sm font-medium" style={{ color: item.activo ? 'var(--color-texto)' : '#9C9C97' }}>
                         {item.nombre}
                       </div>
-                      {!item.activo && (
-                        <span className="mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: '#F0EDEA', color: '#9C9C97' }}>
-                          Inactivo
-                        </span>
-                      )}
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {!item.activo && (
+                          <span className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: '#F0EDEA', color: '#9C9C97' }}>
+                            Inactivo
+                          </span>
+                        )}
+                        {item.tipo === 'servicio' && item.costo == null && (
+                          <span
+                            className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium"
+                            style={{ background: 'color-mix(in srgb, var(--color-advertencia) 15%, white)', color: 'var(--color-advertencia)' }}
+                          >
+                            Sin costo
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <Link
                       to={item.tipo === 'producto' ? `/catalogo/${item.id}` : `/catalogo/${item.id}/editar`}
