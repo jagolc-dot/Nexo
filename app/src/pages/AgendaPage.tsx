@@ -521,7 +521,9 @@ export function AgendaPage() {
         ))}
         <div className="mt-2.5 flex justify-between gap-2 border-t pt-2.5 text-[13px] font-medium" style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
           <span>Total</span>
-          <span>${total.toFixed(0)}</span>
+          <span>
+            {formatearDuracion(duracionCita(c))} · ${total.toFixed(0)}
+          </span>
         </div>
 
         <div className="mt-3.5 flex gap-6">
