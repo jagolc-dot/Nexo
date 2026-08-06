@@ -28,7 +28,8 @@ export function ItemFormPage() {
   const [categorias, setCategorias] = useState<CategoriaItem[]>([])
   const [categoriaId, setCategoriaId] = useState('')
   const [precioBase, setPrecioBase] = useState('')
-  const [duracionMinutos, setDuracionMinutos] = useState('')
+  const [duracionHoras, setDuracionHoras] = useState('')
+  const [duracionMins, setDuracionMins] = useState('')
   const [costo, setCosto] = useState('')
   const [manejaVariantes, setManejaVariantes] = useState(false)
   const [piezasIniciales, setPiezasIniciales] = useState('')
@@ -41,6 +42,7 @@ export function ItemFormPage() {
 
   const tipo: TipoItem = esEdicion ? tipoEdicion ?? 'servicio' : searchParams.get('tipo') === 'producto' ? 'producto' : 'servicio'
   const esServicio = tipo === 'servicio'
+  const duracionTotalMinutos = Number(duracionHoras || 0) * 60 + Number(duracionMins || 0)
 
   useEffect(() => {
     if (!negocioActivo) return
@@ -56,7 +58,10 @@ export function ItemFormPage() {
         setNombre(item.nombre)
         setCategoriaId(item.categoria_id ?? '')
         setPrecioBase(item.precio_base != null ? String(item.precio_base) : '')
-        setDuracionMinutos(item.duracion_minutos != null ? String(item.duracion_minutos) : '')
+        if (item.duracion_minutos != null) {
+          setDuracionHoras(item.duracion_minutos >= 60 ? String(Math.floor(item.duracion_minutos / 60)) : '')
+          setDuracionMins(item.duracion_minutos % 60 ? String(item.duracion_minutos % 60) : '')
+        }
         setCosto(item.costo != null ? String(item.costo) : '')
         setTipoEdicion(item.tipo)
       })
@@ -83,7 +88,7 @@ export function ItemFormPage() {
       setError('El precio es obligatorio.')
       return
     }
-    if (esServicio && !duracionMinutos) {
+    if (esServicio && duracionTotalMinutos <= 0) {
       setError('La duración es obligatoria para un servicio.')
       return
     }
@@ -103,7 +108,7 @@ export function ItemFormPage() {
           nombre,
           categoria_id: categoriaId || null,
           precio_base: precioBase ? Number(precioBase) : null,
-          duracion_minutos: esServicio && duracionMinutos ? Number(duracionMinutos) : null,
+          duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
         })
         navigate('/catalogo', { replace: true })
@@ -117,7 +122,7 @@ export function ItemFormPage() {
           tipo,
           categoria_id: categoriaId || null,
           precio_base: precioBase ? Number(precioBase) : null,
-          duracion_minutos: esServicio && duracionMinutos ? Number(duracionMinutos) : null,
+          duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
         },
         manejaVariantes,
@@ -219,19 +224,32 @@ export function ItemFormPage() {
           </label>
 
           {esServicio && (
-            <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+            <div className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
               Duración <span style={{ color: 'var(--color-error)' }}>*</span>
-              <div className={CAMPO} style={ESTILO_CAMPO}>
-                <input
-                  type="number"
-                  min="1"
-                  value={duracionMinutos}
-                  onChange={(e) => setDuracionMinutos(e.target.value)}
-                  className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-                />
-                <span className="ml-1 font-normal text-[var(--color-texto-suave)]">min</span>
+              <div className="flex gap-2">
+                <div className={CAMPO} style={ESTILO_CAMPO}>
+                  <input
+                    type="number"
+                    min="0"
+                    value={duracionHoras}
+                    onChange={(e) => setDuracionHoras(e.target.value)}
+                    className="min-w-0 flex-1 bg-transparent font-medium outline-none"
+                  />
+                  <span className="ml-1 font-normal text-[var(--color-texto-suave)]">h</span>
+                </div>
+                <div className={CAMPO} style={ESTILO_CAMPO}>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={duracionMins}
+                    onChange={(e) => setDuracionMins(e.target.value)}
+                    className="min-w-0 flex-1 bg-transparent font-medium outline-none"
+                  />
+                  <span className="ml-1 font-normal text-[var(--color-texto-suave)]">min</span>
+                </div>
               </div>
-            </label>
+            </div>
           )}
         </div>
 

@@ -6,6 +6,7 @@ import { obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
 import type { Empleada } from '../types'
 import { Button, claseBoton } from '../components/ui/Button'
 import { EstadoBadge, type TipoEstado } from '../components/ui/EstadoBadge'
+import { formatearDuracion } from '../lib/formato'
 import { InicioAgendaPanel } from './InicioAgendaPanel'
 
 type Vista = 'dia' | 'semana' | 'mes'
@@ -458,7 +459,7 @@ export function AgendaPage() {
       <div className="mt-2 flex justify-between gap-2 text-[13.5px]">
         <span className="text-[var(--color-texto)]">{nombre}</span>
         <span className="whitespace-nowrap text-[var(--color-texto-suave)]">
-          ${precio.toFixed(0)} · {duracion} min
+          ${precio.toFixed(0)} · {formatearDuracion(duracion)}
         </span>
       </div>
     )
@@ -484,7 +485,7 @@ export function AgendaPage() {
           {etiquetaDiaCorta(inicio)} · {inicio.toLocaleTimeString('es-MX', FORMATO_HORA)} – {fin.toLocaleTimeString('es-MX', FORMATO_HORA)}
         </div>
         <div className="mt-0.5 text-[12.5px] text-[var(--color-texto-suave)]">
-          {duracionCita(c)} min · Atiende {c.empleadas?.nombre ?? '—'}
+          {formatearDuracion(duracionCita(c))} · Atiende {c.empleadas?.nombre ?? '—'}
         </div>
 
         <div className="mt-3.5 flex items-center gap-3 rounded-[10px] bg-[var(--color-fondo)] p-3">

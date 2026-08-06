@@ -3,6 +3,7 @@ import { useNegocio } from '../context/NegocioContext'
 import { listarCategorias } from '../lib/catalogo'
 import { FORMAS_UNA, agendarCita, listarEmpleadas, listarServiciosConAgenda, verificarDisponibilidad } from '../lib/agenda'
 import { crearClienteRapido, listarClientes } from '../lib/ventas'
+import { formatearDuracion } from '../lib/formato'
 import type { CategoriaItem, Cliente, Empleada, Item } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -321,7 +322,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
                         {s.nombre}
                       </span>
                       <span className="text-xs text-[var(--color-texto-suave)]">
-                        ${s.precio_base?.toFixed(0)} · {s.duracion_minutos} min
+                        ${s.precio_base?.toFixed(0)} · {formatearDuracion(s.duracion_minutos ?? 0)}
                       </span>
                     </TarjetaSeleccionable>
                   ))}
@@ -542,7 +543,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
               <div key={s.id} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
                 <span className="text-[var(--color-texto)]">{s.nombre}</span>
                 <span className="whitespace-nowrap text-[var(--color-texto-suave)]">
-                  ${s.precio_base?.toFixed(0)} · {s.duracion_minutos} min
+                  ${s.precio_base?.toFixed(0)} · {formatearDuracion(s.duracion_minutos ?? 0)}
                 </span>
               </div>
             ))}
@@ -557,7 +558,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
             <div className="mt-4 border-t pt-3" style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
               <div className="flex justify-between gap-2 text-[13px] text-[var(--color-texto-suave)]">
                 <span>Duración total</span>
-                <span>{duracionTotal} min</span>
+                <span>{formatearDuracion(duracionTotal)}</span>
               </div>
               <div className="mt-2 flex justify-between gap-2 text-[15px] font-medium text-[var(--color-texto)]">
                 <span>Total</span>
@@ -577,7 +578,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
               {elegidos.length} servicio{elegidos.length === 1 ? '' : 's'} seleccionado{elegidos.length === 1 ? '' : 's'}
             </span>
             <span>
-              {duracionTotal} min · ${precioTotal.toFixed(0)}
+              {formatearDuracion(duracionTotal)} · ${precioTotal.toFixed(0)}
             </span>
           </div>
         )}

@@ -10,6 +10,7 @@ import {
   registrarEntradaInventario,
 } from '../lib/catalogo'
 import type { Item, VarianteItem } from '../types'
+import { formatearDuracion } from '../lib/formato'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { EstadoBadge } from '../components/ui/EstadoBadge'
@@ -228,7 +229,7 @@ export function ItemDetallePage() {
             <p className="text-sm text-[var(--color-texto)]">${item.precio_base.toFixed(2)}</p>
           )}
           {item.duracion_minutos != null && (
-            <p className="text-sm text-[var(--color-texto)]">{item.duracion_minutos} min</p>
+            <p className="text-sm text-[var(--color-texto)]">{formatearDuracion(item.duracion_minutos)}</p>
           )}
         </div>
         <div className="flex items-center gap-2">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
 import { listarCategorias, listarItems } from '../lib/catalogo'
+import { formatearDuracion } from '../lib/formato'
 import type { CategoriaItem, Item, TipoItem } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -118,7 +119,9 @@ export function CatalogoPage() {
                     ) : (
                       <span />
                     )}
-                    {item.duracion_minutos != null && <span className="text-xs text-[var(--color-texto-suave)]">{item.duracion_minutos} min</span>}
+                    {item.duracion_minutos != null && (
+                      <span className="text-xs text-[var(--color-texto-suave)]">{formatearDuracion(item.duracion_minutos)}</span>
+                    )}
                     {item.tipo === 'producto' && !item.tiene_variantes && (
                       <span className="text-xs" style={{ color: item.stock === 0 ? 'var(--color-advertencia)' : 'var(--color-texto-suave)' }}>
                         {item.stock === 0 ? 'Agotado' : `${item.stock} en existencia`}
