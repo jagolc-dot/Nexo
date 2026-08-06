@@ -5,6 +5,7 @@ import { cancelarGasto, CATEGORIAS, listarGastos } from '../lib/gastos'
 import { calcularRango } from '../lib/periodos'
 import type { Categoria, Gasto } from '../types'
 import { claseBoton } from '../components/ui/Button'
+import { formatearFechaSolo, hoyEnNegocio, OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
 
 type PeriodoGasto = 'semana' | 'mes' | 'año'
 const PERIODOS: { valor: PeriodoGasto; etiqueta: string }[] = [
@@ -140,7 +141,7 @@ export function GastosPage() {
                 ${totalPeriodo.toFixed(0)}
               </span>
               <span className="text-[12.5px] text-[var(--color-texto-suave)]">
-                {activos.length} gasto{activos.length === 1 ? '' : 's'} en {NOMBRES_MES[new Date().getMonth()]}
+                {activos.length} gasto{activos.length === 1 ? '' : 's'} en {NOMBRES_MES[Number(hoyEnNegocio().split('-')[1]) - 1]}
               </span>
             </div>
 
@@ -151,10 +152,10 @@ export function GastosPage() {
                   <div key={g.id} className={`flex items-center gap-3.5 py-3 ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: 'var(--color-divisor)' }}>
                     <div className="w-16 shrink-0">
                       <div className="text-[13px] font-medium text-[var(--color-texto)]">
-                        {new Date(`${g.fecha_gasto}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                        {formatearFechaSolo(g.fecha_gasto)}
                       </div>
                       <div className="mt-0.5 hidden text-[11.5px] text-[var(--color-texto-suave)] sm:block">
-                        capt. {new Date(g.fecha_registro).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                        capt. {new Date(g.fecha_registro).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">

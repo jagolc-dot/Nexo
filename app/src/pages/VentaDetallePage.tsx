@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { cancelarVenta, obtenerEmpleadaDeVenta, obtenerVenta, type VentaConLineas } from '../lib/ventas'
+import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
 
 function IconoVolver() {
   return (
@@ -98,8 +99,8 @@ export function VentaDetallePage() {
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium text-[var(--color-texto)]">{cliente}</div>
               <div className="text-[12.5px] text-[var(--color-texto-suave)]">
-                {new Date(venta.fecha).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })} ·{' '}
-                {new Date(venta.fecha).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}
+                {new Date(venta.fecha).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })} ·{' '}
+                {new Date(venta.fecha).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })}
                 {empleada && ` · Atendió ${empleada}`}
               </div>
             </div>

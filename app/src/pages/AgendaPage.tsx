@@ -8,6 +8,16 @@ import { Button, claseBoton } from '../components/ui/Button'
 import { EstadoBadge, type TipoEstado } from '../components/ui/EstadoBadge'
 import { formatearDuracion } from '../lib/formato'
 import { InicioAgendaPanel } from './InicioAgendaPanel'
+import { formatoFechaISO } from '../lib/periodos'
+import {
+  ZONA_NEGOCIO,
+  OPCIONES_ZONA_NEGOCIO,
+  hoyEnNegocio,
+  diaCalendarioDesdeYMD,
+  diaCalendarioNegocio,
+  horaMinutoNegocio,
+  inicioDiaNegocio,
+} from '../lib/tiempoNegocio'
 
 type Vista = 'dia' | 'semana' | 'mes'
 
@@ -69,13 +79,14 @@ function capitalizar(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 function etiquetaDiaCorta(fecha: Date): string {
-  const hoy = new Date()
-  if (mismodia(fecha, hoy)) return 'Hoy'
-  if (mismodia(fecha, sumarDias(inicioDia(hoy), 1))) return 'Mañana'
-  return capitalizar(fecha.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'short' }))
+  const hoyCal = diaCalendarioDesdeYMD(hoyEnNegocio())
+  const fechaCal = diaCalendarioNegocio(fecha)
+  if (mismodia(fechaCal, hoyCal)) return 'Hoy'
+  if (mismodia(fechaCal, sumarDias(hoyCal, 1))) return 'Mañana'
+  return capitalizar(fecha.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO }))
 }
 
-const FORMATO_HORA: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' }
+const FORMATO_HORA: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit', timeZone: ZONA_NEGOCIO }
 const NOMBRES_DIA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const NOMBRES_MES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -135,7 +146,7 @@ function Tarjeta({ children, className = '' }: { children: React.ReactNode; clas
 export function AgendaPage() {
   const { negocioActivo } = useNegocio()
   const [vista, setVista] = useState<Vista>('dia')
-  const [fechaRef, setFechaRef] = useState(() => inicioDia(new Date()))
+  const [fechaRef, setFechaRef] = useState(() => diaCalendarioDesdeYMD(hoyEnNegocio()))
   const [citas, setCitas] = useState<Cita[] | null>(null)
   const [empleadas, setEmpleadas] = useState<Empleada[]>([])
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null)
@@ -160,7 +171,9 @@ export function AgendaPage() {
     if (!negocioActivo) return
     setError(false)
     setCitas(null)
-    listarCitasRango(negocioActivo.id, rango.desde.toISOString(), rango.hasta.toISOString())
+    const desdeUtc = inicioDiaNegocio(formatoFechaISO(rango.desde))
+    const hastaUtc = inicioDiaNegocio(formatoFechaISO(rango.hasta))
+    listarCitasRango(negocioActivo.id, desdeUtc.toISOString(), hastaUtc.toISOString())
       .then(setCitas)
       .catch(() => setError(true))
   }
@@ -204,7 +217,7 @@ export function AgendaPage() {
     else setFechaRef((f) => sumarMeses(f, 1))
   }
   function irHoy() {
-    setFechaRef(inicioDia(new Date()))
+    setFechaRef(diaCalendarioDesdeYMD(hoyEnNegocio()))
   }
 
   async function cancelar(cita: Cita) {
@@ -295,8 +308,8 @@ export function AgendaPage() {
     let minIni = 9 * 60
     let minFin = 20 * 60
     citasDia.forEach((c) => {
-      const d = new Date(c.fecha_hora)
-      const ini = d.getHours() * 60 + d.getMinutes()
+      const { horas, minutos } = horaMinutoNegocio(c.fecha_hora)
+      const ini = horas * 60 + minutos
       const fin = ini + duracionCita(c)
       if (ini < minIni) minIni = Math.floor(ini / 60) * 60
       if (fin > minFin) minFin = Math.ceil(fin / 60) * 60
@@ -345,8 +358,8 @@ export function AgendaPage() {
                     <div key={h} className="absolute left-0 right-0 border-t box-border" style={{ top: (h - minIni) * PX_MIN, borderColor: 'var(--color-divisor)' }} />
                   ))}
                   {citasColumna.map((c) => {
-                    const d = new Date(c.fecha_hora)
-                    const ini = d.getHours() * 60 + d.getMinutes()
+                    const { horas, minutos } = horaMinutoNegocio(c.fecha_hora)
+                    const ini = horas * 60 + minutos
                     const alto = Math.max(duracionCita(c) / 60 * 56 - 6, 30)
                     return (
                       <div key={c.id} className="absolute left-1.5 right-1.5" style={{ top: (ini - minIni) * PX_MIN + 2, height: alto }}>
@@ -369,9 +382,9 @@ export function AgendaPage() {
       <Tarjeta className="mt-4 flex overflow-hidden">
         {dias.map((dia, i) => {
           const citasDelDia = (citas ?? [])
-            .filter((c) => mismodia(new Date(c.fecha_hora), dia))
+            .filter((c) => mismodia(diaCalendarioNegocio(c.fecha_hora), dia))
             .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
-          const esHoy = mismodia(dia, new Date())
+          const esHoy = mismodia(dia, diaCalendarioDesdeYMD(hoyEnNegocio()))
           return (
             <div key={dia.toISOString()} className={`min-w-0 flex-1 pb-3.5 ${i > 0 ? 'border-l' : ''}`} style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
               <button
@@ -417,9 +430,9 @@ export function AgendaPage() {
         </div>
         <div className="grid grid-cols-7">
           {dias.map((dia) => {
-            const citasDelDia = (citas ?? []).filter((c) => mismodia(new Date(c.fecha_hora), dia))
+            const citasDelDia = (citas ?? []).filter((c) => mismodia(diaCalendarioNegocio(c.fecha_hora), dia))
             const fueraDeMes = dia.getMonth() !== mesActual
-            const esHoy = mismodia(dia, new Date())
+            const esHoy = mismodia(dia, diaCalendarioDesdeYMD(hoyEnNegocio()))
             return (
               <button
                 key={dia.toISOString()}
@@ -553,7 +566,7 @@ export function AgendaPage() {
           historial.map((v) => (
             <div key={v.id} className="mt-1.5 flex justify-between gap-2 text-[12.5px] text-[var(--color-texto-suave)]">
               <span>
-                {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} · {v.items}
+                {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })} · {v.items}
               </span>
               <span>${v.total.toFixed(0)}</span>
             </div>

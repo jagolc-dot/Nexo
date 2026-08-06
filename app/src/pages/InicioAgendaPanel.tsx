@@ -4,6 +4,7 @@ import { listarCategorias } from '../lib/catalogo'
 import { FORMAS_UNA, agendarCita, listarEmpleadas, listarServiciosConAgenda, verificarDisponibilidad } from '../lib/agenda'
 import { crearClienteRapido, listarClientes } from '../lib/ventas'
 import { formatearDuracion } from '../lib/formato'
+import { horaNegocioAUtc, OPCIONES_ZONA_NEGOCIO, hoyEnNegocio, diaCalendarioDesdeYMD } from '../lib/tiempoNegocio'
 import type { CategoriaItem, Cliente, Empleada, Item } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -109,7 +110,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
   const [serviciosElegidos, setServiciosElegidos] = useState<Set<string>>(new Set())
   const [formaUna, setFormaUna] = useState('')
   const [empleadaId, setEmpleadaId] = useState('')
-  const [fecha, setFecha] = useState(() => formatoFechaInput(new Date()))
+  const [fecha, setFecha] = useState(() => hoyEnNegocio())
   const [hora, setHora] = useState('')
   const [conflicto, setConflicto] = useState(false)
   const [verificando, setVerificando] = useState(false)
@@ -176,7 +177,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
     }
     let cancelado = false
     setVerificando(true)
-    verificarDisponibilidad(negocioActivo.id, empleadaActiva.id, `${fecha}T${hora}`, duracionTotal)
+    verificarDisponibilidad(negocioActivo.id, empleadaActiva.id, horaNegocioAUtc(fecha, hora), duracionTotal)
       .then((disponible) => {
         if (!cancelado) setConflicto(!disponible)
       })
@@ -227,7 +228,8 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
         precio: s.precio_base ?? 0,
         duracion_minutos: s.duracion_minutos ?? 0,
       }))
-      await agendarCita(negocioActivo!.id, clienteId, `${fecha}T${hora}:00`, payload, formaUna || null, empleadaActiva?.id || null)
+      const fechaHoraUtc = horaNegocioAUtc(fecha, hora).toISOString()
+      await agendarCita(negocioActivo!.id, clienteId, fechaHoraUtc, payload, formaUna || null, empleadaActiva?.id || null)
       onListo()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo agendar la cita.')
@@ -283,7 +285,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
   }
 
   const fechasRapidas = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date()
+    const d = diaCalendarioDesdeYMD(hoyEnNegocio())
     d.setDate(d.getDate() + i)
     return d
   })
@@ -528,8 +530,8 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
               <div>
                 <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Fecha y hora</div>
                 <div className="mt-1 text-[13.5px] text-[var(--color-texto)]">
-                  {new Date(`${fecha}T${hora}`).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })} ·{' '}
-                  {new Date(`${fecha}T${hora}`).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}
+                  {horaNegocioAUtc(fecha, hora).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })} ·{' '}
+                  {horaNegocioAUtc(fecha, hora).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })}
                 </div>
               </div>
               <div>

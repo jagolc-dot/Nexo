@@ -4,14 +4,11 @@ import { useNegocio } from '../context/NegocioContext'
 import { crearGasto, listarTiposGasto } from '../lib/gastos'
 import type { TipoGasto } from '../types'
 import { claseBoton } from '../components/ui/Button'
+import { hoyEnNegocio } from '../lib/tiempoNegocio'
 
 const CAMPO =
   'flex min-h-11 w-full items-center gap-1.5 rounded-[10px] border bg-[var(--color-superficie)] px-3 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
 const ESTILO_CAMPO = { borderColor: 'var(--color-borde-campo)' }
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10)
-}
 
 function IconoVolver() {
   return (
@@ -30,7 +27,7 @@ export function GastoFormPage() {
   const [tipoGastoId, setTipoGastoId] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [monto, setMonto] = useState('')
-  const [fechaGasto, setFechaGasto] = useState(hoyISO())
+  const [fechaGasto, setFechaGasto] = useState(hoyEnNegocio())
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { cambiarActivoCliente, obtenerCliente, obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
 import type { Cliente } from '../types'
 import { claseBoton } from '../components/ui/Button'
+import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
 
 function IconoVolver() {
   return (
@@ -20,7 +21,7 @@ function IconoWhatsapp() {
 }
 
 function mesAño(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('es-MX', { month: 'short', year: 'numeric', ...OPCIONES_ZONA_NEGOCIO })
 }
 
 function Tarjeta({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -165,7 +166,7 @@ export function ClienteDetallePage() {
             <Tarjeta className="min-w-0 px-4 py-3.5">
               <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Última visita</div>
               <div className="mt-1 text-[22px] text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                {confirmadas[0] ? new Date(confirmadas[0].fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : '—'}
+                {confirmadas[0] ? new Date(confirmadas[0].fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO }) : '—'}
               </div>
             </Tarjeta>
           </div>
@@ -176,7 +177,7 @@ export function ClienteDetallePage() {
             {historial.map((v, i) => (
               <div key={v.id} className={`flex items-center gap-3 py-2.5 ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: 'var(--color-divisor)' }}>
                 <span className="w-16 shrink-0 text-[12.5px] text-[var(--color-texto-suave)]">
-                  {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                  {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[13.5px] text-[var(--color-texto)]">
                   {v.items}

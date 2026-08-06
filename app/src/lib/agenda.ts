@@ -1,4 +1,6 @@
+import { formatInTimeZone } from 'date-fns-tz'
 import { supabase } from './supabaseClient'
+import { ZONA_NEGOCIO, inicioDiaNegocio, finDiaNegocio } from './tiempoNegocio'
 import type { Empleada, Item } from '../types'
 
 export const FORMAS_UNA = ['Almendrada', 'Cuadrada', 'Coffin', 'Stiletto'] as const
@@ -125,15 +127,13 @@ export async function agendarCita(
 export async function verificarDisponibilidad(
   negocioId: string,
   empleadaId: string,
-  fechaHoraISO: string,
+  inicio: Date,
   duracionMinutos: number,
 ): Promise<boolean> {
-  const inicio = new Date(fechaHoraISO)
   const fin = inicio.getTime() + duracionMinutos * 60000
-  const desdeDia = new Date(inicio)
-  desdeDia.setHours(0, 0, 0, 0)
-  const hastaDia = new Date(desdeDia)
-  hastaDia.setDate(hastaDia.getDate() + 1)
+  const diaYMD = formatInTimeZone(inicio, ZONA_NEGOCIO, 'yyyy-MM-dd')
+  const desdeDia = inicioDiaNegocio(diaYMD)
+  const hastaDia = finDiaNegocio(diaYMD)
 
   const { data, error } = await supabase
     .from('citas')
@@ -142,7 +142,7 @@ export async function verificarDisponibilidad(
     .eq('empleada_id', empleadaId)
     .in('estado', ['pendiente', 'confirmada'])
     .gte('fecha_hora', desdeDia.toISOString())
-    .lt('fecha_hora', hastaDia.toISOString())
+    .lte('fecha_hora', hastaDia.toISOString())
 
   if (error) throw error
 

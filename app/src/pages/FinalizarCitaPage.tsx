@@ -4,6 +4,7 @@ import { completarCita, obtenerCita, type Cita } from '../lib/agenda'
 import { crearVenta, listarItemsVendibles, type ItemConVariantes } from '../lib/ventas'
 import type { LineaVenta, MetodoPago } from '../types'
 import { claseBoton } from '../components/ui/Button'
+import { OPCIONES_ZONA_NEGOCIO, hoyEnNegocio, fechaISOEnNegocio } from '../lib/tiempoNegocio'
 
 const NOMBRES_PASO = ['Precios', 'Agregar productos', 'Recibo']
 const METODOS: { valor: MetodoPago; etiqueta: string }[] = [
@@ -33,9 +34,8 @@ function IconoBuscar() {
 }
 
 function nombreDiaCorto(fecha: Date): string {
-  const hoy = new Date()
-  if (fecha.toDateString() === hoy.toDateString()) return 'Hoy'
-  return fecha.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+  if (fechaISOEnNegocio(fecha) === hoyEnNegocio()) return 'Hoy'
+  return fecha.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })
 }
 
 export function FinalizarCitaPage() {
@@ -232,7 +232,7 @@ export function FinalizarCitaPage() {
               Finalizar servicio
             </div>
             <div className="mt-0.5 truncate text-xs text-[var(--color-texto-suave)]">
-              {cita.clientes?.nombre ?? 'Sin clienta'} · {nombreDiaCorto(fechaCita)} {fechaCita.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })} — Paso {paso} de 3 · {NOMBRES_PASO[paso - 1]}
+              {cita.clientes?.nombre ?? 'Sin clienta'} · {nombreDiaCorto(fechaCita)} {fechaCita.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })} — Paso {paso} de 3 · {NOMBRES_PASO[paso - 1]}
             </div>
           </div>
         </div>
@@ -445,7 +445,7 @@ export function FinalizarCitaPage() {
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium text-[var(--color-texto)]">{cita.clientes?.nombre ?? 'Sin clienta'}</div>
                 <div className="truncate text-[12.5px] text-[var(--color-texto-suave)]">
-                  {nombreDiaCorto(fechaCita)} · {fechaCita.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })} · Atendió {cita.empleadas?.nombre ?? '—'}
+                  {nombreDiaCorto(fechaCita)} · {fechaCita.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })} · Atendió {cita.empleadas?.nombre ?? '—'}
                 </div>
               </div>
             </div>

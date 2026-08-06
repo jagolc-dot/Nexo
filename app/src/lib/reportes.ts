@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import { formatoFechaISO } from './periodos'
+import { fechaISOEnNegocio } from './tiempoNegocio'
 import type { MetodoPago } from '../types'
 
 interface VentaConDetalle {
@@ -43,8 +43,8 @@ async function gastosActivosEnRango(negocioId: string, inicio: Date, fin: Date):
     .select('id, fecha_gasto, categoria, descripcion, monto, tipos_gasto(nombre)')
     .eq('negocio_id', negocioId)
     .eq('estado', 'activo')
-    .gte('fecha_gasto', formatoFechaISO(inicio))
-    .lte('fecha_gasto', formatoFechaISO(fin))
+    .gte('fecha_gasto', fechaISOEnNegocio(inicio))
+    .lte('fecha_gasto', fechaISOEnNegocio(fin))
 
   if (error) throw error
   return data as unknown as GastoActivo[]

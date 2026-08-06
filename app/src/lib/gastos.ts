@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { fechaISOEnNegocio } from './tiempoNegocio'
 import type { Categoria, Gasto, TipoGasto } from '../types'
 
 export const CATEGORIAS: Categoria[] = [
@@ -44,8 +45,8 @@ export async function listarGastos(
   opciones?: { inicio?: Date; fin?: Date; categoria?: Categoria },
 ): Promise<Gasto[]> {
   let query = supabase.from('gastos').select('*, tipos_gasto(nombre)').eq('negocio_id', negocioId)
-  if (opciones?.inicio) query = query.gte('fecha_gasto', opciones.inicio.toISOString().slice(0, 10))
-  if (opciones?.fin) query = query.lte('fecha_gasto', opciones.fin.toISOString().slice(0, 10))
+  if (opciones?.inicio) query = query.gte('fecha_gasto', fechaISOEnNegocio(opciones.inicio))
+  if (opciones?.fin) query = query.lte('fecha_gasto', fechaISOEnNegocio(opciones.fin))
   if (opciones?.categoria) query = query.eq('categoria', opciones.categoria)
   const { data, error } = await query.order('fecha_gasto', { ascending: false })
   if (error) throw error

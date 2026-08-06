@@ -4,6 +4,7 @@ import { useNegocio } from '../context/NegocioContext'
 import { listarVentas, type VentaConConceptos } from '../lib/ventas'
 import { calcularRango, type Periodo } from '../lib/periodos'
 import { claseBoton } from '../components/ui/Button'
+import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
 
 const PERIODOS: { valor: Periodo; etiqueta: string }[] = [
   { valor: 'hoy', etiqueta: 'Hoy' },
@@ -109,10 +110,10 @@ export function VentasHistorialPage() {
                   >
                     <div className="w-16 shrink-0">
                       <div className="text-[13px] font-medium text-[var(--color-texto)]">
-                        {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}
+                        {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
                       </div>
                       <div className="mt-0.5 text-[11.5px] text-[var(--color-texto-suave)]">
-                        {new Date(v.fecha).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}
+                        {new Date(v.fecha).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })}
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">

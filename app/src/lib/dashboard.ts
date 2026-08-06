@@ -1,12 +1,16 @@
 import { supabase } from './supabaseClient'
 import { calcularRango } from './periodos'
 import { obtenerEstadoResultados, obtenerServiciosYClientasFrecuentes, obtenerTasaCitas } from './reportes'
+import { hoyEnNegocio, inicioDiaNegocio, finDiaNegocio } from './tiempoNegocio'
 
 function inicioMesAnterior(): { inicio: Date; fin: Date } {
-  const hoy = new Date()
-  const inicio = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1)
-  const fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0, 23, 59, 59, 999)
-  return { inicio, fin }
+  const [y, m] = hoyEnNegocio().split('-').map(Number)
+  const mesAnteriorY = m === 1 ? y - 1 : y
+  const mesAnteriorM = m === 1 ? 12 : m - 1
+  const inicioYMD = `${mesAnteriorY}-${String(mesAnteriorM).padStart(2, '0')}-01`
+  const ultimoDia = new Date(mesAnteriorY, mesAnteriorM, 0).getDate()
+  const finYMD = `${mesAnteriorY}-${String(mesAnteriorM).padStart(2, '0')}-${String(ultimoDia).padStart(2, '0')}`
+  return { inicio: inicioDiaNegocio(inicioYMD), fin: finDiaNegocio(finYMD) }
 }
 
 async function citasHoyDesglose(negocioId: string): Promise<{ completadas: number; pendientes: number; total: number }> {
@@ -129,8 +133,11 @@ export async function obtenerDashboardBoutique(negocioId: string): Promise<Dashb
 }
 
 async function contarClientesActivos(negocioId: string): Promise<number> {
-  const desde = new Date()
-  desde.setMonth(desde.getMonth() - 2)
+  const [y, m, d] = hoyEnNegocio().split('-').map(Number)
+  const desdeYMD = new Date(y, m - 1 - 2, d)
+  const desde = inicioDiaNegocio(
+    `${desdeYMD.getFullYear()}-${String(desdeYMD.getMonth() + 1).padStart(2, '0')}-${String(desdeYMD.getDate()).padStart(2, '0')}`,
+  )
 
   const { data, error } = await supabase
     .from('ventas')

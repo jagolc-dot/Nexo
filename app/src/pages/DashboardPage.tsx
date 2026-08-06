@@ -9,15 +9,19 @@ import {
   type DashboardSastreria,
 } from '../lib/dashboard'
 import { claseBoton } from '../components/ui/Button'
+import { OPCIONES_ZONA_NEGOCIO, hoyEnNegocio } from '../lib/tiempoNegocio'
 
 type Estado = 'cargando' | 'normal' | 'vacio' | 'error'
 
 function fechaLarga(d: Date): string {
-  return d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '')
+  return d
+    .toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', ...OPCIONES_ZONA_NEGOCIO })
+    .replace(',', '')
 }
 
 function nombreMesAnterior(): string {
-  const d = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+  const [y, m] = hoyEnNegocio().split('-').map(Number)
+  const d = new Date(y, m - 1 - 1, 1)
   return d.toLocaleDateString('es-MX', { month: 'long' })
 }
 
@@ -225,10 +229,10 @@ function PanelProximasCitas({ citas }: { citas: Array<{ id: string; fecha_hora: 
             </div>
             <div className="shrink-0 text-right">
               <div className="text-[13px] font-medium text-[var(--color-texto)]">
-                {new Date(c.fecha_hora).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })}
+                {new Date(c.fecha_hora).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', ...OPCIONES_ZONA_NEGOCIO })}
               </div>
               <div className="mt-0.5 text-xs text-[var(--color-texto-suave)]">
-                {new Date(c.fecha_hora).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })}
+                {new Date(c.fecha_hora).toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
               </div>
             </div>
           </div>

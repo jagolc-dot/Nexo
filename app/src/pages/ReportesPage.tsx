@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNegocio } from '../context/NegocioContext'
-import { calcularRango, formatoFechaISO, type Periodo } from '../lib/periodos'
+import { calcularRango, type Periodo } from '../lib/periodos'
+import { componentesFechaNegocio, formatearFechaSolo, hoyEnNegocio, OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
 import {
   obtenerEstadoResultados,
   obtenerGastosPorCategoria,
@@ -30,12 +31,14 @@ const PERIODOS: { valor: Periodo; etiqueta: string }[] = [
 const NOMBRES_MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 
 function etiquetaPeriodo(periodo: Periodo, inicio: Date, fin: Date): string {
-  if (periodo === 'hoy') return inicio.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })
-  if (periodo === 'semana') return `${inicio.getDate()} – ${fin.getDate()} de ${NOMBRES_MES[fin.getMonth()]}`
-  if (periodo === 'año') return String(inicio.getFullYear())
+  const ci = componentesFechaNegocio(inicio)
+  const cf = componentesFechaNegocio(fin)
+  if (periodo === 'hoy') return inicio.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric', ...OPCIONES_ZONA_NEGOCIO })
+  if (periodo === 'semana') return `${ci.dia} – ${cf.dia} de ${NOMBRES_MES[cf.mes - 1]}`
+  if (periodo === 'año') return String(ci.anio)
   if (periodo === 'personalizado')
-    return `${inicio.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} – ${fin.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}`
-  return `${NOMBRES_MES[inicio.getMonth()].charAt(0).toUpperCase()}${NOMBRES_MES[inicio.getMonth()].slice(1)} ${inicio.getFullYear()}`
+    return `${inicio.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })} – ${fin.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', ...OPCIONES_ZONA_NEGOCIO })}`
+  return `${NOMBRES_MES[ci.mes - 1].charAt(0).toUpperCase()}${NOMBRES_MES[ci.mes - 1].slice(1)} ${ci.anio}`
 }
 
 function Tarjeta({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -173,7 +176,7 @@ function DetalleER({ datos }: { datos: EstadoResultados }) {
       {datos.ventas.length === 0 && <p className="mt-2 text-sm text-[var(--color-texto-suave)]">Sin ventas en este periodo.</p>}
       {ventasVisibles.map((v) => (
         <div key={v.id} className="flex items-center gap-2.5 border-b py-2.5 text-[13px]" style={{ borderColor: 'var(--color-divisor)' }}>
-          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span>
+          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}</span>
           <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">{v.cliente}</span>
           <span className="shrink-0 font-medium text-[var(--color-texto)]">${v.total.toFixed(0)}</span>
           <span className="w-24 shrink-0 text-right text-xs text-[var(--color-exito)]">margen ${v.margen.toFixed(0)}</span>
@@ -191,7 +194,7 @@ function DetalleER({ datos }: { datos: EstadoResultados }) {
       {datos.gastos.length === 0 && <p className="mt-2 text-sm text-[var(--color-texto-suave)]">Sin gastos en este periodo.</p>}
       {gastosVisibles.map((g) => (
         <div key={g.id} className="flex items-center gap-2.5 border-b py-2.5 text-[13px]" style={{ borderColor: 'var(--color-divisor)' }}>
-          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(`${g.fecha_gasto}T00:00:00`).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span>
+          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{formatearFechaSolo(g.fecha_gasto)}</span>
           <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">{g.concepto}</span>
           <span className="shrink-0 text-xs text-[var(--color-texto-suave)]">{g.categoria}</span>
           <span className="w-16 shrink-0 text-right font-medium text-[var(--color-texto)]">${g.monto.toFixed(0)}</span>
@@ -210,7 +213,7 @@ export function ReportesPage() {
   const { negocioActivo } = useNegocio()
   const [periodo, setPeriodo] = useState<Periodo>('mes')
   const [rangoLibreAbierto, setRangoLibreAbierto] = useState(false)
-  const [rangoPersonalizado, setRangoPersonalizado] = useState({ inicio: formatoFechaISO(new Date()), fin: formatoFechaISO(new Date()) })
+  const [rangoPersonalizado, setRangoPersonalizado] = useState({ inicio: hoyEnNegocio(), fin: hoyEnNegocio() })
   const [vista, setVista] = useState<'cascada' | 'documento'>('cascada')
   const [nivel, setNivel] = useState<'resumen' | 'detalle'>('resumen')
   const [datos, setDatos] = useState<EstadoResultados | null>(null)
@@ -277,12 +280,12 @@ export function ReportesPage() {
       fn(
         'Estado de Resultados - Ventas',
         ['Fecha', 'Cliente', 'Total', 'Costo', 'Margen'],
-        datos.ventas.map((v) => [new Date(v.fecha).toLocaleString(), v.cliente, v.total.toFixed(2), v.costo.toFixed(2), v.margen.toFixed(2)]),
+        datos.ventas.map((v) => [new Date(v.fecha).toLocaleString('es-MX', OPCIONES_ZONA_NEGOCIO), v.cliente, v.total.toFixed(2), v.costo.toFixed(2), v.margen.toFixed(2)]),
       )
       fn(
         'Estado de Resultados - Gastos',
         ['Fecha', 'Concepto', 'Categoría', 'Monto'],
-        datos.gastos.map((g) => [new Date(g.fecha_gasto).toLocaleDateString(), g.concepto, g.categoria, g.monto.toFixed(2)]),
+        datos.gastos.map((g) => [formatearFechaSolo(g.fecha_gasto), g.concepto, g.categoria, g.monto.toFixed(2)]),
       )
     }
   }
