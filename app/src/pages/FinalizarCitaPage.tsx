@@ -5,7 +5,7 @@ import { crearVenta, listarItemsVendibles, type ItemConVariantes } from '../lib/
 import type { LineaVenta, MetodoPago } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
-const NOMBRES_PASO = ['Costo por servicio', 'Agregar productos', 'Recibo']
+const NOMBRES_PASO = ['Precios', 'Agregar productos', 'Recibo']
 const METODOS: { valor: MetodoPago; etiqueta: string }[] = [
   { valor: 'efectivo', etiqueta: 'Efectivo' },
   { valor: 'transferencia', etiqueta: 'Transferencia' },
@@ -47,7 +47,9 @@ export function FinalizarCitaPage() {
   const [productosDelNegocio, setProductosDelNegocio] = useState<ItemConVariantes[]>([])
   const [cargando, setCargando] = useState(true)
 
-  const [costosManuales, setCostosManuales] = useState<Record<string, string>>({})
+  const [preciosServicios, setPreciosServicios] = useState<Record<string, string>>({})
+  const [confirmacionesCeroServicio, setConfirmacionesCeroServicio] = useState<Record<string, boolean>>({})
+  const [confirmacionesCeroProducto, setConfirmacionesCeroProducto] = useState<Record<number, boolean>>({})
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
   const [lineasProductos, setLineasProductos] = useState<LineaVenta[]>([])
   const [busquedaProducto, setBusquedaProducto] = useState('')
@@ -125,10 +127,22 @@ export function FinalizarCitaPage() {
     })
   }
 
-  const totalServicios = cita.cita_servicios.reduce((acc, s) => acc + s.precio, 0)
+  function precioServicio(s: Cita['cita_servicios'][number]): number {
+    const texto = preciosServicios[s.item_id]
+    return texto !== undefined ? Number(texto) || 0 : s.precio
+  }
+
+  const totalServicios = cita.cita_servicios.reduce((acc, s) => acc + precioServicio(s), 0)
   const totalProductos = lineasProductos.reduce((acc, l) => acc + l.cantidad * l.precio_unitario, 0)
   const totalRecibo = totalServicios + totalProductos
-  const sumaCostosCapturados = Object.values(costosManuales).reduce((acc, v) => acc + (Number(v) || 0), 0)
+
+  function actualizarPrecioProducto(index: number, valor: string) {
+    setLineasProductos((prev) => {
+      const copia = [...prev]
+      copia[index] = { ...copia[index], precio_unitario: Number(valor) || 0 }
+      return copia
+    })
+  }
 
   function irAtras() {
     setError(null)
@@ -143,15 +157,28 @@ export function FinalizarCitaPage() {
     setError(null)
     if (paso === 1) {
       for (const s of cita!.cita_servicios) {
-        const texto = costosManuales[s.item_id]
-        const num = Number(texto)
-        if (!texto || Number.isNaN(num) || num < 0) {
-          setError(`Falta el costo de "${s.items?.nombre ?? 'servicio'}".`)
+        const precio = precioServicio(s)
+        if (precio < 0) {
+          setError(`El precio de "${s.items?.nombre ?? 'servicio'}" no puede ser negativo.`)
+          return
+        }
+        if (precio === 0 && !confirmacionesCeroServicio[s.item_id]) {
+          setError(`Confirma que "${s.items?.nombre ?? 'servicio'}" se cobra en $0.`)
           return
         }
       }
     }
     if (paso === 3) {
+      for (const [i, l] of lineasProductos.entries()) {
+        if (l.precio_unitario < 0) {
+          setError(`El precio de "${l.item_nombre}" no puede ser negativo.`)
+          return
+        }
+        if (l.precio_unitario === 0 && !confirmacionesCeroProducto[i]) {
+          setError(`Confirma que "${l.item_nombre}" se cobra en $0.`)
+          return
+        }
+      }
       finalizarRecibo()
       return
     }
@@ -169,8 +196,8 @@ export function FinalizarCitaPage() {
       variante_id: null,
       variante_descripcion: null,
       cantidad: 1,
-      precio_unitario: s.precio,
-      costo_unitario: Number(costosManuales[s.item_id]) || 0,
+      precio_unitario: precioServicio(s),
+      costo_unitario: s.items?.costo ?? 0,
     }))
 
     setEnviando(true)
@@ -218,31 +245,41 @@ export function FinalizarCitaPage() {
         {paso === 1 && (
           <div>
             <p className="mb-3.5 text-[13px] leading-[1.45] text-[var(--color-texto-suave)]">
-              Captura el costo de insumos de cada servicio. Todos los campos son obligatorios.
+              Confirma el precio de cada servicio. Ya viene precargado desde lo cotizado al agendar — ajústalo solo si hubo algún cambio.
             </p>
             <div className="flex flex-col gap-3.5">
-              {cita.cita_servicios.map((s) => (
-                <div key={s.item_id}>
-                  <div className="mb-1.5 flex justify-between gap-2">
-                    <div className="text-[12.5px] font-medium text-[var(--color-texto)]">
-                      {s.items?.nombre} <span style={{ color: 'var(--color-error)' }}>*</span>
+              {cita.cita_servicios.map((s) => {
+                const precio = precioServicio(s)
+                return (
+                  <div key={s.item_id}>
+                    <div className="mb-1.5 flex justify-between gap-2">
+                      <div className="text-[12.5px] font-medium text-[var(--color-texto)]">{s.items?.nombre}</div>
+                      <div className="text-[11.5px] text-[var(--color-texto-suave)]">cotizado: ${s.precio.toFixed(0)}</div>
                     </div>
-                    <div className="text-[11.5px] text-[var(--color-texto-suave)]">precio: ${s.precio.toFixed(0)}</div>
+                    <div className={CAMPO} style={ESTILO_CAMPO}>
+                      <span className="font-normal text-[var(--color-texto-suave)]">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={preciosServicios[s.item_id] ?? String(s.precio)}
+                        onChange={(e) => setPreciosServicios((prev) => ({ ...prev, [s.item_id]: e.target.value }))}
+                        className="min-w-0 flex-1 bg-transparent outline-none"
+                      />
+                    </div>
+                    {precio === 0 && (
+                      <label className="mt-1.5 flex items-center gap-1.5 text-xs text-[var(--color-advertencia)]">
+                        <input
+                          type="checkbox"
+                          checked={confirmacionesCeroServicio[s.item_id] ?? false}
+                          onChange={(e) => setConfirmacionesCeroServicio((prev) => ({ ...prev, [s.item_id]: e.target.checked }))}
+                        />
+                        Confirmo cobrar $0 (cortesía o promoción)
+                      </label>
+                    )}
                   </div>
-                  <div className={CAMPO} style={ESTILO_CAMPO}>
-                    <span className="font-normal text-[var(--color-texto-suave)]">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={costosManuales[s.item_id] ?? ''}
-                      onChange={(e) => setCostosManuales((prev) => ({ ...prev, [s.item_id]: e.target.value }))}
-                      className="min-w-0 flex-1 bg-transparent outline-none"
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}
@@ -417,7 +454,7 @@ export function FinalizarCitaPage() {
             {cita.cita_servicios.map((s, i) => (
               <div key={i} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
                 <span className="text-[var(--color-texto)]">{s.items?.nombre}</span>
-                <span className="text-[var(--color-texto-suave)]">${s.precio.toFixed(0)}</span>
+                <span className="text-[var(--color-texto-suave)]">${precioServicio(s).toFixed(0)}</span>
               </div>
             ))}
 
@@ -425,11 +462,35 @@ export function FinalizarCitaPage() {
               <>
                 <div className="mb-2 mt-4 text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Productos</div>
                 {lineasProductos.map((l, i) => (
-                  <div key={i} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
-                    <span className="text-[var(--color-texto)]">
-                      {l.item_nombre} × {l.cantidad}
-                    </span>
-                    <span className="text-[var(--color-texto-suave)]">${(l.cantidad * l.precio_unitario).toFixed(0)}</span>
+                  <div key={i} className="mt-1.5">
+                    <div className="flex items-center justify-between gap-2 text-[13.5px]">
+                      <span className="text-[var(--color-texto)]">
+                        {l.item_nombre} × {l.cantidad}
+                      </span>
+                      <div className="flex items-center gap-1 whitespace-nowrap text-[var(--color-texto-suave)]">
+                        <span className="font-normal">$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={l.precio_unitario}
+                          onChange={(e) => actualizarPrecioProducto(i, e.target.value)}
+                          className="w-16 rounded-md border bg-transparent px-1.5 py-0.5 text-right text-[13.5px] text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]"
+                          style={{ borderColor: 'var(--color-borde-campo)' }}
+                        />
+                        <span>c/u</span>
+                      </div>
+                    </div>
+                    {l.precio_unitario === 0 && (
+                      <label className="mt-1 flex items-center gap-1.5 text-xs text-[var(--color-advertencia)]">
+                        <input
+                          type="checkbox"
+                          checked={confirmacionesCeroProducto[i] ?? false}
+                          onChange={(e) => setConfirmacionesCeroProducto((prev) => ({ ...prev, [i]: e.target.checked }))}
+                        />
+                        Confirmo cobrar $0 (cortesía o promoción)
+                      </label>
+                    )}
                   </div>
                 ))}
               </>
@@ -472,7 +533,7 @@ export function FinalizarCitaPage() {
             <span>
               {cita.cita_servicios.length} servicio{cita.cita_servicios.length === 1 ? '' : 's'}
             </span>
-            <span>${sumaCostosCapturados.toFixed(0)} capturado</span>
+            <span>${totalServicios.toFixed(0)} total</span>
           </div>
         )}
         {error && <p className="mb-2.5 text-sm text-[var(--color-error)]">{error}</p>}

@@ -42,7 +42,7 @@ export interface CitaServicio {
   item_id: string
   precio: number
   duracion_minutos: number
-  items: { nombre: string } | null
+  items: { nombre: string; costo: number | null } | null
 }
 
 export interface Cita {
@@ -60,7 +60,7 @@ export interface Cita {
 }
 
 const SELECT_CITA =
-  '*, clientes(nombre, telefono, contacto_red_social, notas), empleadas(nombre), cita_servicios(item_id, precio, duracion_minutos, items(nombre))'
+  '*, clientes(nombre, telefono, contacto_red_social, notas), empleadas(nombre), cita_servicios(item_id, precio, duracion_minutos, items(nombre, costo))'
 
 export async function listarCitasRango(
   negocioId: string,
