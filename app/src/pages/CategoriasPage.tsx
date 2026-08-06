@@ -1,5 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useNegocio } from '../context/NegocioContext'
 import { actualizarCategoria, cambiarActivoCategoria, crearCategoria, listarCategorias, listarItems } from '../lib/catalogo'
 import type { CategoriaItem, TipoItem } from '../types'
@@ -53,7 +56,11 @@ export function CategoriasPage() {
   const [enviando, setEnviando] = useState(false)
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [nombreEdicion, setNombreEdicion] = useState('')
-  const [arrastrandoId, setArrastrandoId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   function cargar() {
     if (!negocioActivo) return
@@ -112,91 +119,101 @@ export function CategoriasPage() {
     }
   }
 
-  async function soltarSobre(subset: CategoriaItem[], idDestino: string) {
-    if (!arrastrandoId || arrastrandoId === idDestino) {
-      setArrastrandoId(null)
-      return
-    }
-    const origenIdx = subset.findIndex((c) => c.id === arrastrandoId)
-    const destinoIdx = subset.findIndex((c) => c.id === idDestino)
-    if (origenIdx === -1 || destinoIdx === -1) {
-      setArrastrandoId(null)
-      return
-    }
-    const actual = [...subset]
-    const [movida] = actual.splice(origenIdx, 1)
-    actual.splice(destinoIdx, 0, movida)
-    setArrastrandoId(null)
-    await Promise.all(actual.map((c, i) => actualizarCategoria(c.id, { orden: i + 1 })))
+  async function persistirOrden(subset: CategoriaItem[]) {
+    await Promise.all(subset.map((c, i) => actualizarCategoria(c.id, { orden: i + 1 })))
     cargar()
+  }
+
+  function handleDragEnd(subset: CategoriaItem[], event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = subset.findIndex((c) => c.id === active.id)
+    const newIndex = subset.findIndex((c) => c.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    persistirOrden(arrayMove(subset, oldIndex, newIndex))
+  }
+
+  function Fila({ c }: { c: CategoriaItem }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: c.id })
+    const estilo = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+    return (
+      <div
+        ref={setNodeRef}
+        style={{ ...estilo, borderColor: 'var(--color-hairline)', background: c.activo ? 'var(--color-superficie)' : '#FBF8F6' }}
+        className="flex items-center gap-2.5 rounded-[10px] border px-3.5 py-3"
+      >
+        <button
+          {...attributes}
+          {...listeners}
+          className="shrink-0 cursor-grab touch-none"
+          aria-label="Arrastrar para reordenar"
+        >
+          <IconoAsa />
+        </button>
+
+        {editandoId === c.id ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              guardarRenombre(c)
+            }}
+            className="flex flex-1 items-center gap-2"
+          >
+            <input
+              autoFocus
+              value={nombreEdicion}
+              onChange={(e) => setNombreEdicion(e.target.value)}
+              className="min-w-0 flex-1 rounded-lg border px-2 py-1 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]"
+              style={{ borderColor: 'var(--color-borde-campo)' }}
+            />
+            <button type="submit" className="text-xs font-medium text-[var(--color-primario)]">
+              Guardar
+            </button>
+            <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-[var(--color-texto-suave)]">
+              Cancelar
+            </button>
+          </form>
+        ) : (
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium" style={{ color: c.activo ? 'var(--color-texto)' : '#9C9C97' }}>
+              {c.nombre}
+            </div>
+            <div className="text-xs text-[var(--color-texto-suave)]">
+              {conteos[c.id] ? `${conteos[c.id]} ítem${conteos[c.id] === 1 ? '' : 's'}` : 'Sin ítems'}
+            </div>
+          </div>
+        )}
+
+        {editandoId !== c.id && (
+          <>
+            <button
+              onClick={() => iniciarEdicion(c)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--color-texto-suave)] hover:bg-[var(--color-hover-nav)]"
+              aria-label="Renombrar"
+            >
+              <IconoEditar />
+            </button>
+            <Toggle activo={c.activo} onClick={() => alternarActivo(c)} ariaLabel={c.activo ? 'Desactivar categoría' : 'Activar categoría'} />
+          </>
+        )}
+      </div>
+    )
   }
 
   function Lista({ titulo, subset }: { titulo: string; subset: CategoriaItem[] }) {
     return (
       <div className="mb-5">
         <div className="mb-2 text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">{titulo}</div>
-        <div className="flex flex-col gap-2">
-          {subset.map((c) => (
-            <div
-              key={c.id}
-              draggable
-              onDragStart={() => setArrastrandoId(c.id)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => soltarSobre(subset, c.id)}
-              className="flex items-center gap-2.5 rounded-[10px] border px-3.5 py-3"
-              style={{ borderColor: 'var(--color-hairline)', background: c.activo ? 'var(--color-superficie)' : '#FBF8F6' }}
-            >
-              <IconoAsa />
-
-              {editandoId === c.id ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    guardarRenombre(c)
-                  }}
-                  className="flex flex-1 items-center gap-2"
-                >
-                  <input
-                    autoFocus
-                    value={nombreEdicion}
-                    onChange={(e) => setNombreEdicion(e.target.value)}
-                    className="min-w-0 flex-1 rounded-lg border px-2 py-1 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]"
-                    style={{ borderColor: 'var(--color-borde-campo)' }}
-                  />
-                  <button type="submit" className="text-xs font-medium text-[var(--color-primario)]">
-                    Guardar
-                  </button>
-                  <button type="button" onClick={() => setEditandoId(null)} className="text-xs text-[var(--color-texto-suave)]">
-                    Cancelar
-                  </button>
-                </form>
-              ) : (
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium" style={{ color: c.activo ? 'var(--color-texto)' : '#9C9C97' }}>
-                    {c.nombre}
-                  </div>
-                  <div className="text-xs text-[var(--color-texto-suave)]">
-                    {conteos[c.id] ? `${conteos[c.id]} ítem${conteos[c.id] === 1 ? '' : 's'}` : 'Sin ítems'}
-                  </div>
-                </div>
-              )}
-
-              {editandoId !== c.id && (
-                <>
-                  <button
-                    onClick={() => iniciarEdicion(c)}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[var(--color-texto-suave)] hover:bg-[var(--color-hover-nav)]"
-                    aria-label="Renombrar"
-                  >
-                    <IconoEditar />
-                  </button>
-                  <Toggle activo={c.activo} onClick={() => alternarActivo(c)} ariaLabel={c.activo ? 'Desactivar categoría' : 'Activar categoría'} />
-                </>
-              )}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(subset, e)}>
+          <SortableContext items={subset.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-2">
+              {subset.map((c) => (
+                <Fila key={c.id} c={c} />
+              ))}
+              {subset.length === 0 && <p className="text-sm text-[var(--color-texto-suave)]">Sin categorías todavía.</p>}
             </div>
-          ))}
-          {subset.length === 0 && <p className="text-sm text-[var(--color-texto-suave)]">Sin categorías todavía.</p>}
-        </div>
+          </SortableContext>
+        </DndContext>
       </div>
     )
   }
