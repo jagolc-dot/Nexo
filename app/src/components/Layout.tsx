@@ -184,6 +184,7 @@ export function Layout() {
             <div
               className="truncate text-[14.5px] font-medium leading-tight text-[var(--color-texto)]"
               style={{ fontFamily: 'var(--fuente-titulos)' }}
+              translate="no"
             >
               {nombreNegocio}
             </div>
@@ -324,6 +325,7 @@ export function Layout() {
           <div
             className="min-w-0 flex-1 truncate text-[15px] font-medium"
             style={{ fontFamily: 'var(--fuente-titulos)', color: 'var(--color-texto)' }}
+            translate="no"
           >
             {nombreNegocio}
             {subtituloNegocio && (
