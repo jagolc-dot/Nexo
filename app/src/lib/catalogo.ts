@@ -130,7 +130,6 @@ export interface DatosNuevaVariante {
   item_id: string
   color: string | null
   talla: string | null
-  precio: number | null
 }
 
 export async function crearVariante(datos: DatosNuevaVariante): Promise<VarianteItem> {
@@ -141,6 +140,13 @@ export async function crearVariante(datos: DatosNuevaVariante): Promise<Variante
 
 export async function cambiarActivoVariante(varianteId: string, activo: boolean): Promise<void> {
   const { error } = await supabase.from('variantes_item').update({ activo }).eq('id', varianteId)
+  if (error) throw error
+}
+
+/** Solo elimina si la variante no está referenciada en ventas ni entradas
+ * de inventario — validado en base de datos, no aquí. */
+export async function eliminarVariante(varianteId: string): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_variante', { p_variante_id: varianteId })
   if (error) throw error
 }
 

@@ -5,6 +5,7 @@ import {
   cambiarActivoItem,
   cambiarActivoVariante,
   crearVariante,
+  eliminarVariante,
   listarVariantes,
   obtenerItem,
   registrarEntradaInventario,
@@ -14,6 +15,7 @@ import { formatearDuracion } from '../lib/formato'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { EstadoBadge } from '../components/ui/EstadoBadge'
+import { Toggle } from '../components/ui/Toggle'
 
 const CAMPO =
   'rounded-lg border border-black/15 bg-[var(--color-superficie)] px-2 py-1 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
@@ -21,7 +23,6 @@ const CAMPO =
 function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: () => void }) {
   const [color, setColor] = useState('')
   const [talla, setTalla] = useState('')
-  const [precio, setPrecio] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,11 +35,9 @@ function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: ()
         item_id: itemId,
         color: color || null,
         talla: talla || null,
-        precio: precio ? Number(precio) : null,
       })
       setColor('')
       setTalla('')
-      setPrecio('')
       onCreada()
     } catch {
       setError('No se pudo agregar la variante.')
@@ -59,17 +58,6 @@ function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: ()
       <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
         Talla
         <input value={talla} onChange={(e) => setTalla(e.target.value)} className={`w-20 ${CAMPO}`} />
-      </label>
-      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
-        Precio (opcional)
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-          className={`w-28 ${CAMPO}`}
-        />
       </label>
       <Button type="submit" disabled={enviando} className="min-h-0 px-3 py-1.5 text-sm">
         Agregar variante
@@ -180,6 +168,7 @@ export function ItemDetallePage() {
   const [variantes, setVariantes] = useState<VarianteItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [mostrarFormularioVariante, setMostrarFormularioVariante] = useState(false)
+  const [verInactivas, setVerInactivas] = useState(false)
 
   async function cargar() {
     if (!id) return
@@ -211,6 +200,24 @@ export function ItemDetallePage() {
   async function alternarActivoVariante(variante: VarianteItem) {
     await cambiarActivoVariante(variante.id, !variante.activo)
     await cargar()
+  }
+
+  async function eliminarVarianteClick(variante: VarianteItem) {
+    if (variante.existencia > 0) {
+      if (
+        !confirm(
+          `Esta variante tiene ${variante.existencia} en existencia registrada. Eliminarla hace desaparecer ese inventario del sistema sin dejar rastro de la salida. ¿Continuar de todas formas?`,
+        )
+      )
+        return
+    }
+    if (!confirm('¿Eliminar esta variante? No se puede deshacer.')) return
+    try {
+      await eliminarVariante(variante.id)
+      await cargar()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo eliminar la variante.')
+    }
   }
 
   return (
@@ -270,36 +277,52 @@ export function ItemDetallePage() {
 
       {item.tiene_variantes && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-[var(--color-texto)]">Variantes</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium text-[var(--color-texto)]">Variantes</h2>
+            {variantes.some((v) => !v.activo) && (
+              <label className="flex items-center gap-2 text-xs text-[var(--color-texto-suave)]">
+                <Toggle activo={verInactivas} onClick={() => setVerInactivas((v) => !v)} ariaLabel="Ver variantes inactivas" />
+                Ver inactivas ({variantes.filter((v) => !v.activo).length})
+              </label>
+            )}
+          </div>
 
           <ul className="flex flex-col gap-2">
-            {variantes.map((v) => (
-              <li key={v.id}>
-                <Card className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="text-sm text-[var(--color-texto)]">
-                    <span className="font-medium">
-                      {[v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'}
-                    </span>
-                    {!v.activo && <EstadoBadge tipo="neutral" texto="Inactiva" />}
-                    {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
-                    <p className="text-xs text-[var(--color-texto-suave)]">
-                      Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
-                      {v.precio != null && <> · Precio: ${v.precio.toFixed(2)}</>}
-                    </p>
-                  </div>
+            {variantes
+              .filter((v) => verInactivas || v.activo)
+              .map((v) => (
+                <li key={v.id}>
+                  <Card className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-[var(--color-texto)]">
+                      <span className="font-medium">
+                        {[v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'}
+                      </span>
+                      {!v.activo && <EstadoBadge tipo="neutral" texto="Inactiva" />}
+                      {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
+                      <p className="text-xs text-[var(--color-texto-suave)]">
+                        Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
+                      </p>
+                    </div>
 
-                  <div className="flex items-center gap-3">
-                    <FormularioEntrada negocioId={negocioActivo.id} destino={{ varianteId: v.id }} onRegistrada={cargar} />
-                    <button
-                      onClick={() => alternarActivoVariante(v)}
-                      className="text-xs text-[var(--color-texto-suave)] underline"
-                    >
-                      {v.activo ? 'Desactivar' : 'Reactivar'}
-                    </button>
-                  </div>
-                </Card>
-              </li>
-            ))}
+                    <div className="flex items-center gap-3">
+                      <FormularioEntrada negocioId={negocioActivo.id} destino={{ varianteId: v.id }} onRegistrada={cargar} />
+                      <button
+                        onClick={() => alternarActivoVariante(v)}
+                        className="text-xs text-[var(--color-texto-suave)] underline"
+                      >
+                        {v.activo ? 'Desactivar' : 'Reactivar'}
+                      </button>
+                      <button
+                        onClick={() => eliminarVarianteClick(v)}
+                        className="text-xs underline"
+                        style={{ color: 'var(--color-error)' }}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </Card>
+                </li>
+              ))}
           </ul>
 
           <FormularioVariante itemId={item.id} onCreada={cargar} />

@@ -76,10 +76,9 @@ export function VentaNuevaPage() {
 
   function seleccionarVariante(id: string) {
     setVarianteId(id)
-    const v = variantesDisponibles.find((x) => x.id === id)
-    if (v) {
-      setPrecioUnitario(v.precio != null ? String(v.precio) : String(itemSeleccionado?.precio_base ?? 0))
-    }
+    // El precio siempre es el del modelo (items.precio_base) — la variante ya
+    // no tiene precio propio, solo color/talla/existencia/costo promedio.
+    setPrecioUnitario(String(itemSeleccionado?.precio_base ?? 0))
   }
 
   function agregarLinea() {

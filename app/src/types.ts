@@ -44,7 +44,6 @@ export interface VarianteItem {
   item_id: string
   color: string | null
   talla: string | null
-  precio: number | null
   costo_promedio: number
   existencia: number
   activo: boolean

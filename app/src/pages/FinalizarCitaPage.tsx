@@ -93,7 +93,7 @@ export function FinalizarCitaPage() {
         variante_id: variante.id,
         variante_descripcion: [variante.color, variante.talla].filter(Boolean).join(' / ') || null,
         cantidad: 1,
-        precio_unitario: variante.precio ?? item.precio_base ?? 0,
+        precio_unitario: item.precio_base ?? 0,
         costo_unitario: variante.costo_promedio,
       },
     ])
@@ -370,7 +370,7 @@ export function FinalizarCitaPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-[var(--color-texto)]">{item.nombre}</div>
-                        <div className="text-xs text-[var(--color-texto-suave)]">${(v.precio ?? item.precio_base ?? 0).toFixed(0)}</div>
+                        <div className="text-xs text-[var(--color-texto-suave)]">${(item.precio_base ?? 0).toFixed(0)}</div>
                       </div>
                       {linea ? (
                         <div className="flex items-center overflow-hidden rounded-lg border" style={{ borderColor: '#E0CCC2' }}>
