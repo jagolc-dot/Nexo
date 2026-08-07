@@ -235,51 +235,49 @@ export function ItemFormPage() {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-            {esServicio ? 'Precio' : 'Precio'} <span style={{ color: 'var(--color-error)' }}>*</span>
-            <div className={CAMPO} style={ESTILO_CAMPO}>
-              <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={precioBase}
-                onChange={(e) => setPrecioBase(e.target.value)}
-                className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-              />
-            </div>
-          </label>
+        <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+          Precio <span style={{ color: 'var(--color-error)' }}>*</span>
+          <div className={CAMPO} style={ESTILO_CAMPO}>
+            <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={precioBase}
+              onChange={(e) => setPrecioBase(e.target.value)}
+              className="min-w-0 flex-1 bg-transparent font-medium outline-none"
+            />
+          </div>
+        </label>
 
-          {esServicio && (
-            <div className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-              Duración <span style={{ color: 'var(--color-error)' }}>*</span>
-              <div className="flex gap-2">
-                <div className={CAMPO} style={ESTILO_CAMPO}>
-                  <input
-                    type="number"
-                    min="0"
-                    value={duracionHoras}
-                    onChange={(e) => setDuracionHoras(e.target.value)}
-                    className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-                  />
-                  <span className="ml-1 font-normal text-[var(--color-texto-suave)]">h</span>
-                </div>
-                <div className={CAMPO} style={ESTILO_CAMPO}>
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={duracionMins}
-                    onChange={(e) => setDuracionMins(e.target.value)}
-                    className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-                  />
-                  <span className="ml-1 font-normal text-[var(--color-texto-suave)]">min</span>
-                </div>
+        {esServicio && (
+          <div className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+            Duración <span style={{ color: 'var(--color-error)' }}>*</span>
+            <div className="flex gap-2">
+              <div className={`flex-1 ${CAMPO}`} style={ESTILO_CAMPO}>
+                <input
+                  type="number"
+                  min="0"
+                  value={duracionHoras}
+                  onChange={(e) => setDuracionHoras(e.target.value)}
+                  className="w-full min-w-0 bg-transparent font-medium outline-none"
+                />
+                <span className="ml-1 shrink-0 font-normal text-[var(--color-texto-suave)]">h</span>
+              </div>
+              <div className={`flex-1 ${CAMPO}`} style={ESTILO_CAMPO}>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={duracionMins}
+                  onChange={(e) => setDuracionMins(e.target.value)}
+                  className="w-full min-w-0 bg-transparent font-medium outline-none"
+                />
+                <span className="ml-1 shrink-0 font-normal text-[var(--color-texto-suave)]">min</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {esServicio && (
           <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
