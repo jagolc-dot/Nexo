@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
 import { listarCategorias, listarItems } from '../lib/catalogo'
 import { formatearDuracion } from '../lib/formato'
+import { Toggle } from '../components/ui/Toggle'
 import type { CategoriaItem, Item, TipoItem } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -35,6 +36,7 @@ export function CatalogoPage() {
   const [items, setItems] = useState<Item[] | null>(null)
   const [categorias, setCategorias] = useState<CategoriaItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [verInactivos, setVerInactivos] = useState(false)
 
   useEffect(() => {
     if (!negocioActivo) return
@@ -48,7 +50,7 @@ export function CatalogoPage() {
 
   function secciones(tipo: TipoItem) {
     if (!items) return []
-    const itemsTipo = items.filter((i) => i.tipo === tipo)
+    const itemsTipo = items.filter((i) => i.tipo === tipo && (verInactivos || i.activo))
     const grupos = categorias
       .filter((c) => c.tipo === tipo)
       .map((cat) => ({ categoria: cat, items: itemsTipo.filter((i) => i.categoria_id === cat.id) }))
@@ -155,6 +157,13 @@ export function CatalogoPage() {
           Nuevo servicio
         </Link>
       </div>
+
+      {items && items.some((i) => !i.activo) && (
+        <label className="mt-3 flex items-center gap-2 text-[13px] text-[var(--color-texto-suave)]">
+          <Toggle activo={verInactivos} onClick={() => setVerInactivos((v) => !v)} ariaLabel="Ver ítems inactivos" />
+          Ver inactivos ({items.filter((i) => !i.activo).length})
+        </label>
+      )}
 
       {error && <p className="mt-4 text-sm text-[var(--color-error)]">{error}</p>}
       {items === null && !error && <p className="mt-4 text-sm text-[var(--color-texto-suave)]">Cargando...</p>}

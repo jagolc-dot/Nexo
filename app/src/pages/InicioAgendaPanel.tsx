@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNegocio } from '../context/NegocioContext'
 import { listarCategorias } from '../lib/catalogo'
-import { FORMAS_UNA, agendarCita, listarEmpleadas, listarServiciosConAgenda, verificarDisponibilidad } from '../lib/agenda'
+import { FORMAS_UNA, agendarCita, editarCita, listarEmpleadas, listarServiciosConAgenda, verificarDisponibilidad, type Cita } from '../lib/agenda'
 import { crearClienteRapido, listarClientes } from '../lib/ventas'
 import { formatearDuracion } from '../lib/formato'
-import { horaNegocioAUtc, OPCIONES_ZONA_NEGOCIO, hoyEnNegocio, diaCalendarioDesdeYMD } from '../lib/tiempoNegocio'
+import { horaNegocioAUtc, OPCIONES_ZONA_NEGOCIO, hoyEnNegocio, diaCalendarioDesdeYMD, fechaISOEnNegocio, horaMinutoNegocio } from '../lib/tiempoNegocio'
 import type { CategoriaItem, Cliente, Empleada, Item } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -97,8 +97,9 @@ function TarjetaSeleccionable({
   )
 }
 
-export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
+export function InicioAgendaPanel({ onListo, editando }: { onListo: () => void; editando?: Cita }) {
   const { negocioActivo } = useNegocio()
+  const esEdicion = Boolean(editando)
 
   const [paso, setPaso] = useState(1)
   const [categorias, setCategorias] = useState<CategoriaItem[]>([])
@@ -107,17 +108,29 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [cargando, setCargando] = useState(true)
 
-  const [serviciosElegidos, setServiciosElegidos] = useState<Set<string>>(new Set())
-  const [formaUna, setFormaUna] = useState('')
-  const [empleadaId, setEmpleadaId] = useState('')
-  const [fecha, setFecha] = useState(() => hoyEnNegocio())
-  const [hora, setHora] = useState('')
+  const [serviciosElegidos, setServiciosElegidos] = useState<Set<string>>(
+    () => new Set(editando?.cita_servicios.map((s) => s.item_id) ?? []),
+  )
+  // Precio/duración congelados de los servicios que ya estaban en la cita
+  // al entrar a editar — nunca se recalculan. Los que se agreguen durante
+  // la edición usan el precio/duración vigentes del catálogo.
+  const [preciosCongelados] = useState<Record<string, { precio: number; duracion: number }>>(() =>
+    Object.fromEntries((editando?.cita_servicios ?? []).map((s) => [s.item_id, { precio: s.precio, duracion: s.duracion_minutos }])),
+  )
+  const [formaUna, setFormaUna] = useState(editando?.forma_una ?? '')
+  const [empleadaId, setEmpleadaId] = useState(editando?.empleada_id ?? '')
+  const [fecha, setFecha] = useState(() => (editando ? fechaISOEnNegocio(editando.fecha_hora) : hoyEnNegocio()))
+  const [hora, setHora] = useState(() => {
+    if (!editando) return ''
+    const { horas, minutos } = horaMinutoNegocio(editando.fecha_hora)
+    return `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`
+  })
   const [conflicto, setConflicto] = useState(false)
   const [verificando, setVerificando] = useState(false)
 
   const [tabClienta, setTabClienta] = useState<'existente' | 'nueva'>('existente')
   const [busquedaClienta, setBusquedaClienta] = useState('')
-  const [clienteId, setClienteId] = useState('')
+  const [clienteId, setClienteId] = useState(editando?.cliente_id ?? '')
   const [nuevoNombre, setNuevoNombre] = useState('')
   const [nuevoTelefono, setNuevoTelefono] = useState('')
   const [nuevoRedSocial, setNuevoRedSocial] = useState('')
@@ -129,7 +142,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
     if (!negocioActivo) return
     Promise.all([
       listarCategorias(negocioActivo.id, false, 'servicio'),
-      listarServiciosConAgenda(negocioActivo.id),
+      listarServiciosConAgenda(negocioActivo.id, !esEdicion),
       listarEmpleadas(negocioActivo.id),
       listarClientes(negocioActivo.id),
     ]).then(([c, s, e, cl]) => {
@@ -153,9 +166,16 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
     return grupos
   }, [categorias, servicios])
 
+  // Servicio ya congelado (venía en la cita al editar) -> conserva su
+  // precio/duración originales. Servicio nuevo -> precio/duración vigentes
+  // del catálogo. Nunca se recalcula lo que ya estaba.
+  function datosServicio(s: Item): { precio: number; duracion: number } {
+    return preciosCongelados[s.id] ?? { precio: s.precio_base ?? 0, duracion: s.duracion_minutos ?? 0 }
+  }
+
   const elegidos = servicios.filter((s) => serviciosElegidos.has(s.id))
-  const duracionTotal = elegidos.reduce((acc, s) => acc + (s.duracion_minutos ?? 0), 0)
-  const precioTotal = elegidos.reduce((acc, s) => acc + (s.precio_base ?? 0), 0)
+  const duracionTotal = elegidos.reduce((acc, s) => acc + datosServicio(s).duracion, 0)
+  const precioTotal = elegidos.reduce((acc, s) => acc + datosServicio(s).precio, 0)
   const empleadaActiva = empleadas.length === 1 ? empleadas[0] : empleadas.find((e) => e.id === empleadaId) ?? null
   const clienteElegido = clientes.find((c) => c.id === clienteId) ?? null
 
@@ -177,7 +197,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
     }
     let cancelado = false
     setVerificando(true)
-    verificarDisponibilidad(negocioActivo.id, empleadaActiva.id, horaNegocioAUtc(fecha, hora), duracionTotal)
+    verificarDisponibilidad(negocioActivo.id, empleadaActiva.id, horaNegocioAUtc(fecha, hora), duracionTotal, editando?.id)
       .then((disponible) => {
         if (!cancelado) setConflicto(!disponible)
       })
@@ -223,16 +243,19 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
     setError(null)
     setEnviando(true)
     try {
-      const payload = elegidos.map((s) => ({
-        item_id: s.id,
-        precio: s.precio_base ?? 0,
-        duracion_minutos: s.duracion_minutos ?? 0,
-      }))
+      const payload = elegidos.map((s) => {
+        const { precio, duracion } = datosServicio(s)
+        return { item_id: s.id, precio, duracion_minutos: duracion }
+      })
       const fechaHoraUtc = horaNegocioAUtc(fecha, hora).toISOString()
-      await agendarCita(negocioActivo!.id, clienteId, fechaHoraUtc, payload, formaUna || null, empleadaActiva?.id || null)
+      if (esEdicion) {
+        await editarCita(editando!.id, clienteId, fechaHoraUtc, payload, formaUna || null, empleadaActiva?.id || null)
+      } else {
+        await agendarCita(negocioActivo!.id, clienteId, fechaHoraUtc, payload, formaUna || null, empleadaActiva?.id || null)
+      }
       onListo()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo agendar la cita.')
+      setError(err instanceof Error ? err.message : `No se pudo ${esEdicion ? 'guardar los cambios' : 'agendar la cita'}.`)
     } finally {
       setEnviando(false)
     }
@@ -299,7 +322,7 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
           </button>
           <div className="min-w-0 flex-1">
             <div className="text-[17px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-              Agendar cita
+              {esEdicion ? 'Editar cita' : 'Agendar cita'}
             </div>
             <div className="mt-0.5 text-xs text-[var(--color-texto-suave)]">
               Paso {paso} de 5 · {NOMBRES_PASO[paso - 1]}
@@ -541,14 +564,17 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
             </div>
 
             <div className="mb-2 mt-4 text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Servicios</div>
-            {elegidos.map((s) => (
-              <div key={s.id} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
-                <span className="text-[var(--color-texto)]">{s.nombre}</span>
-                <span className="whitespace-nowrap text-[var(--color-texto-suave)]">
-                  ${s.precio_base?.toFixed(0)} · {formatearDuracion(s.duracion_minutos ?? 0)}
-                </span>
-              </div>
-            ))}
+            {elegidos.map((s) => {
+              const { precio, duracion } = datosServicio(s)
+              return (
+                <div key={s.id} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
+                  <span className="text-[var(--color-texto)]">{s.nombre}</span>
+                  <span className="whitespace-nowrap text-[var(--color-texto-suave)]">
+                    ${precio.toFixed(0)} · {formatearDuracion(duracion)}
+                  </span>
+                </div>
+              )
+            })}
 
             {formaUna && (
               <div className="mt-4">
@@ -590,7 +616,15 @@ export function InicioAgendaPanel({ onListo }: { onListo: () => void }) {
           disabled={enviando || (paso === 3 && conflicto)}
           className={paso === 3 && conflicto ? 'flex min-h-12 w-full items-center justify-center rounded-lg bg-[var(--color-deshabilitado-fondo)] text-sm font-medium text-[var(--color-deshabilitado-texto)]' : claseBoton('primario', 'w-full !min-h-12')}
         >
-          {enviando ? 'Agendando...' : paso === 5 ? 'Confirmar cita' : 'Continuar'}
+          {enviando
+            ? esEdicion
+              ? 'Guardando...'
+              : 'Agendando...'
+            : paso === 5
+              ? esEdicion
+                ? 'Guardar cambios'
+                : 'Confirmar cita'
+              : 'Continuar'}
         </button>
         {paso === 2 && (
           <button onClick={() => setPaso(3)} className="mt-1 flex min-h-11 w-full items-center justify-center text-[13.5px] font-medium text-[var(--color-texto-suave)]">

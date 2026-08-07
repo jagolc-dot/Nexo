@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
-import { actualizarItem, cambiarActivoItem, crearItem, listarCategorias, obtenerItem, registrarEntradaInventario } from '../lib/catalogo'
+import { actualizarItem, cambiarActivoItem, crearItem, eliminarItem, listarCategorias, obtenerItem, registrarEntradaInventario } from '../lib/catalogo'
 import type { CategoriaItem, TipoItem } from '../types'
 import { claseBoton } from '../components/ui/Button'
 
@@ -35,10 +35,13 @@ export function ItemFormPage() {
   const [piezasIniciales, setPiezasIniciales] = useState('')
   const [costoInicial, setCostoInicial] = useState('')
   const [tipoEdicion, setTipoEdicion] = useState<TipoItem | null>(null)
+  const [activoActual, setActivoActual] = useState(true)
+  const [stockActual, setStockActual] = useState(0)
   const [cargando, setCargando] = useState(esEdicion)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
   const [desactivando, setDesactivando] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
 
   const tipo: TipoItem = esEdicion ? tipoEdicion ?? 'servicio' : searchParams.get('tipo') === 'producto' ? 'producto' : 'servicio'
   const esServicio = tipo === 'servicio'
@@ -64,6 +67,8 @@ export function ItemFormPage() {
         }
         setCosto(item.costo != null ? String(item.costo) : '')
         setTipoEdicion(item.tipo)
+        setActivoActual(item.activo)
+        setStockActual(item.stock)
       })
       .catch(() => setError('No se pudo cargar el ítem.'))
       .finally(() => setCargando(false))
@@ -143,16 +148,39 @@ export function ItemFormPage() {
     }
   }
 
-  async function desactivar() {
+  async function alternarActivo() {
     if (!id) return
-    if (!confirm(`¿Desactivar este ${esServicio ? 'servicio' : 'producto'}? Deja de ofrecerse; su historial no se toca.`)) return
+    if (activoActual) {
+      if (!confirm(`¿Desactivar este ${esServicio ? 'servicio' : 'producto'}? Deja de ofrecerse; su historial no se toca.`)) return
+    }
     setDesactivando(true)
     try {
-      await cambiarActivoItem(id, false)
-      navigate('/catalogo', { replace: true })
+      await cambiarActivoItem(id, !activoActual)
+      if (activoActual) {
+        navigate('/catalogo', { replace: true })
+      } else {
+        setActivoActual(true)
+        setDesactivando(false)
+      }
     } catch {
-      setError('No se pudo desactivar.')
+      setError(`No se pudo ${activoActual ? 'desactivar' : 'reactivar'}.`)
       setDesactivando(false)
+    }
+  }
+
+  async function eliminar() {
+    if (!id) return
+    if (tipo === 'producto' && stockActual > 0) {
+      if (!confirm(`Este producto tiene ${stockActual} en existencia registrada. Eliminarlo hace desaparecer ese inventario del sistema sin dejar rastro de la salida. ¿Continuar de todas formas?`)) return
+    }
+    if (!confirm(`¿Eliminar este ${esServicio ? 'servicio' : 'producto'}? No se puede deshacer.`)) return
+    setEliminando(true)
+    try {
+      await eliminarItem(id)
+      navigate('/catalogo', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo eliminar.')
+      setEliminando(false)
     }
   }
 
@@ -334,16 +362,40 @@ export function ItemFormPage() {
         </button>
         {esEdicion && (
           <>
+            {!activoActual && (
+              <p className="mt-2 text-center text-xs font-medium text-[var(--color-advertencia)]">
+                Inactivo — no aparece al agendar ni al vender.
+              </p>
+            )}
             <button
-              onClick={desactivar}
+              onClick={alternarActivo}
               disabled={desactivando}
               className="mt-2 flex min-h-11 w-full items-center justify-center rounded-lg border-[1.5px] text-[13.5px] font-medium text-[var(--color-texto-suave)]"
               style={{ borderColor: '#E0CCC2' }}
             >
-              {desactivando ? 'Desactivando...' : `Desactivar ${esServicio ? 'servicio' : 'producto'}`}
+              {desactivando
+                ? activoActual
+                  ? 'Desactivando...'
+                  : 'Reactivando...'
+                : activoActual
+                  ? `Desactivar ${esServicio ? 'servicio' : 'producto'}`
+                  : `Reactivar ${esServicio ? 'servicio' : 'producto'}`}
             </button>
             <p className="mt-2 text-center text-xs text-[var(--color-texto-suave)]">
-              Un {esServicio ? 'servicio desactivado deja' : 'producto desactivado deja'} de ofrecerse al agendar; su historial no se toca.
+              {activoActual
+                ? `Un ${esServicio ? 'servicio desactivado deja' : 'producto desactivado deja'} de ofrecerse al agendar; su historial no se toca.`
+                : `Al reactivar, ${esServicio ? 'el servicio' : 'el producto'} vuelve a ofrecerse tal como estaba — su existencia y costo promedio no se reinician.`}
+            </p>
+            <button
+              onClick={eliminar}
+              disabled={eliminando}
+              className="mt-3 flex min-h-11 w-full items-center justify-center rounded-lg border-[1.5px] text-[13.5px] font-medium"
+              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+            >
+              {eliminando ? 'Eliminando...' : `Eliminar ${esServicio ? 'servicio' : 'producto'}`}
+            </button>
+            <p className="mt-2 text-center text-xs text-[var(--color-texto-suave)]">
+              Solo se puede eliminar si nunca se usó en ventas, citas o entradas de inventario. Si tiene historial, desactívalo en vez de eliminarlo.
             </p>
           </>
         )}

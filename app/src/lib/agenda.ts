@@ -27,14 +27,10 @@ export async function tieneServiciosConAgenda(negocioId: string): Promise<boolea
   return (count ?? 0) > 0
 }
 
-export async function listarServiciosConAgenda(negocioId: string): Promise<Item[]> {
-  const { data, error } = await supabase
-    .from('items')
-    .select('*')
-    .eq('negocio_id', negocioId)
-    .eq('requiere_agenda', true)
-    .eq('activo', true)
-    .order('nombre')
+export async function listarServiciosConAgenda(negocioId: string, soloActivos = true): Promise<Item[]> {
+  let query = supabase.from('items').select('*').eq('negocio_id', negocioId).eq('requiere_agenda', true)
+  if (soloActivos) query = query.eq('activo', true)
+  const { data, error } = await query.order('nombre')
 
   if (error) throw error
   return data as unknown as Item[]
@@ -119,6 +115,38 @@ export async function agendarCita(
 }
 
 /**
+ * Solo citas pendientes o confirmadas. Revalida traslapes con la misma
+ * lógica que agendar_cita (excluyéndose a sí misma). Los servicios que ya
+ * estaban en cita_servicios conservan su precio/duración congelados — la
+ * función solo inserta los item_id nuevos con lo que venga en `servicios`.
+ */
+export async function editarCita(
+  citaId: string,
+  clienteId: string,
+  fechaHoraISO: string,
+  servicios: ServicioParaAgendar[],
+  formaUna: string | null,
+  empleadaId: string | null,
+): Promise<void> {
+  const { error } = await supabase.rpc('editar_cita', {
+    p_cita_id: citaId,
+    p_cliente_id: clienteId,
+    p_fecha_hora: fechaHoraISO,
+    p_servicios: servicios,
+    p_forma_una: formaUna,
+    p_empleada_id: empleadaId,
+  })
+  if (error) throw error
+}
+
+/** Solo permite eliminar citas que nunca tuvieron consecuencia (pendiente
+ * o confirmada, sin venta asociada) — validado también en base de datos. */
+export async function eliminarCita(citaId: string): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_cita', { p_cita_id: citaId })
+  if (error) throw error
+}
+
+/**
  * Chequeo de disponibilidad puramente informativo para la UI (mismo patrón
  * que la prevención de venta con existencia insuficiente): agendar_cita es
  * la única autoridad real sobre traslapes, esto solo evita que la clienta
@@ -129,25 +157,29 @@ export async function verificarDisponibilidad(
   empleadaId: string,
   inicio: Date,
   duracionMinutos: number,
+  excluirCitaId?: string,
 ): Promise<boolean> {
   const fin = inicio.getTime() + duracionMinutos * 60000
   const diaYMD = formatInTimeZone(inicio, ZONA_NEGOCIO, 'yyyy-MM-dd')
   const desdeDia = inicioDiaNegocio(diaYMD)
   const hastaDia = finDiaNegocio(diaYMD)
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('citas')
-    .select('fecha_hora, cita_servicios(duracion_minutos)')
+    .select('id, fecha_hora, cita_servicios(duracion_minutos)')
     .eq('negocio_id', negocioId)
     .eq('empleada_id', empleadaId)
     .in('estado', ['pendiente', 'confirmada'])
     .gte('fecha_hora', desdeDia.toISOString())
     .lte('fecha_hora', hastaDia.toISOString())
+  if (excluirCitaId) query = query.neq('id', excluirCitaId)
+
+  const { data, error } = await query
 
   if (error) throw error
 
   const conflicto = (
-    data as Array<{ fecha_hora: string; cita_servicios: Array<{ duracion_minutos: number }> }>
+    data as Array<{ id: string; fecha_hora: string; cita_servicios: Array<{ duracion_minutos: number }> }>
   ).some((c) => {
     const cIni = new Date(c.fecha_hora).getTime()
     const cDur = c.cita_servicios.reduce((acc, s) => acc + s.duracion_minutos, 0)

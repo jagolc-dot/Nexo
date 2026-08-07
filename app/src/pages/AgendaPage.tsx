@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
-import { cancelarCita, listarCitasRango, listarEmpleadas, type Cita } from '../lib/agenda'
+import { cancelarCita, eliminarCita, listarCitasRango, listarEmpleadas, type Cita } from '../lib/agenda'
 import { obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
 import type { Empleada } from '../types'
 import { Button, claseBoton } from '../components/ui/Button'
@@ -153,6 +153,7 @@ export function AgendaPage() {
   const [historial, setHistorial] = useState<VisitaCliente[] | null>(null)
   const [error, setError] = useState(false)
   const [mostrarAgendar, setMostrarAgendar] = useState(false)
+  const [citaEditando, setCitaEditando] = useState<Cita | null>(null)
 
   const rango = useMemo(() => {
     if (vista === 'dia') return { desde: inicioDia(fechaRef), hasta: sumarDias(inicioDia(fechaRef), 1) }
@@ -195,11 +196,14 @@ export function AgendaPage() {
 
   if (!negocioActivo) return null
 
-  if (mostrarAgendar) {
+  if (mostrarAgendar || citaEditando) {
     return (
       <InicioAgendaPanel
+        editando={citaEditando ?? undefined}
         onListo={() => {
           setMostrarAgendar(false)
+          setCitaEditando(null)
+          setCitaSeleccionada(null)
           cargar()
         }}
       />
@@ -228,6 +232,17 @@ export function AgendaPage() {
       cargar()
     } catch {
       alert('No se pudo cancelar la cita.')
+    }
+  }
+
+  async function eliminar(cita: Cita) {
+    if (!confirm('¿Eliminar esta cita? Fue un error de captura, no una cancelación — no se puede deshacer.')) return
+    try {
+      await eliminarCita(cita.id)
+      setCitaSeleccionada(null)
+      cargar()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo eliminar la cita.')
     }
   }
 
@@ -578,9 +593,17 @@ export function AgendaPage() {
             <Link to={`/agenda/${c.id}/finalizar`} className={claseBoton('primario')}>
               Finalizar servicio
             </Link>
+            <button onClick={() => setCitaEditando(c)} className={claseBoton('secundario')}>
+              Editar cita
+            </button>
             <button onClick={() => cancelar(c)} className={claseBoton('destructivo')}>
               Cancelar cita
             </button>
+            {!c.venta_id && (
+              <button onClick={() => eliminar(c)} className={claseBoton('destructivo')}>
+                Eliminar cita
+              </button>
+            )}
           </div>
         )}
       </Tarjeta>

@@ -108,6 +108,13 @@ export async function cambiarActivoItem(itemId: string, activo: boolean): Promis
   if (error) throw error
 }
 
+/** Solo elimina si el ítem no está referenciado en ventas, citas ni
+ * entradas de inventario — validado en base de datos, no aquí. */
+export async function eliminarItem(itemId: string): Promise<void> {
+  const { error } = await supabase.rpc('eliminar_item', { p_item_id: itemId })
+  if (error) throw error
+}
+
 export async function listarVariantes(itemId: string): Promise<VarianteItem[]> {
   const { data, error } = await supabase
     .from('variantes_item')
