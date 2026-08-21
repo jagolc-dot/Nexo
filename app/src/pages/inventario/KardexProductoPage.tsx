@@ -1,24 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { listarKardex } from '../../lib/inventario'
+import { useNegocio } from '../../context/NegocioContext'
+import { aplicarRecosteo, listarKardex, obtenerAlmacen, previsualizarRecosteo, type PrevisualizacionRecosteo } from '../../lib/inventario'
 import { listarVariantes, obtenerItem } from '../../lib/catalogo'
+import { supabase } from '../../lib/supabaseClient'
 import type { Item, MovimientoInventario, TipoMovimiento } from '../../types'
+import { Button } from '../../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO } from '../../lib/tiempoNegocio'
 
 const ETIQUETA_TIPO: Record<TipoMovimiento, string> = {
-  entrada: 'Entrada (compra)',
-  salida_venta: 'Salida (venta)',
-  ajuste_positivo: 'Ajuste positivo',
-  ajuste_negativo: 'Ajuste negativo',
+  compra: 'Compra',
+  venta: 'Venta',
+  ajuste: 'Ajuste',
+  cancelacion_venta: 'Cancelación de venta',
   cancelacion_compra: 'Cancelación de compra',
-}
-
-const SIGNO: Record<TipoMovimiento, 1 | -1> = {
-  entrada: 1,
-  salida_venta: -1,
-  ajuste_positivo: 1,
-  ajuste_negativo: -1,
-  cancelacion_compra: -1,
+  recosteo: 'Recosteo',
 }
 
 function formatearFecha(iso: string): string {
@@ -27,31 +23,67 @@ function formatearFecha(iso: string): string {
 
 export function KardexProductoPage() {
   const { itemId, varianteId } = useParams<{ itemId: string; varianteId?: string }>()
+  const { negocioActivo } = useNegocio()
   const [item, setItem] = useState<Item | null>(null)
   const [descripcionVariante, setDescripcionVariante] = useState<string | null>(null)
   const [movimientos, setMovimientos] = useState<MovimientoInventario[] | null>(null)
+  const [motivosAjuste, setMotivosAjuste] = useState<Record<string, string>>({})
   const [desde, setDesde] = useState('')
   const [hasta, setHasta] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [previsualizacion, setPrevisualizacion] = useState<PrevisualizacionRecosteo | null>(null)
+  const [aplicandoRecosteo, setAplicandoRecosteo] = useState(false)
 
-  useEffect(() => {
+  function cargar() {
     if (!itemId) return
     setMovimientos(null)
+    const destino = varianteId ? { varianteId } : { itemId }
     Promise.all([
       obtenerItem(itemId),
       varianteId ? listarVariantes(itemId) : Promise.resolve([]),
-      listarKardex(varianteId ? { varianteId } : { itemId }),
+      listarKardex(destino),
     ])
-      .then(([i, variantes, mov]) => {
+      .then(async ([i, variantes, mov]) => {
         setItem(i)
         if (varianteId) {
           const v = variantes.find((x) => x.id === varianteId)
           setDescripcionVariante(v ? [v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla' : null)
         }
         setMovimientos(mov)
+
+        const idsAjuste = mov.filter((m) => m.tipo === 'ajuste' && m.referencia_id).map((m) => m.referencia_id as string)
+        if (idsAjuste.length > 0) {
+          const { data } = await supabase.from('ajustes_inventario').select('id, motivo').in('id', idsAjuste)
+          const mapa: Record<string, string> = {}
+          for (const a of (data ?? []) as Array<{ id: string; motivo: string }>) mapa[a.id] = a.motivo
+          setMotivosAjuste(mapa)
+        }
       })
       .catch(() => setError('No se pudo cargar el kardex.'))
-  }, [itemId, varianteId])
+  }
+
+  useEffect(cargar, [itemId, varianteId])
+
+  async function previsualizar() {
+    if (!itemId) return
+    const resultado = await previsualizarRecosteo(varianteId ? { varianteId } : { itemId })
+    setPrevisualizacion(resultado)
+  }
+
+  async function confirmarRecosteo() {
+    if (!itemId || !negocioActivo) return
+    setAplicandoRecosteo(true)
+    try {
+      const almacen = await obtenerAlmacen(negocioActivo.id)
+      await aplicarRecosteo(negocioActivo.id, almacen.id, varianteId ? { varianteId } : { itemId })
+      setPrevisualizacion(null)
+      cargar()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo aplicar el recosteo.')
+    } finally {
+      setAplicandoRecosteo(false)
+    }
+  }
 
   const filtrados = (movimientos ?? []).filter((m) => {
     const fecha = m.fecha.slice(0, 10)
@@ -66,10 +98,62 @@ export function KardexProductoPage() {
         ← Volver a Inventario
       </Link>
 
-      <div className="mt-2 text-[22px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-        Kardex — {item?.nombre ?? '...'}
-        {descripcionVariante && <span className="ml-2 text-base text-[var(--color-texto-suave)]">({descripcionVariante})</span>}
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <div className="text-[22px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
+          Kardex — {item?.nombre ?? '...'}
+          {descripcionVariante && <span className="ml-2 text-base text-[var(--color-texto-suave)]">({descripcionVariante})</span>}
+        </div>
+        <Button variante="secundario" onClick={previsualizar} className="!min-h-9 px-3 text-xs">
+          Recostear
+        </Button>
       </div>
+
+      {previsualizacion && (
+        <div className="mt-3 max-w-[520px] rounded-xl border p-4" style={{ borderColor: 'var(--color-hairline)' }}>
+          {previsualizacion.existencia_actual === previsualizacion.existencia_recalculada &&
+          Math.abs(previsualizacion.costo_actual - previsualizacion.costo_recalculado) < 0.0001 ? (
+            <>
+              <p className="text-sm text-[var(--color-texto)]">El kardex ya cuadra con lo almacenado — no hay nada que corregir.</p>
+              <button onClick={() => setPrevisualizacion(null)} className="mt-2 text-xs text-[var(--color-texto-suave)] underline">
+                Cerrar
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-[var(--color-texto)]">Diferencia encontrada</p>
+              <table className="mt-2 w-full text-left text-sm">
+                <thead>
+                  <tr className="text-xs text-[var(--color-texto-suave)]">
+                    <th className="py-1 font-medium"> </th>
+                    <th className="py-1 font-medium">Actual</th>
+                    <th className="py-1 font-medium">Recalculado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-1 text-[var(--color-texto-suave)]">Existencia</td>
+                    <td className="py-1 text-[var(--color-texto)]">{previsualizacion.existencia_actual}</td>
+                    <td className="py-1 font-medium text-[var(--color-texto)]">{previsualizacion.existencia_recalculada}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1 text-[var(--color-texto-suave)]">Costo promedio</td>
+                    <td className="py-1 text-[var(--color-texto)]">${previsualizacion.costo_actual.toFixed(4)}</td>
+                    <td className="py-1 font-medium text-[var(--color-texto)]">${previsualizacion.costo_recalculado.toFixed(4)}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div className="mt-3 flex gap-2">
+                <Button onClick={confirmarRecosteo} disabled={aplicandoRecosteo} className="!min-h-9 px-3 text-xs">
+                  {aplicandoRecosteo ? 'Aplicando...' : 'Aplicar recosteo'}
+                </Button>
+                <Button variante="secundario" onClick={() => setPrevisualizacion(null)} className="!min-h-9 px-3 text-xs">
+                  Cancelar
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="mt-3.5 flex flex-wrap items-center gap-2.5">
         <label className="flex items-center gap-1.5 text-xs text-[var(--color-texto-suave)]">
@@ -89,7 +173,7 @@ export function KardexProductoPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[var(--color-fondo)]">
               <tr>
-                {['Fecha', 'Tipo', 'Referencia', 'Cantidad', 'Costo unitario', 'Saldo existencia', 'Saldo costo promedio', 'Motivo'].map((c) => (
+                {['Fecha', 'Tipo', 'Detalle', 'Cantidad', 'Costo unitario', 'Existencia resultante', 'Costo promedio resultante'].map((c) => (
                   <th key={c} className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto-suave)]">
                     {c}
                   </th>
@@ -99,7 +183,7 @@ export function KardexProductoPage() {
             <tbody>
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-3 text-[var(--color-texto-suave)]">
+                  <td colSpan={7} className="px-3 py-3 text-[var(--color-texto-suave)]">
                     Sin movimientos en este periodo.
                   </td>
                 </tr>
@@ -108,14 +192,15 @@ export function KardexProductoPage() {
                 <tr key={m.id} className="border-t border-black/10">
                   <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearFecha(m.fecha)}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{ETIQUETA_TIPO[m.tipo]}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto-suave)]">{m.referencia_tipo ?? '—'}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto-suave)]">
+                    {m.tipo === 'ajuste' && m.referencia_id ? (motivosAjuste[m.referencia_id] ?? '—') : '—'}
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">
-                    {SIGNO[m.tipo] > 0 ? '+' : '−'}{m.cantidad}
+                    {m.cantidad > 0 ? '+' : ''}{m.cantidad}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${m.costo_unitario.toFixed(4)}</td>
-                  <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">{m.saldo_cantidad}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${m.saldo_costo_promedio.toFixed(4)}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto-suave)]">{m.motivo ?? '—'}</td>
+                  <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">{m.existencia_resultante}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${m.costo_promedio_resultante.toFixed(4)}</td>
                 </tr>
               ))}
             </tbody>

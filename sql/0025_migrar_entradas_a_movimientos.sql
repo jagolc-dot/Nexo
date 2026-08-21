@@ -17,14 +17,14 @@ begin
   for v_evento in
     select negocio_id, item_id, variante_id, tipo, cantidad, costo_unitario, fecha, referencia_id
     from (
-      select e.negocio_id, e.item_id, e.variante_id, 'entrada'::text as tipo,
+      select e.negocio_id, e.item_id, e.variante_id, 'compra'::text as tipo,
              e.cantidad, e.costo_unitario, e.fecha, e.id as referencia_id
       from entradas_inventario e
       union all
       select i.negocio_id,
              case when vd.variante_id is null then vd.item_id else null end,
-             vd.variante_id, 'salida_venta'::text,
-             vd.cantidad, vd.costo_unitario, v.fecha, vd.venta_id
+             vd.variante_id, 'venta'::text,
+             -vd.cantidad, vd.costo_unitario, v.fecha, vd.venta_id
       from venta_detalle vd
       join ventas v on v.id = vd.venta_id
       join items i on i.id = vd.item_id
@@ -37,9 +37,7 @@ begin
     perform fn_registrar_movimiento(
       v_evento.negocio_id, v_almacen_id, v_evento.item_id, v_evento.variante_id,
       v_evento.tipo, v_evento.cantidad, v_evento.costo_unitario,
-      v_evento.referencia_id,
-      case when v_evento.tipo = 'entrada' then 'entrada_migrada' else 'venta' end,
-      null, v_evento.fecha
+      v_evento.referencia_id, v_evento.fecha
     );
   end loop;
 end;

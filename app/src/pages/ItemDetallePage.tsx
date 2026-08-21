@@ -6,8 +6,10 @@ import {
   cambiarActivoVariante,
   crearVariante,
   eliminarVariante,
+  generarCodigoSugerido,
   listarVariantes,
   obtenerItem,
+  verificarCodigoDisponible,
 } from '../lib/catalogo'
 import type { Item, VarianteItem } from '../types'
 import { formatearDuracion } from '../lib/formato'
@@ -19,24 +21,39 @@ import { Toggle } from '../components/ui/Toggle'
 const CAMPO =
   'rounded-lg border border-black/15 bg-[var(--color-superficie)] px-2 py-1 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
 
-function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: () => void }) {
+function FormularioVariante({
+  itemId, itemNombre, negocioId, onCreada,
+}: { itemId: string; itemNombre: string; negocioId: string; onCreada: () => void }) {
   const [color, setColor] = useState('')
   const [talla, setTalla] = useState('')
+  const [codigo, setCodigo] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (!codigo.trim()) {
+      setError('El código es obligatorio para cada variante.')
+      return
+    }
     setEnviando(true)
     try {
+      const disponibilidad = await verificarCodigoDisponible(codigo.trim(), { tipo: 'variante' })
+      if (!disponibilidad.disponible) {
+        setError(`Ese código ya lo usa "${disponibilidad.perteneceA}".`)
+        setEnviando(false)
+        return
+      }
       await crearVariante({
         item_id: itemId,
         color: color || null,
         talla: talla || null,
+        codigo: codigo.trim(),
       })
       setColor('')
       setTalla('')
+      setCodigo('')
       onCreada()
     } catch {
       setError('No se pudo agregar la variante.')
@@ -58,6 +75,17 @@ function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: ()
         Talla
         <input value={talla} onChange={(e) => setTalla(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-20 ${CAMPO}`} />
       </label>
+      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
+        Código *
+        <input value={codigo} onChange={(e) => setCodigo(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-24 ${CAMPO}`} />
+      </label>
+      <button
+        type="button"
+        onClick={async () => setCodigo(await generarCodigoSugerido(negocioId, itemNombre, [color, talla]))}
+        className="min-h-0 rounded-lg border-[1.5px] border-black/15 px-2 py-1.5 text-xs text-[var(--color-texto-suave)]"
+      >
+        Generar
+      </button>
       <Button type="submit" disabled={enviando} className="min-h-0 px-3 py-1.5 text-sm">
         Agregar variante
       </Button>
@@ -161,8 +189,9 @@ export function ItemDetallePage() {
           <h2 className="text-sm font-medium text-[var(--color-texto)]">Inventario</h2>
           <Card className="p-3">
             <p className="text-sm text-[var(--color-texto)]">
-              Existencia: {item.stock} · Costo promedio: ${item.costo_promedio.toFixed(2)}
+              Código: {item.codigo ?? '—'} · Existencia: {item.stock} · Costo promedio: ${item.costo_promedio.toFixed(2)}
               {item.stock === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
+              {!item.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
             </p>
             <Link to={`/inventario/productos/${item.id}`} className="mt-2 inline-block text-xs text-[var(--color-texto-suave)] underline">
               Ver movimientos en Inventario
@@ -177,7 +206,7 @@ export function ItemDetallePage() {
               ¿Necesitas manejar variantes (color/talla) para este producto?
             </button>
           ) : (
-            <FormularioVariante itemId={item.id} onCreada={cargar} />
+            <FormularioVariante itemId={item.id} itemNombre={item.nombre} negocioId={negocioActivo.id} onCreada={cargar} />
           )}
         </div>
       )}
@@ -206,8 +235,9 @@ export function ItemDetallePage() {
                       </span>
                       {!v.activo && <EstadoBadge tipo="neutral" texto="Inactiva" />}
                       {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
+                      {!v.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
                       <p className="text-xs text-[var(--color-texto-suave)]">
-                        Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
+                        Código: {v.codigo ?? '—'} · Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
                       </p>
                     </div>
 
@@ -234,7 +264,7 @@ export function ItemDetallePage() {
               ))}
           </ul>
 
-          <FormularioVariante itemId={item.id} onCreada={cargar} />
+          <FormularioVariante itemId={item.id} itemNombre={item.nombre} negocioId={negocioActivo.id} onCreada={cargar} />
         </div>
       )}
     </div>

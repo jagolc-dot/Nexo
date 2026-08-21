@@ -38,7 +38,7 @@ export interface Item {
   costo_promedio: number
   stock: number
   codigo: string | null
-  unidad: Unidad
+  unidad: Unidad | null
   activo: boolean
   categorias_item: { nombre: string } | null
 }
@@ -48,6 +48,7 @@ export interface VarianteItem {
   item_id: string
   color: string | null
   talla: string | null
+  codigo: string | null
   costo_promedio: number
   existencia: number
   activo: boolean
@@ -130,7 +131,7 @@ export interface Almacen {
   activo: boolean
 }
 
-export type TipoMovimiento = 'entrada' | 'salida_venta' | 'ajuste_positivo' | 'ajuste_negativo' | 'cancelacion_compra'
+export type TipoMovimiento = 'compra' | 'venta' | 'ajuste' | 'cancelacion_venta' | 'cancelacion_compra' | 'recosteo'
 
 export interface MovimientoInventario {
   id: string
@@ -140,11 +141,9 @@ export interface MovimientoInventario {
   tipo: TipoMovimiento
   cantidad: number
   costo_unitario: number
-  saldo_cantidad: number
-  saldo_costo_promedio: number
+  existencia_resultante: number
+  costo_promedio_resultante: number
   referencia_id: string | null
-  referencia_tipo: string | null
-  motivo: string | null
   fecha: string
 }
 
@@ -157,19 +156,34 @@ export interface Compra {
   proveedor: string | null
   folio: string | null
   fecha: string
+  notas: string | null
   subtotal: number
   costo_envio: number
   total: number
   estado: EstadoCompra
 }
 
-export interface CompraDetalle {
+export interface CompraPartida {
   id: string
   compra_id: string
   item_id: string | null
   variante_id: string | null
   cantidad: number
-  costo_partida: number
-  envio_prorrateado: number
+  costo_total_partida: number
+  costo_unitario: number
+  flete_asignado: number
   costo_unitario_final: number
+}
+
+export type TipoAjuste = 'merma' | 'caducidad' | 'perdida' | 'obsequio' | 'uso_interno' | 'ajuste_conteo'
+
+export interface AjusteInventario {
+  id: string
+  almacen_id: string
+  item_id: string | null
+  variante_id: string | null
+  tipo: TipoAjuste
+  cantidad: number
+  motivo: string
+  fecha: string
 }

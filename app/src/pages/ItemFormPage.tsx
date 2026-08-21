@@ -1,7 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
-import { actualizarItem, cambiarActivoItem, crearItem, eliminarItem, listarCategorias, obtenerItem } from '../lib/catalogo'
+import {
+  actualizarItem,
+  cambiarActivoItem,
+  crearItem,
+  eliminarItem,
+  generarCodigoSugerido,
+  listarCategorias,
+  obtenerItem,
+  verificarCodigoDisponible,
+} from '../lib/catalogo'
 import type { CategoriaItem, TipoItem, Unidad } from '../types'
 
 const UNIDADES: Unidad[] = ['Pieza', 'Caja', 'Paquete', 'Par', 'Juego', 'Gramo', 'Kilogramo', 'Mililitro', 'Litro', 'Metro']
@@ -34,6 +43,7 @@ export function ItemFormPage() {
   const [duracionMins, setDuracionMins] = useState('')
   const [costo, setCosto] = useState('')
   const [manejaVariantes, setManejaVariantes] = useState(false)
+  const [tieneVariantesEdicion, setTieneVariantesEdicion] = useState(false)
   const [codigo, setCodigo] = useState('')
   const [unidad, setUnidad] = useState<Unidad>('Pieza')
   const [tipoEdicion, setTipoEdicion] = useState<TipoItem | null>(null)
@@ -47,6 +57,7 @@ export function ItemFormPage() {
 
   const tipo: TipoItem = esEdicion ? tipoEdicion ?? 'servicio' : searchParams.get('tipo') === 'producto' ? 'producto' : 'servicio'
   const esServicio = tipo === 'servicio'
+  const tieneVariantes = esEdicion ? tieneVariantesEdicion : manejaVariantes
   const duracionTotalMinutos = Number(duracionHoras || 0) * 60 + Number(duracionMins || 0)
 
   useEffect(() => {
@@ -69,7 +80,8 @@ export function ItemFormPage() {
         }
         setCosto(item.costo != null ? String(item.costo) : '')
         setCodigo(item.codigo ?? '')
-        setUnidad(item.unidad)
+        setUnidad(item.unidad ?? 'Pieza')
+        setTieneVariantesEdicion(item.tiene_variantes)
         setTipoEdicion(item.tipo)
         setActivoActual(item.activo)
         setStockActual(item.stock)
@@ -105,6 +117,19 @@ export function ItemFormPage() {
       setError('El costo es obligatorio.')
       return
     }
+    if (!esServicio && !tieneVariantes && !codigo.trim()) {
+      setError('El código es obligatorio para un producto sin variantes.')
+      return
+    }
+    if (!esServicio && !tieneVariantes && codigo.trim()) {
+      const disponibilidad = await verificarCodigoDisponible(codigo.trim(), {
+        tipo: 'item', negocioId: negocioActivo!.id, excluirId: id,
+      })
+      if (!disponibilidad.disponible) {
+        setError(`Ese código ya lo usa "${disponibilidad.perteneceA}".`)
+        return
+      }
+    }
 
     setEnviando(true)
     try {
@@ -115,7 +140,7 @@ export function ItemFormPage() {
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
-          codigo: !esServicio ? codigo || null : undefined,
+          codigo: !esServicio && !tieneVariantes ? codigo || null : undefined,
           unidad: !esServicio ? unidad : undefined,
         })
         navigate('/catalogo', { replace: true })
@@ -131,8 +156,8 @@ export function ItemFormPage() {
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
-          codigo: !esServicio ? codigo || null : null,
-          unidad,
+          codigo: !esServicio && !tieneVariantes ? codigo || null : null,
+          unidad: !esServicio ? unidad : null,
         },
         manejaVariantes,
       )
@@ -305,31 +330,43 @@ export function ItemFormPage() {
           </label>
         )}
 
-        {!esServicio && (
-          <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-              Código
+        {!esServicio && !tieneVariantes && (
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+            Código <span style={{ color: 'var(--color-error)' }}>*</span>
+            <div className="flex gap-2">
               <input
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
                 autoCapitalize="off"
                 autoCorrect="off"
                 spellCheck={false}
-                className={CAMPO}
+                className={`flex-1 ${CAMPO}`}
                 style={ESTILO_CAMPO}
               />
-            </label>
-            <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-              Unidad
-              <select value={unidad} onChange={(e) => setUnidad(e.target.value as Unidad)} className={CAMPO} style={ESTILO_CAMPO}>
-                {UNIDADES.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+              <button
+                type="button"
+                onClick={async () => setCodigo(await generarCodigoSugerido(negocioActivo!.id, nombre || 'Producto'))}
+                disabled={!nombre}
+                className="shrink-0 rounded-lg border-[1.5px] px-3 text-xs font-medium text-[var(--color-texto-suave)] disabled:opacity-50"
+                style={{ borderColor: 'var(--color-hairline)' }}
+              >
+                Generar código
+              </button>
+            </div>
+          </label>
+        )}
+
+        {!esServicio && (
+          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+            Unidad
+            <select value={unidad} onChange={(e) => setUnidad(e.target.value as Unidad)} className={CAMPO} style={ESTILO_CAMPO}>
+              {UNIDADES.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
 
         {!esServicio && !esEdicion && (

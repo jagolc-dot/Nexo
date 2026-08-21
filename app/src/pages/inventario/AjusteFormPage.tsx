@@ -2,13 +2,22 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNegocio } from '../../context/NegocioContext'
 import { listarProductosInventario, obtenerAlmacen, registrarAjuste, type ProductoInventario } from '../../lib/inventario'
+import { hoyEnNegocio } from '../../lib/tiempoNegocio'
+import type { TipoAjuste } from '../../types'
 import { Button } from '../../components/ui/Button'
 
 const CAMPO =
   'flex min-h-11 w-full items-center rounded-[10px] border bg-[var(--color-superficie)] px-3 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
 const ESTILO_CAMPO = { borderColor: 'var(--color-borde-campo)' }
 
-const MOTIVOS = ['Merma', 'Rotura', 'Caducidad', 'Pérdida', 'Obsequio', 'Corrección de conteo', 'Otro']
+const TIPOS: { valor: TipoAjuste; etiqueta: string }[] = [
+  { valor: 'merma', etiqueta: 'Merma' },
+  { valor: 'caducidad', etiqueta: 'Caducidad' },
+  { valor: 'perdida', etiqueta: 'Pérdida' },
+  { valor: 'obsequio', etiqueta: 'Obsequio' },
+  { valor: 'uso_interno', etiqueta: 'Uso interno' },
+  { valor: 'ajuste_conteo', etiqueta: 'Corrección de conteo físico' },
+]
 
 export function AjusteFormPage() {
   const { negocioActivo } = useNegocio()
@@ -18,11 +27,11 @@ export function AjusteFormPage() {
   const [productos, setProductos] = useState<ProductoInventario[]>([])
   const [itemId, setItemId] = useState('')
   const [varianteId, setVarianteId] = useState('')
-  const [tipo, setTipo] = useState<'ajuste_positivo' | 'ajuste_negativo'>('ajuste_negativo')
+  const [tipo, setTipo] = useState<TipoAjuste>('merma')
+  const [signoConteo, setSignoConteo] = useState<'mas' | 'menos'>('menos')
   const [cantidad, setCantidad] = useState('')
-  const [costoUnitario, setCostoUnitario] = useState('')
   const [motivo, setMotivo] = useState('')
-  const [motivoLibre, setMotivoLibre] = useState('')
+  const [fecha, setFecha] = useState(hoyEnNegocio())
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,6 +46,7 @@ export function AjusteFormPage() {
   if (!negocioActivo) return null
 
   const producto = productos.find((p) => p.id === itemId)
+  const esConteo = tipo === 'ajuste_conteo'
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -55,15 +65,12 @@ export function AjusteFormPage() {
       setError('La cantidad debe ser mayor a 0.')
       return
     }
-    const motivoFinal = motivo === 'Otro' ? motivoLibre.trim() : motivo
-    if (!motivoFinal) {
+    if (!motivo.trim()) {
       setError('El motivo es obligatorio.')
       return
     }
-    if (tipo === 'ajuste_positivo' && !costoUnitario) {
-      setError('Un ajuste positivo requiere capturar el costo unitario.')
-      return
-    }
+
+    const cantidadConSigno = esConteo && signoConteo === 'mas' ? cantidadNum : -cantidadNum
 
     setEnviando(true)
     try {
@@ -72,9 +79,9 @@ export function AjusteFormPage() {
         almacenId,
         producto?.tiene_variantes ? { varianteId } : { itemId },
         tipo,
-        cantidadNum,
-        motivoFinal,
-        tipo === 'ajuste_positivo' ? Number(costoUnitario) : undefined,
+        cantidadConSigno,
+        motivo.trim(),
+        fecha,
       )
       navigate('/inventario', { replace: true })
     } catch (err) {
@@ -125,65 +132,56 @@ export function AjusteFormPage() {
           </label>
         )}
 
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setTipo('ajuste_negativo')}
-            className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium ${tipo === 'ajuste_negativo' ? 'border-[var(--color-primario)] text-[var(--color-primario)]' : 'border-[var(--color-hairline)] text-[var(--color-texto-suave)]'}`}
-          >
-            Negativo (merma, pérdida...)
-          </button>
-          <button
-            type="button"
-            onClick={() => setTipo('ajuste_positivo')}
-            className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium ${tipo === 'ajuste_positivo' ? 'border-[var(--color-primario)] text-[var(--color-primario)]' : 'border-[var(--color-hairline)] text-[var(--color-texto-suave)]'}`}
-          >
-            Positivo (conteo físico)
-          </button>
-        </div>
+        <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+          Tipo de ajuste
+          <select value={tipo} onChange={(e) => setTipo(e.target.value as TipoAjuste)} className={CAMPO} style={ESTILO_CAMPO}>
+            {TIPOS.map((t) => (
+              <option key={t.valor} value={t.valor}>
+                {t.etiqueta}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {esConteo && (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSignoConteo('mas')}
+              className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium ${signoConteo === 'mas' ? 'border-[var(--color-primario)] text-[var(--color-primario)]' : 'border-[var(--color-hairline)] text-[var(--color-texto-suave)]'}`}
+            >
+              Encontré más de lo registrado
+            </button>
+            <button
+              type="button"
+              onClick={() => setSignoConteo('menos')}
+              className={`flex-1 rounded-lg border-2 py-2 text-sm font-medium ${signoConteo === 'menos' ? 'border-[var(--color-primario)] text-[var(--color-primario)]' : 'border-[var(--color-hairline)] text-[var(--color-texto-suave)]'}`}
+            >
+              Encontré menos de lo registrado
+            </button>
+          </div>
+        )}
 
         <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
           Cantidad
           <input type="number" min="1" value={cantidad} onChange={(e) => setCantidad(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
         </label>
 
-        {tipo === 'ajuste_positivo' && (
-          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-            Costo unitario
-            <div className={CAMPO} style={ESTILO_CAMPO}>
-              <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={costoUnitario}
-                onChange={(e) => setCostoUnitario(e.target.value)}
-                className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-              />
-            </div>
-          </label>
-        )}
+        <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+          Fecha
+          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
+        </label>
 
         <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
           Motivo
-          <select value={motivo} onChange={(e) => setMotivo(e.target.value)} className={CAMPO} style={ESTILO_CAMPO}>
-            <option value="">Selecciona...</option>
-            {MOTIVOS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </label>
-        {motivo === 'Otro' && (
           <input
-            value={motivoLibre}
-            onChange={(e) => setMotivoLibre(e.target.value)}
-            placeholder="Describe el motivo"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Describe qué pasó"
             className={CAMPO}
             style={ESTILO_CAMPO}
           />
-        )}
+        </label>
 
         {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
 

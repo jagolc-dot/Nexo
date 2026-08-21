@@ -42,16 +42,16 @@ export function AlmacenDetallePage() {
   const filas: (string | number)[][] = []
   for (const p of filtrados) {
     if (!p.tiene_variantes) {
-      filas.push([p.codigo ?? '—', p.nombre, p.categoria ?? '—', p.unidad, p.stock, p.costo_promedio.toFixed(2), (p.stock * p.costo_promedio).toFixed(2)])
+      filas.push([p.codigo ?? '—', p.nombre, p.categoria ?? '—', p.unidad ?? '—', p.stock, p.costo_promedio.toFixed(2), (p.stock * p.costo_promedio).toFixed(2)])
       continue
     }
     for (const v of p.variantes) {
       const desc = [v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'
       filas.push([
-        p.codigo ?? '—',
+        v.codigo ?? '—',
         `${p.nombre} (${desc})`,
         p.categoria ?? '—',
-        p.unidad,
+        p.unidad ?? '—',
         v.existencia,
         v.costo_promedio.toFixed(2),
         (v.existencia * v.costo_promedio).toFixed(2),

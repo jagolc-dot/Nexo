@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { Almacen, Compra, CompraDetalle, MovimientoInventario } from '../types'
+import type { Almacen, Compra, CompraPartida, MovimientoInventario, TipoAjuste } from '../types'
 
 export async function obtenerAlmacen(negocioId: string): Promise<Almacen> {
   const { data, error } = await supabase.from('almacenes').select('*').eq('negocio_id', negocioId).eq('activo', true).single()
@@ -11,6 +11,7 @@ export interface VarianteInventario {
   id: string
   color: string | null
   talla: string | null
+  codigo: string | null
   existencia: number
   costo_promedio: number
 }
@@ -20,7 +21,7 @@ export interface ProductoInventario {
   codigo: string | null
   nombre: string
   categoria: string | null
-  unidad: string
+  unidad: string | null
   tiene_variantes: boolean
   stock: number
   costo_promedio: number
@@ -30,7 +31,7 @@ export interface ProductoInventario {
 export async function listarProductosInventario(negocioId: string): Promise<ProductoInventario[]> {
   const { data, error } = await supabase
     .from('items')
-    .select('id, codigo, nombre, unidad, tiene_variantes, stock, costo_promedio, categorias_item(nombre), variantes_item(id, color, talla, existencia, costo_promedio, activo)')
+    .select('id, codigo, nombre, unidad, tiene_variantes, stock, costo_promedio, categorias_item(nombre), variantes_item(id, color, talla, codigo, existencia, costo_promedio, activo)')
     .eq('negocio_id', negocioId)
     .eq('tipo', 'producto')
     .eq('activo', true)
@@ -38,7 +39,7 @@ export async function listarProductosInventario(negocioId: string): Promise<Prod
   if (error) throw error
 
   type Fila = {
-    id: string; codigo: string | null; nombre: string; unidad: string; tiene_variantes: boolean
+    id: string; codigo: string | null; nombre: string; unidad: string | null; tiene_variantes: boolean
     stock: number; costo_promedio: number
     categorias_item: { nombre: string } | null
     variantes_item: Array<VarianteInventario & { activo: boolean }>
@@ -71,19 +72,19 @@ export async function listarCompras(negocioId: string): Promise<Compra[]> {
   return data as Compra[]
 }
 
-export interface PartidaCompraConNombre extends CompraDetalle {
+export interface PartidaCompraConNombre extends CompraPartida {
   nombre: string
 }
 
 export async function obtenerCompraConPartidas(compraId: string): Promise<{ compra: Compra; partidas: PartidaCompraConNombre[] }> {
   const [{ data: compra, error: e1 }, { data: partidas, error: e2 }] = await Promise.all([
     supabase.from('compras').select('*').eq('id', compraId).single(),
-    supabase.from('compra_detalle').select('*, items(nombre), variantes_item(color, talla, items(nombre))').eq('compra_id', compraId),
+    supabase.from('compra_partidas').select('*, items(nombre), variantes_item(color, talla, items(nombre))').eq('compra_id', compraId),
   ])
   if (e1) throw e1
   if (e2) throw e2
 
-  type Fila = CompraDetalle & {
+  type Fila = CompraPartida & {
     items: { nombre: string } | null
     variantes_item: { color: string | null; talla: string | null; items: { nombre: string } } | null
   }
@@ -99,30 +100,28 @@ export async function obtenerCompraConPartidas(compraId: string): Promise<{ comp
   }
 }
 
+export async function actualizarCompra(
+  compraId: string,
+  cambios: Partial<Pick<Compra, 'proveedor' | 'folio' | 'fecha' | 'notas'>>,
+): Promise<void> {
+  const { error } = await supabase.from('compras').update(cambios).eq('id', compraId)
+  if (error) throw error
+}
+
 export interface PartidaCompra {
   item_id: string | null
   variante_id: string | null
   cantidad: number
-  costo_partida: number
+  costo_total_partida: number
 }
 
 export async function confirmarCompra(
-  negocioId: string,
-  almacenId: string,
-  proveedor: string | null,
-  folio: string | null,
-  fecha: string,
-  costoEnvio: number,
-  partidas: PartidaCompra[],
+  negocioId: string, almacenId: string, proveedor: string | null, folio: string | null,
+  fecha: string, notas: string | null, costoEnvio: number, partidas: PartidaCompra[],
 ): Promise<string> {
   const { data, error } = await supabase.rpc('confirmar_compra', {
-    p_negocio_id: negocioId,
-    p_almacen_id: almacenId,
-    p_proveedor: proveedor,
-    p_folio: folio,
-    p_fecha: fecha,
-    p_costo_envio: costoEnvio,
-    p_partidas: partidas,
+    p_negocio_id: negocioId, p_almacen_id: almacenId, p_proveedor: proveedor, p_folio: folio,
+    p_fecha: fecha, p_notas: notas, p_costo_envio: costoEnvio, p_partidas: partidas,
   })
   if (error) throw error
   return data as string
@@ -134,24 +133,43 @@ export async function cancelarCompra(compraId: string): Promise<void> {
 }
 
 export async function registrarAjuste(
-  negocioId: string,
-  almacenId: string,
-  destino: { itemId: string } | { varianteId: string },
-  tipo: 'ajuste_positivo' | 'ajuste_negativo',
-  cantidad: number,
-  motivo: string,
-  costoUnitario?: number,
+  negocioId: string, almacenId: string, destino: { itemId: string } | { varianteId: string },
+  tipo: TipoAjuste, cantidadConSigno: number, motivo: string, fecha: string,
 ): Promise<string> {
   const { data, error } = await supabase.rpc('registrar_ajuste_inventario', {
-    p_negocio_id: negocioId,
-    p_almacen_id: almacenId,
+    p_negocio_id: negocioId, p_almacen_id: almacenId,
     p_item_id: 'itemId' in destino ? destino.itemId : null,
     p_variante_id: 'varianteId' in destino ? destino.varianteId : null,
-    p_tipo: tipo,
-    p_cantidad: cantidad,
-    p_motivo: motivo,
-    p_costo_unitario: costoUnitario ?? null,
+    p_tipo: tipo, p_cantidad: cantidadConSigno, p_motivo: motivo, p_fecha: fecha,
   })
   if (error) throw error
   return data as string
+}
+
+export interface PrevisualizacionRecosteo {
+  existencia_actual: number
+  costo_actual: number
+  existencia_recalculada: number
+  costo_recalculado: number
+}
+
+export async function previsualizarRecosteo(destino: { itemId: string } | { varianteId: string }): Promise<PrevisualizacionRecosteo> {
+  const { data, error } = await supabase.rpc('previsualizar_recosteo', {
+    p_item_id: 'itemId' in destino ? destino.itemId : null,
+    p_variante_id: 'varianteId' in destino ? destino.varianteId : null,
+  })
+  if (error) throw error
+  return (data as PrevisualizacionRecosteo[])[0]
+}
+
+export async function aplicarRecosteo(
+  negocioId: string, almacenId: string, destino: { itemId: string } | { varianteId: string },
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc('aplicar_recosteo', {
+    p_negocio_id: negocioId, p_almacen_id: almacenId,
+    p_item_id: 'itemId' in destino ? destino.itemId : null,
+    p_variante_id: 'varianteId' in destino ? destino.varianteId : null,
+  })
+  if (error) throw error
+  return data as string | null
 }

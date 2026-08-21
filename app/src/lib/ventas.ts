@@ -129,7 +129,11 @@ export async function obtenerEmpleadaDeVenta(ventaId: string): Promise<string | 
   return filas[0]?.empleadas?.nombre ?? null
 }
 
+/** Cancela la venta y, para las líneas de producto, devuelve la
+ * existencia al inventario (movimiento `cancelacion_venta` en el
+ * kardex) — el costo unitario ya congelado en `venta_detalle` no se
+ * toca; el costo promedio del producto tampoco se recalcula. */
 export async function cancelarVenta(ventaId: string): Promise<void> {
-  const { error } = await supabase.from('ventas').update({ estado: 'cancelada' }).eq('id', ventaId)
+  const { error } = await supabase.rpc('cancelar_venta', { p_venta_id: ventaId })
   if (error) throw error
 }

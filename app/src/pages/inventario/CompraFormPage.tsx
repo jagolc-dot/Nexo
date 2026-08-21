@@ -29,6 +29,7 @@ export function CompraFormPage() {
   const [proveedor, setProveedor] = useState('')
   const [folio, setFolio] = useState('')
   const [fecha, setFecha] = useState(hoyEnNegocio())
+  const [notas, setNotas] = useState('')
   const [costoEnvio, setCostoEnvio] = useState('')
   const [partidas, setPartidas] = useState<FilaPartida[]>([filaVacia()])
   const [enviando, setEnviando] = useState(false)
@@ -82,6 +83,7 @@ export function CompraFormPage() {
         proveedor || null,
         folio || null,
         fecha,
+        notas || null,
         costoEnvio ? Number(costoEnvio) : 0,
         partidasValidas.map((p) => {
           const producto = productos.find((x) => x.id === p.itemId)
@@ -89,7 +91,7 @@ export function CompraFormPage() {
             item_id: producto?.tiene_variantes ? null : p.itemId,
             variante_id: producto?.tiene_variantes ? p.varianteId : null,
             cantidad: Number(p.cantidad),
-            costo_partida: Number(p.costoPartida),
+            costo_total_partida: Number(p.costoPartida),
           }
         }),
       )
@@ -122,6 +124,11 @@ export function CompraFormPage() {
             <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
           </label>
         </div>
+
+        <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+          Notas (opcional)
+          <input value={notas} onChange={(e) => setNotas(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
+        </label>
 
         <div className="text-xs font-medium text-[var(--color-texto)]">Partidas</div>
         {partidas.map((p, i) => {
