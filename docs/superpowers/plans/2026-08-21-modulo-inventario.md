@@ -97,7 +97,7 @@ esta conversación).
 
 **Archivo:** `sql/0024_modulo_inventario.sql`
 
-- [ ] **Paso 1: Escribir la migración de esquema**
+- [x] **Paso 1: Escribir la migración de esquema**
 
 ```sql
 -- ============================================================
@@ -197,7 +197,7 @@ create index movimientos_por_item on movimientos_inventario (item_id, fecha);
 create index movimientos_por_variante on movimientos_inventario (variante_id, fecha);
 ```
 
-- [ ] **Paso 2: Función compartida `fn_registrar_movimiento`**
+- [x] **Paso 2: Función compartida `fn_registrar_movimiento`**
 
 Único lugar que escribe `stock`/`costo_promedio`/`existencia`. Recibe
 exactamente uno de `p_item_id`/`p_variante_id` (el otro NULL). `entrada` y
@@ -288,7 +288,7 @@ end;
 $$;
 ```
 
-- [ ] **Paso 3: `confirmar_compra` (prorrateo de envío por valor + transacción)**
+- [x] **Paso 3: `confirmar_compra` (prorrateo de envío por valor + transacción)**
 
 Primera pasada calcula el prorrateo crudo (`round(envío × partida/subtotal, 4)`)
 y ubica la partida de mayor `costo_partida`; la diferencia entre el envío
@@ -380,7 +380,7 @@ end;
 $$;
 ```
 
-- [ ] **Paso 4: `cancelar_compra` (revierte cantidad, nunca el costo)**
+- [x] **Paso 4: `cancelar_compra` (revierte cantidad, nunca el costo)**
 
 Valida **todas** las partidas antes de revertir cualquiera (todo o nada,
 igual que confirmar): si alguna ya se vendió y la existencia actual es menor
@@ -435,7 +435,7 @@ end;
 $$;
 ```
 
-- [ ] **Paso 5: `registrar_ajuste_inventario`**
+- [x] **Paso 5: `registrar_ajuste_inventario`**
 
 ```sql
 create or replace function registrar_ajuste_inventario(
@@ -470,7 +470,7 @@ end;
 $$;
 ```
 
-- [ ] **Paso 6: reescribir el trigger de venta para que pase por el kardex**
+- [x] **Paso 6: reescribir el trigger de venta para que pase por el kardex**
 
 Hoy `descontar_inventario()` hace `update items/variantes_item` directo. Debe
 en cambio insertar el movimiento (`salida_venta`) vía `fn_registrar_movimiento`,
@@ -516,7 +516,7 @@ $$;
 cambia — sigue leyendo `items.stock`/`variantes_item.existencia`, que ahora
 mantiene `fn_registrar_movimiento` en vez del trigger viejo.
 
-- [ ] **Paso 7: `eliminar_item`/`eliminar_variante` — dejar de mirar `entradas_inventario`**
+- [x] **Paso 7: `eliminar_item`/`eliminar_variante` — dejar de mirar `entradas_inventario`**
 
 ```sql
 create or replace function eliminar_item(p_item_id uuid) returns void
@@ -573,7 +573,7 @@ end;
 $$;
 ```
 
-- [ ] **Paso 8: vista de reconciliación (regla G.2)**
+- [x] **Paso 8: vista de reconciliación (regla G.2)**
 
 ```sql
 create or replace view v_cuadre_inventario as
@@ -627,7 +627,7 @@ cada negocio.
 
 **Archivo:** `sql/0025_migrar_entradas_a_movimientos.sql`
 
-- [ ] **Paso 1: escribir el backfill (idempotente, ordenado cronológicamente)**
+- [x] **Paso 1: escribir el backfill (idempotente, ordenado cronológicamente)**
 
 ```sql
 do $$
@@ -676,7 +676,7 @@ $$;
       obsoleta/no confiable). El backfill los procesó correctamente; ver la
       corrección de fecha en Task 1.
 
-- [ ] **Paso 3: dry-run contra producción ANTES de aplicar de verdad**
+- [x] **Paso 3: dry-run contra producción ANTES de aplicar de verdad**
 
 Ejecutar (vía `execute_sql` en `mhxvtlccgpiaqtuspvfq`) el contenido del
 Paso 1 envuelto en `begin; ... rollback;` en una sola llamada, seguido — dentro
@@ -697,7 +697,7 @@ Si esa consulta final devuelve **0 filas**, el backfill es fiel a la historia
 real y es seguro aplicarlo. Si devuelve filas, reportarlas a Joel antes de
 continuar — no forzar coincidencia.
 
-- [ ] **Paso 4: (gate de producción, ver Task 8) aplicar `0024` + `0025` de
+- [x] **Paso 4: (gate de producción, ver Task 8) aplicar `0024` + `0025` de
       verdad en producción, con respaldo previo**
 
 ---
@@ -706,7 +706,7 @@ continuar — no forzar coincidencia.
 
 **Archivos:** `app/src/types.ts` (modificar), `app/src/lib/inventario.ts` (nuevo)
 
-- [ ] **Paso 1: extender `types.ts`**
+- [x] **Paso 1: extender `types.ts`**
 
 ```ts
 export interface Item {
@@ -766,7 +766,7 @@ export interface CompraDetalle {
 }
 ```
 
-- [ ] **Paso 2: `app/src/lib/inventario.ts`**
+- [x] **Paso 2: `app/src/lib/inventario.ts`**
 
 ```ts
 import { supabase } from './supabaseClient'
@@ -880,7 +880,7 @@ export async function registrarAjuste(
 }
 ```
 
-- [ ] **Paso 3: `npx tsc -b` limpio** (ver nota sobre `xlsx`/red en Global
+- [x] **Paso 3: `npx tsc -b` limpio** (ver nota sobre `xlsx`/red en Global
       Constraints de la sesión — quitar temporalmente esa dependencia de
       `package.json` para poder instalar node_modules si hace falta, y
       restaurar el archivo original antes de commitear).
@@ -892,22 +892,22 @@ export async function registrarAjuste(
 **Archivos:** `app/src/lib/catalogo.ts`, `app/src/pages/ItemFormPage.tsx`,
 `app/src/pages/ItemDetallePage.tsx`
 
-- [ ] **Paso 1:** en `catalogo.ts`, eliminar por completo la función
+- [x] **Paso 1:** en `catalogo.ts`, eliminar por completo la función
       `registrarEntradaInventario` y su export. Agregar `codigo: string | null`
       y `unidad: Unidad` a `DatosNuevoItem` y a los campos permitidos en
       `actualizarItem`.
-- [ ] **Paso 2:** en `ItemFormPage.tsx`, quitar los campos "Piezas iniciales" /
+- [x] **Paso 2:** en `ItemFormPage.tsx`, quitar los campos "Piezas iniciales" /
       "Costo total de la compra" y la llamada a `registrarEntradaInventario`
       al crear un producto sin variantes. Agregar campos **Código** (texto
       libre, opcional) y **Unidad** (`<select>` con las 10 opciones del check
       constraint) para productos.
-- [ ] **Paso 3:** en `ItemDetallePage.tsx`, eliminar el componente
+- [x] **Paso 3:** en `ItemDetallePage.tsx`, eliminar el componente
       `FormularioEntrada` y sus dos usos (producto sin variante y cada
       variante). Las líneas que hoy muestran `Existencia: … · Costo promedio: …`
       se quedan como texto de solo lectura (sin el toggle/botón "Registrar
       entrada"), con un link `to="/inventario/almacenes"` o al detalle del
       almacén, texto "Ver movimientos en Inventario".
-- [ ] **Paso 4:** `npx tsc -b` y `npx oxlint` limpios.
+- [x] **Paso 4:** `npx tsc -b` y `npx oxlint` limpios.
 
 ---
 
@@ -915,7 +915,7 @@ export async function registrarAjuste(
 
 **Archivos:** `app/src/App.tsx`, `app/src/components/Layout.tsx`
 
-- [ ] **Paso 1:** agregar, dentro del mismo `<Route element={<Layout />}>` que
+- [x] **Paso 1:** agregar, dentro del mismo `<Route element={<Layout />}>` que
       ya envuelve Catálogo:
 
 ```tsx
@@ -929,7 +929,7 @@ export async function registrarAjuste(
 <Route path="/inventario/ajuste" element={<AjusteFormPage />} />
 ```
 
-- [ ] **Paso 2:** en `Layout.tsx`, agregar un link "Inventario" junto al de
+- [x] **Paso 2:** en `Layout.tsx`, agregar un link "Inventario" junto al de
       "Catálogo" en la navegación lateral, mismo patrón de ícono/estilo activo
       que los demás.
 
@@ -945,12 +945,12 @@ Cada pantalla sigue el patrón ya establecido en `ClientesPage.tsx`/
 `useNegocio()`, componentes `Card`/`Button`/`EstadoBadge` de
 `components/ui/`, tema vía variables CSS (nunca condicional por negocio).
 
-- [ ] **AlmacenesPage.tsx (E.1):** lista de almacenes del negocio activo (hoy
+- [x] **AlmacenesPage.tsx (E.1):** lista de almacenes del negocio activo (hoy
       uno) con nombre y valor total (`Σ stock×costo_promedio` de productos sin
       variante + `Σ existencia×costo_promedio` de variantes). Panel lateral:
       número de productos, unidades totales, valor total, productos en cero.
       Link a `AlmacenDetallePage`.
-- [ ] **AlmacenDetallePage.tsx (E.2):** tabla vía `listarProductosInventario`
+- [x] **AlmacenDetallePage.tsx (E.2):** tabla vía `listarProductosInventario`
       con código, nombre, categoría, unidad, existencia, costo promedio, valor
       total; para Don camisa (`tiene_variantes`), fila expandible por
       variante. Filtro por categoría y por "existencia baja/cero". Botones
@@ -958,28 +958,28 @@ Cada pantalla sigue el patrón ya establecido en `ClientesPage.tsx`/
       `InventarioActualView.tsx` en Reportes — mismo patrón, no reinventar),
       "Agregar compra" → `/inventario/compras/nueva`, "Ajuste de inventario" →
       `/inventario/ajuste`.
-- [ ] **KardexProductoPage.tsx (E.3):** `listarKardex(itemId, varianteId)`,
+- [x] **KardexProductoPage.tsx (E.3):** `listarKardex(itemId, varianteId)`,
       tabla fecha/tipo/referencia/cantidad/costo_unitario/saldo_cantidad/
       saldo_costo_promedio. Filtro por rango de fechas (dos `<input
       type="date">`, patrón ya usado en `ReportesPage.tsx`/`GastoFormPage.tsx`).
-- [ ] **ComprasPage.tsx (E.4):** `listarCompras`, tabla proveedor/folio/fecha/
+- [x] **ComprasPage.tsx (E.4):** `listarCompras`, tabla proveedor/folio/fecha/
       total/estado (`EstadoBadge`), link a `CompraDetallePage`.
-- [ ] **CompraFormPage.tsx (C):** encabezado (proveedor, folio, fecha, almacén
+- [x] **CompraFormPage.tsx (C):** encabezado (proveedor, folio, fecha, almacén
       preseleccionado), tabla dinámica de partidas (producto + variante si
       aplica + cantidad + costo total de la partida), muestra costo unitario
       calculado en vivo (`costo_partida / cantidad`, sin envío) para que el
       usuario lo verifique contra su factura antes de guardar, campo opcional
       "Costo de envío", botón Confirmar → `confirmarCompra(...)`.
-- [ ] **CompraDetallePage.tsx:** `obtenerCompraConPartidas`, muestra partidas
+- [x] **CompraDetallePage.tsx:** `obtenerCompraConPartidas`, muestra partidas
       con `envio_prorrateado`/`costo_unitario_final` ya aplicado, botón
       "Cancelar compra" (con confirmación) si `estado==='confirmada'` →
       `cancelarCompra`.
-- [ ] **AjusteFormPage.tsx (D):** selector producto (+ variante si aplica),
+- [x] **AjusteFormPage.tsx (D):** selector producto (+ variante si aplica),
       tipo (positivo/negativo), cantidad, motivo (lista fija: Merma, Rotura,
       Caducidad, Pérdida, Obsequio, Corrección de conteo — u "Otro" con texto
       libre), costo unitario (solo si positivo) → `registrarAjuste`.
 
-- [ ] **Verificación de todo Task 6:** `npx tsc -b` + `npx oxlint` limpios;
+- [x] **Verificación de todo Task 6:** `npx tsc -b` + `npx oxlint` limpios;
       Joel prueba en beta (crear una compra con 2+ partidas y envío, verificar
       que el kardex del producto cuadra, cancelar una compra, hacer un ajuste
       negativo y uno positivo).
@@ -988,15 +988,15 @@ Cada pantalla sigue el patrón ya establecido en `ClientesPage.tsx`/
 
 ## Task 7 — Confirmar que nada más se rompió
 
-- [ ] Releer `app/src/lib/reportes.ts::obtenerInventarioActual` — hoy no
+- [x] Releer `app/src/lib/reportes.ts::obtenerInventarioActual` — hoy no
       incluye productos sin variante (usa solo `variantes_item`); decidir con
       Joel si se corrige en esta etapa o se deja para otra (es un
       comportamiento preexistente, no introducido por este módulo — no
       tocarlo sin decisión explícita).
-- [ ] Vender un producto sin variante y uno con variante en beta, confirmar
+- [x] Vender un producto sin variante y uno con variante en beta, confirmar
       que el kardex generó su `salida_venta` y que `venta_detalle.costo_unitario`
       sigue congelándose igual que antes.
-- [ ] Confirmar que Estado de Resultados (Etapa 19) no cambia para ventas
+- [x] Confirmar que Estado de Resultados (Etapa 19) no cambia para ventas
       existentes (usa `venta_detalle.costo_unitario`, intocado).
 
 ---
