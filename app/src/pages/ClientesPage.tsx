@@ -39,11 +39,14 @@ function IconoChevron() {
   )
 }
 
+type OrdenClientes = 'alfabetico' | 'visitas' | 'consumo'
+
 export function ClientesPage() {
   const { negocioActivo } = useNegocio()
   const [clientes, setClientes] = useState<Cliente[] | null>(null)
   const [resumenes, setResumenes] = useState<Record<string, ResumenCliente>>({})
   const [busqueda, setBusqueda] = useState('')
+  const [orden, setOrden] = useState<OrdenClientes>('alfabetico')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -59,14 +62,23 @@ export function ClientesPage() {
   const filtrados = useMemo(() => {
     if (!clientes) return []
     const q = busqueda.trim().toLowerCase()
-    if (!q) return clientes
-    return clientes.filter(
-      (c) =>
-        c.nombre.toLowerCase().includes(q) ||
-        (c.telefono ?? '').includes(q) ||
-        (c.contacto_red_social ?? '').toLowerCase().includes(q),
-    )
-  }, [clientes, busqueda])
+    const base = !q
+      ? clientes
+      : clientes.filter(
+          (c) =>
+            c.nombre.toLowerCase().includes(q) ||
+            (c.telefono ?? '').includes(q) ||
+            (c.contacto_red_social ?? '').toLowerCase().includes(q),
+        )
+
+    const metrica = orden === 'visitas' ? 'visitas' : orden === 'consumo' ? 'gasto' : null
+    if (!metrica) return [...base].sort((a, b) => a.nombre.localeCompare(b.nombre))
+
+    return [...base].sort((a, b) => {
+      const diff = (resumenes[b.id]?.[metrica] ?? 0) - (resumenes[a.id]?.[metrica] ?? 0)
+      return diff !== 0 ? diff : a.nombre.localeCompare(b.nombre)
+    })
+  }, [clientes, busqueda, orden, resumenes])
 
   if (!negocioActivo) return null
 
@@ -86,14 +98,27 @@ export function ClientesPage() {
       </div>
 
       <div className="max-w-[760px]">
-        <div className="mt-4 flex items-center gap-2.5 rounded-[10px] border px-3" style={{ borderColor: 'var(--color-borde-campo)', minHeight: 44 }}>
-          <IconoBuscar />
-          <input
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar por nombre, teléfono o red"
-            className="min-w-0 flex-1 bg-transparent text-[13.5px] text-[var(--color-texto)] outline-none"
-          />
+        <div className="mt-4 flex items-center gap-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] border px-3" style={{ borderColor: 'var(--color-borde-campo)', minHeight: 44 }}>
+            <IconoBuscar />
+            <input
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Buscar por nombre, teléfono o red"
+              className="min-w-0 flex-1 bg-transparent text-[13.5px] text-[var(--color-texto)] outline-none"
+            />
+          </div>
+          <select
+            value={orden}
+            onChange={(e) => setOrden(e.target.value as OrdenClientes)}
+            aria-label="Ordenar por"
+            className="shrink-0 rounded-[10px] border px-3 text-[13px] text-[var(--color-texto)] outline-none"
+            style={{ borderColor: 'var(--color-borde-campo)', minHeight: 44 }}
+          >
+            <option value="alfabetico">A–Z</option>
+            <option value="visitas">Más visitas</option>
+            <option value="consumo">Más consumo</option>
+          </select>
         </div>
 
         {error && <p className="mt-4 text-sm text-[var(--color-error)]">{error}</p>}
