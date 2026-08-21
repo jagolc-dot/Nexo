@@ -25,6 +25,13 @@ import { AdminUsuariosPage } from './pages/AdminUsuariosPage'
 import { AdminCrearUsuarioPage } from './pages/AdminCrearUsuarioPage'
 import { CategoriasPage } from './pages/CategoriasPage'
 import { AjustesPage } from './pages/AjustesPage'
+import { AlmacenesPage } from './pages/inventario/AlmacenesPage'
+import { AlmacenDetallePage } from './pages/inventario/AlmacenDetallePage'
+import { KardexProductoPage } from './pages/inventario/KardexProductoPage'
+import { ComprasPage } from './pages/inventario/ComprasPage'
+import { CompraFormPage } from './pages/inventario/CompraFormPage'
+import { CompraDetallePage } from './pages/inventario/CompraDetallePage'
+import { AjusteFormPage } from './pages/inventario/AjusteFormPage'
 
 function App() {
   return (
@@ -45,6 +52,14 @@ function App() {
                 <Route path="/catalogo/categorias" element={<CategoriasPage />} />
                 <Route path="/catalogo/:id" element={<ItemDetallePage />} />
                 <Route path="/catalogo/:id/editar" element={<ItemFormPage />} />
+                <Route path="/inventario" element={<AlmacenesPage />} />
+                <Route path="/inventario/almacenes/:id" element={<AlmacenDetallePage />} />
+                <Route path="/inventario/productos/:itemId" element={<KardexProductoPage />} />
+                <Route path="/inventario/productos/:itemId/variantes/:varianteId" element={<KardexProductoPage />} />
+                <Route path="/inventario/compras" element={<ComprasPage />} />
+                <Route path="/inventario/compras/nueva" element={<CompraFormPage />} />
+                <Route path="/inventario/compras/:id" element={<CompraDetallePage />} />
+                <Route path="/inventario/ajuste" element={<AjusteFormPage />} />
                 <Route path="/ventas" element={<VentasHistorialPage />} />
                 <Route path="/ventas/nueva" element={<VentaNuevaPage />} />
                 <Route path="/ventas/:id" element={<VentaDetallePage />} />

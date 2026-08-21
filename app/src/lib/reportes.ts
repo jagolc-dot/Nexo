@@ -190,7 +190,7 @@ export interface FilaInventario {
 export async function obtenerInventarioActual(negocioId: string): Promise<FilaInventario[]> {
   const { data, error } = await supabase
     .from('items')
-    .select('nombre, variantes_item(color, talla, existencia, costo_promedio, activo)')
+    .select('nombre, tiene_variantes, stock, costo_promedio, variantes_item(color, talla, existencia, costo_promedio, activo)')
     .eq('negocio_id', negocioId)
     .eq('tipo', 'producto')
     .eq('activo', true)
@@ -200,8 +200,15 @@ export async function obtenerInventarioActual(negocioId: string): Promise<FilaIn
   const filas: FilaInventario[] = []
   for (const item of data as unknown as Array<{
     nombre: string
+    tiene_variantes: boolean
+    stock: number
+    costo_promedio: number
     variantes_item: Array<{ color: string | null; talla: string | null; existencia: number; costo_promedio: number; activo: boolean }>
   }>) {
+    if (!item.tiene_variantes) {
+      filas.push({ item: item.nombre, color: null, talla: null, existencia: item.stock, costo_promedio: item.costo_promedio })
+      continue
+    }
     for (const v of item.variantes_item) {
       if (!v.activo) continue
       filas.push({

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { CategoriaItem, Item, TipoItem, VarianteItem } from '../types'
+import type { CategoriaItem, Item, TipoItem, Unidad, VarianteItem } from '../types'
 
 export async function listarItems(negocioId: string): Promise<Item[]> {
   const { data, error } = await supabase
@@ -30,6 +30,8 @@ export interface DatosNuevoItem {
   precio_base: number | null
   duracion_minutos: number | null
   costo: number | null
+  codigo: string | null
+  unidad: Unidad
 }
 
 export async function crearItem(datos: DatosNuevoItem, manejaVariantes = false): Promise<Item> {
@@ -53,7 +55,7 @@ export async function crearItem(datos: DatosNuevoItem, manejaVariantes = false):
 
 export async function actualizarItem(
   itemId: string,
-  cambios: Partial<Pick<Item, 'nombre' | 'categoria_id' | 'precio_base' | 'duracion_minutos' | 'costo'>>,
+  cambios: Partial<Pick<Item, 'nombre' | 'categoria_id' | 'precio_base' | 'duracion_minutos' | 'costo' | 'codigo' | 'unidad'>>,
 ): Promise<void> {
   const { error } = await supabase.from('items').update(cambios).eq('id', itemId)
   if (error) throw error
@@ -109,7 +111,7 @@ export async function cambiarActivoItem(itemId: string, activo: boolean): Promis
 }
 
 /** Solo elimina si el ítem no está referenciado en ventas, citas ni
- * entradas de inventario — validado en base de datos, no aquí. */
+ * inventario (compras/ajustes) — validado en base de datos, no aquí. */
 export async function eliminarItem(itemId: string): Promise<void> {
   const { error } = await supabase.rpc('eliminar_item', { p_item_id: itemId })
   if (error) throw error
@@ -143,30 +145,9 @@ export async function cambiarActivoVariante(varianteId: string, activo: boolean)
   if (error) throw error
 }
 
-/** Solo elimina si la variante no está referenciada en ventas ni entradas
- * de inventario — validado en base de datos, no aquí. */
+/** Solo elimina si la variante no está referenciada en ventas ni en
+ * inventario (compras/ajustes) — validado en base de datos, no aquí. */
 export async function eliminarVariante(varianteId: string): Promise<void> {
   const { error } = await supabase.rpc('eliminar_variante', { p_variante_id: varianteId })
-  if (error) throw error
-}
-
-export async function registrarEntradaInventario(
-  negocioId: string,
-  destino: { varianteId: string } | { itemId: string },
-  cantidad: number,
-  costoTotal: number,
-): Promise<void> {
-  // El costo unitario se deriva del total capturado (como viene en la
-  // factura), nunca al revés — evita que redondear a mano pierda
-  // centavos en costeo promedio ponderado.
-  const costoUnitario = costoTotal / cantidad
-  const { error } = await supabase.from('entradas_inventario').insert({
-    negocio_id: negocioId,
-    variante_id: 'varianteId' in destino ? destino.varianteId : null,
-    item_id: 'itemId' in destino ? destino.itemId : null,
-    cantidad,
-    costo_total: costoTotal,
-    costo_unitario: costoUnitario,
-  })
   if (error) throw error
 }

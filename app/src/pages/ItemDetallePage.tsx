@@ -8,7 +8,6 @@ import {
   eliminarVariante,
   listarVariantes,
   obtenerItem,
-  registrarEntradaInventario,
 } from '../lib/catalogo'
 import type { Item, VarianteItem } from '../types'
 import { formatearDuracion } from '../lib/formato'
@@ -62,98 +61,6 @@ function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: ()
       <Button type="submit" disabled={enviando} className="min-h-0 px-3 py-1.5 text-sm">
         Agregar variante
       </Button>
-      {error && <p className="w-full text-xs text-[var(--color-error)]">{error}</p>}
-    </form>
-  )
-}
-
-function FormularioEntrada({
-  negocioId,
-  destino,
-  onRegistrada,
-}: {
-  negocioId: string
-  destino: { varianteId: string } | { itemId: string }
-  onRegistrada: () => void
-}) {
-  const [abierto, setAbierto] = useState(false)
-  const [cantidad, setCantidad] = useState('')
-  const [costoTotal, setCostoTotal] = useState('')
-  const [enviando, setEnviando] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const cantidadNum = Number(cantidad)
-  const costoTotalNum = Number(costoTotal)
-  const costoUnitarioPreview = cantidadNum > 0 && costoTotalNum > 0 ? costoTotalNum / cantidadNum : null
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    if (!cantidadNum || cantidadNum <= 0) {
-      setError('La cantidad debe ser mayor a 0.')
-      return
-    }
-    if (!costoTotalNum || costoTotalNum < 0) {
-      setError('Captura el costo total de la compra.')
-      return
-    }
-
-    setEnviando(true)
-    try {
-      await registrarEntradaInventario(negocioId, destino, cantidadNum, costoTotalNum)
-      setCantidad('')
-      setCostoTotal('')
-      setAbierto(false)
-      onRegistrada()
-    } catch {
-      setError('No se pudo registrar la entrada.')
-    } finally {
-      setEnviando(false)
-    }
-  }
-
-  if (!abierto) {
-    return (
-      <button onClick={() => setAbierto(true)} className="text-xs text-[var(--color-texto-suave)] underline">
-        Registrar entrada
-      </button>
-    )
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2">
-      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
-        Piezas
-        <input
-          type="number"
-          min="1"
-          required
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-          className={`w-20 ${CAMPO}`}
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
-        Costo total de la compra
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          required
-          value={costoTotal}
-          onChange={(e) => setCostoTotal(e.target.value)}
-          className={`w-32 ${CAMPO}`}
-        />
-      </label>
-      {costoUnitarioPreview !== null && (
-        <span className="text-xs text-[var(--color-texto-suave)]">costo unitario: ${costoUnitarioPreview.toFixed(4)}</span>
-      )}
-      <Button type="submit" disabled={enviando} className="min-h-0 px-3 py-1.5 text-xs">
-        Confirmar
-      </Button>
-      <button type="button" onClick={() => setAbierto(false)} className="text-xs text-[var(--color-texto-suave)]">
-        Cancelar
-      </button>
       {error && <p className="w-full text-xs text-[var(--color-error)]">{error}</p>}
     </form>
   )
@@ -257,9 +164,9 @@ export function ItemDetallePage() {
               Existencia: {item.stock} · Costo promedio: ${item.costo_promedio.toFixed(2)}
               {item.stock === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
             </p>
-            <div className="mt-2">
-              <FormularioEntrada negocioId={negocioActivo.id} destino={{ itemId: item.id }} onRegistrada={cargar} />
-            </div>
+            <Link to={`/inventario/productos/${item.id}`} className="mt-2 inline-block text-xs text-[var(--color-texto-suave)] underline">
+              Ver movimientos en Inventario
+            </Link>
           </Card>
 
           {!mostrarFormularioVariante ? (
@@ -305,7 +212,9 @@ export function ItemDetallePage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <FormularioEntrada negocioId={negocioActivo.id} destino={{ varianteId: v.id }} onRegistrada={cargar} />
+                      <Link to={`/inventario/productos/${item.id}/variantes/${v.id}`} className="text-xs text-[var(--color-texto-suave)] underline">
+                        Ver movimientos
+                      </Link>
                       <button
                         onClick={() => alternarActivoVariante(v)}
                         className="text-xs text-[var(--color-texto-suave)] underline"

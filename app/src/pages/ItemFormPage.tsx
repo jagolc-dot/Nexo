@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
-import { actualizarItem, cambiarActivoItem, crearItem, eliminarItem, listarCategorias, obtenerItem, registrarEntradaInventario } from '../lib/catalogo'
-import type { CategoriaItem, TipoItem } from '../types'
+import { actualizarItem, cambiarActivoItem, crearItem, eliminarItem, listarCategorias, obtenerItem } from '../lib/catalogo'
+import type { CategoriaItem, TipoItem, Unidad } from '../types'
+
+const UNIDADES: Unidad[] = ['Pieza', 'Caja', 'Paquete', 'Par', 'Juego', 'Gramo', 'Kilogramo', 'Mililitro', 'Litro', 'Metro']
 import { claseBoton } from '../components/ui/Button'
 
 const CAMPO =
@@ -32,8 +34,8 @@ export function ItemFormPage() {
   const [duracionMins, setDuracionMins] = useState('')
   const [costo, setCosto] = useState('')
   const [manejaVariantes, setManejaVariantes] = useState(false)
-  const [piezasIniciales, setPiezasIniciales] = useState('')
-  const [costoInicial, setCostoInicial] = useState('')
+  const [codigo, setCodigo] = useState('')
+  const [unidad, setUnidad] = useState<Unidad>('Pieza')
   const [tipoEdicion, setTipoEdicion] = useState<TipoItem | null>(null)
   const [activoActual, setActivoActual] = useState(true)
   const [stockActual, setStockActual] = useState(0)
@@ -66,6 +68,8 @@ export function ItemFormPage() {
           setDuracionMins(item.duracion_minutos % 60 ? String(item.duracion_minutos % 60) : '')
         }
         setCosto(item.costo != null ? String(item.costo) : '')
+        setCodigo(item.codigo ?? '')
+        setUnidad(item.unidad)
         setTipoEdicion(item.tipo)
         setActivoActual(item.activo)
         setStockActual(item.stock)
@@ -101,10 +105,6 @@ export function ItemFormPage() {
       setError('El costo es obligatorio.')
       return
     }
-    if (!esServicio && !manejaVariantes && (Boolean(piezasIniciales) !== Boolean(costoInicial))) {
-      setError('Captura piezas y costo total juntos, o deja ambos vacíos.')
-      return
-    }
 
     setEnviando(true)
     try {
@@ -115,6 +115,8 @@ export function ItemFormPage() {
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
+          codigo: !esServicio ? codigo || null : undefined,
+          unidad: !esServicio ? unidad : undefined,
         })
         navigate('/catalogo', { replace: true })
         return
@@ -129,14 +131,13 @@ export function ItemFormPage() {
           precio_base: precioBase ? Number(precioBase) : null,
           duracion_minutos: esServicio && duracionTotalMinutos > 0 ? duracionTotalMinutos : null,
           costo: esServicio && costo ? Number(costo) : null,
+          codigo: !esServicio ? codigo || null : null,
+          unidad,
         },
         manejaVariantes,
       )
 
       if (tipo === 'producto') {
-        if (!manejaVariantes && piezasIniciales && costoInicial) {
-          await registrarEntradaInventario(negocioActivo!.id, { itemId: item.id }, Number(piezasIniciales), Number(costoInicial))
-        }
         navigate(`/catalogo/${item.id}`, { replace: true })
       } else {
         navigate('/catalogo', { replace: true })
@@ -183,9 +184,6 @@ export function ItemFormPage() {
       setEliminando(false)
     }
   }
-
-  const costoUnitarioPreview =
-    piezasIniciales && costoInicial && Number(piezasIniciales) > 0 ? Number(costoInicial) / Number(piezasIniciales) : null
 
   return (
     <div className="mx-auto flex max-h-full w-full max-w-[560px] flex-col overflow-hidden rounded-[14px] border bg-[var(--color-superficie)] lg:mt-8 lg:shadow-[0_18px_50px_rgba(74,50,43,.15)]" style={{ borderColor: 'var(--color-hairline)' }}>
@@ -307,6 +305,33 @@ export function ItemFormPage() {
           </label>
         )}
 
+        {!esServicio && (
+          <div className="flex gap-3">
+            <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+              Código
+              <input
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                className={CAMPO}
+                style={ESTILO_CAMPO}
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
+              Unidad
+              <select value={unidad} onChange={(e) => setUnidad(e.target.value as Unidad)} className={CAMPO} style={ESTILO_CAMPO}>
+                {UNIDADES.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+
         {!esServicio && !esEdicion && (
           <>
             <label className="flex items-center gap-2 text-sm text-[var(--color-texto-suave)]">
@@ -315,47 +340,9 @@ export function ItemFormPage() {
             </label>
             <p className="-mt-2 text-xs text-[var(--color-texto-suave)]">
               {manejaVariantes
-                ? 'Después de crear el producto podrás agregar sus variantes (color/talla) y registrar entradas de inventario para cada una.'
-                : 'Costo y existencia se registran directo sobre el producto, sin pedir color ni talla.'}
+                ? 'Después de crear el producto podrás agregar sus variantes (color/talla). El costo y la existencia se registran después, desde Inventario, al capturar la primera compra.'
+                : 'El costo y la existencia se registran después, desde Inventario, al capturar la primera compra.'}
             </p>
-
-            {!manejaVariantes && (
-              <div className="flex gap-3">
-                <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-                  Piezas iniciales
-                  <input
-                    type="number"
-                    min="1"
-                    value={piezasIniciales}
-                    onChange={(e) => setPiezasIniciales(e.target.value)}
-                    className={CAMPO}
-                    style={ESTILO_CAMPO}
-                  />
-                </label>
-                <label className="flex flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
-                  Costo total de la compra
-                  <div className={CAMPO} style={ESTILO_CAMPO}>
-                    <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={costoInicial}
-                      onChange={(e) => setCostoInicial(e.target.value)}
-                      className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-                    />
-                  </div>
-                </label>
-              </div>
-            )}
-            {costoUnitarioPreview !== null && (
-              <p className="-mt-2 text-xs text-[var(--color-texto-suave)]">costo unitario: ${costoUnitarioPreview.toFixed(4)}</p>
-            )}
-            {!manejaVariantes && (
-              <p className="-mt-2 text-xs text-[var(--color-texto-suave)]">
-                Opcional — déjalo vacío si prefieres registrar la primera entrada después, desde el detalle del producto.
-              </p>
-            )}
           </>
         )}
 
@@ -401,7 +388,7 @@ export function ItemFormPage() {
               {eliminando ? 'Eliminando...' : `Eliminar ${esServicio ? 'servicio' : 'producto'}`}
             </button>
             <p className="mt-2 text-center text-xs text-[var(--color-texto-suave)]">
-              Solo se puede eliminar si nunca se usó en ventas, citas o entradas de inventario. Si tiene historial, desactívalo en vez de eliminarlo.
+              Solo se puede eliminar si nunca se usó en ventas, citas o inventario (compras/ajustes). Si tiene historial, desactívalo en vez de eliminarlo.
             </p>
           </>
         )}

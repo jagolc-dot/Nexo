@@ -43,6 +43,15 @@ function IconoCatalogo(p: { size: number }) {
     </svg>
   )
 }
+function IconoInventario(p: { size: number }) {
+  return (
+    <svg width={p.size} height={p.size} viewBox="0 0 24 24" {...TRAZO}>
+      <path d="M3.5 7.5 12 3l8.5 4.5-8.5 4.5-8.5-4.5Z" />
+      <path d="M3.5 7.5v9L12 21l8.5-4.5v-9" />
+      <path d="M12 12v9" />
+    </svg>
+  )
+}
 function IconoVentas(p: { size: number }) {
   return (
     <svg width={p.size} height={p.size} viewBox="0 0 24 24" {...TRAZO}>
@@ -144,6 +153,7 @@ export function Layout() {
     { to: '/agenda', etiqueta: 'Agenda', icono: IconoAgenda, visible: mostrarAgenda },
     { to: '/clientes', etiqueta: 'Clientes', icono: IconoClientes },
     { to: '/catalogo', etiqueta: 'Catálogo', icono: IconoCatalogo },
+    { to: '/inventario', etiqueta: 'Inventario', icono: IconoInventario },
     { to: '/ventas', etiqueta: 'Ventas', icono: IconoVentas },
     { to: '/gastos', etiqueta: 'Gastos', icono: IconoGastos },
     { to: '/reportes', etiqueta: 'Reportes', icono: IconoReportes },

@@ -1,0 +1,157 @@
+import { supabase } from './supabaseClient'
+import type { Almacen, Compra, CompraDetalle, MovimientoInventario } from '../types'
+
+export async function obtenerAlmacen(negocioId: string): Promise<Almacen> {
+  const { data, error } = await supabase.from('almacenes').select('*').eq('negocio_id', negocioId).eq('activo', true).single()
+  if (error) throw error
+  return data as Almacen
+}
+
+export interface VarianteInventario {
+  id: string
+  color: string | null
+  talla: string | null
+  existencia: number
+  costo_promedio: number
+}
+
+export interface ProductoInventario {
+  id: string
+  codigo: string | null
+  nombre: string
+  categoria: string | null
+  unidad: string
+  tiene_variantes: boolean
+  stock: number
+  costo_promedio: number
+  variantes: VarianteInventario[]
+}
+
+export async function listarProductosInventario(negocioId: string): Promise<ProductoInventario[]> {
+  const { data, error } = await supabase
+    .from('items')
+    .select('id, codigo, nombre, unidad, tiene_variantes, stock, costo_promedio, categorias_item(nombre), variantes_item(id, color, talla, existencia, costo_promedio, activo)')
+    .eq('negocio_id', negocioId)
+    .eq('tipo', 'producto')
+    .eq('activo', true)
+    .order('nombre')
+  if (error) throw error
+
+  type Fila = {
+    id: string; codigo: string | null; nombre: string; unidad: string; tiene_variantes: boolean
+    stock: number; costo_promedio: number
+    categorias_item: { nombre: string } | null
+    variantes_item: Array<VarianteInventario & { activo: boolean }>
+  }
+
+  return (data as unknown as Fila[]).map((i) => ({
+    id: i.id,
+    codigo: i.codigo,
+    nombre: i.nombre,
+    categoria: i.categorias_item?.nombre ?? null,
+    unidad: i.unidad,
+    tiene_variantes: i.tiene_variantes,
+    stock: i.stock,
+    costo_promedio: i.costo_promedio,
+    variantes: i.variantes_item.filter((v) => v.activo),
+  }))
+}
+
+export async function listarKardex(destino: { itemId: string } | { varianteId: string }): Promise<MovimientoInventario[]> {
+  let query = supabase.from('movimientos_inventario').select('*').order('fecha', { ascending: false }).order('creado_en', { ascending: false })
+  query = 'varianteId' in destino ? query.eq('variante_id', destino.varianteId) : query.eq('item_id', destino.itemId)
+  const { data, error } = await query
+  if (error) throw error
+  return data as MovimientoInventario[]
+}
+
+export async function listarCompras(negocioId: string): Promise<Compra[]> {
+  const { data, error } = await supabase.from('compras').select('*').eq('negocio_id', negocioId).order('fecha', { ascending: false })
+  if (error) throw error
+  return data as Compra[]
+}
+
+export interface PartidaCompraConNombre extends CompraDetalle {
+  nombre: string
+}
+
+export async function obtenerCompraConPartidas(compraId: string): Promise<{ compra: Compra; partidas: PartidaCompraConNombre[] }> {
+  const [{ data: compra, error: e1 }, { data: partidas, error: e2 }] = await Promise.all([
+    supabase.from('compras').select('*').eq('id', compraId).single(),
+    supabase.from('compra_detalle').select('*, items(nombre), variantes_item(color, talla, items(nombre))').eq('compra_id', compraId),
+  ])
+  if (e1) throw e1
+  if (e2) throw e2
+
+  type Fila = CompraDetalle & {
+    items: { nombre: string } | null
+    variantes_item: { color: string | null; talla: string | null; items: { nombre: string } } | null
+  }
+
+  return {
+    compra: compra as Compra,
+    partidas: (partidas as unknown as Fila[]).map((p) => ({
+      ...p,
+      nombre: p.items
+        ? p.items.nombre
+        : `${p.variantes_item?.items.nombre} (${[p.variantes_item?.color, p.variantes_item?.talla].filter(Boolean).join(' / ')})`,
+    })),
+  }
+}
+
+export interface PartidaCompra {
+  item_id: string | null
+  variante_id: string | null
+  cantidad: number
+  costo_partida: number
+}
+
+export async function confirmarCompra(
+  negocioId: string,
+  almacenId: string,
+  proveedor: string | null,
+  folio: string | null,
+  fecha: string,
+  costoEnvio: number,
+  partidas: PartidaCompra[],
+): Promise<string> {
+  const { data, error } = await supabase.rpc('confirmar_compra', {
+    p_negocio_id: negocioId,
+    p_almacen_id: almacenId,
+    p_proveedor: proveedor,
+    p_folio: folio,
+    p_fecha: fecha,
+    p_costo_envio: costoEnvio,
+    p_partidas: partidas,
+  })
+  if (error) throw error
+  return data as string
+}
+
+export async function cancelarCompra(compraId: string): Promise<void> {
+  const { error } = await supabase.rpc('cancelar_compra', { p_compra_id: compraId })
+  if (error) throw error
+}
+
+export async function registrarAjuste(
+  negocioId: string,
+  almacenId: string,
+  destino: { itemId: string } | { varianteId: string },
+  tipo: 'ajuste_positivo' | 'ajuste_negativo',
+  cantidad: number,
+  motivo: string,
+  costoUnitario?: number,
+): Promise<string> {
+  const { data, error } = await supabase.rpc('registrar_ajuste_inventario', {
+    p_negocio_id: negocioId,
+    p_almacen_id: almacenId,
+    p_item_id: 'itemId' in destino ? destino.itemId : null,
+    p_variante_id: 'varianteId' in destino ? destino.varianteId : null,
+    p_tipo: tipo,
+    p_cantidad: cantidad,
+    p_motivo: motivo,
+    p_costo_unitario: costoUnitario ?? null,
+  })
+  if (error) throw error
+  return data as string
+}

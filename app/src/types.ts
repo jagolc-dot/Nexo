@@ -22,6 +22,8 @@ export interface CategoriaItem {
   activo: boolean
 }
 
+export type Unidad = 'Pieza' | 'Caja' | 'Paquete' | 'Par' | 'Juego' | 'Gramo' | 'Kilogramo' | 'Mililitro' | 'Litro' | 'Metro'
+
 export interface Item {
   id: string
   negocio_id: string
@@ -35,6 +37,8 @@ export interface Item {
   costo: number | null
   costo_promedio: number
   stock: number
+  codigo: string | null
+  unidad: Unidad
   activo: boolean
   categorias_item: { nombre: string } | null
 }
@@ -117,4 +121,55 @@ export interface Gasto {
   fecha_registro: string
   estado: EstadoGasto
   tipos_gasto: { nombre: string } | null
+}
+
+export interface Almacen {
+  id: string
+  negocio_id: string
+  nombre: string
+  activo: boolean
+}
+
+export type TipoMovimiento = 'entrada' | 'salida_venta' | 'ajuste_positivo' | 'ajuste_negativo' | 'cancelacion_compra'
+
+export interface MovimientoInventario {
+  id: string
+  almacen_id: string
+  item_id: string | null
+  variante_id: string | null
+  tipo: TipoMovimiento
+  cantidad: number
+  costo_unitario: number
+  saldo_cantidad: number
+  saldo_costo_promedio: number
+  referencia_id: string | null
+  referencia_tipo: string | null
+  motivo: string | null
+  fecha: string
+}
+
+export type EstadoCompra = 'confirmada' | 'cancelada'
+
+export interface Compra {
+  id: string
+  negocio_id: string
+  almacen_id: string
+  proveedor: string | null
+  folio: string | null
+  fecha: string
+  subtotal: number
+  costo_envio: number
+  total: number
+  estado: EstadoCompra
+}
+
+export interface CompraDetalle {
+  id: string
+  compra_id: string
+  item_id: string | null
+  variante_id: string | null
+  cantidad: number
+  costo_partida: number
+  envio_prorrateado: number
+  costo_unitario_final: number
 }
