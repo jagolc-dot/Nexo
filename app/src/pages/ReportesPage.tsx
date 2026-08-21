@@ -68,10 +68,20 @@ function IconoDescargar() {
 const COLOR_ERROR = '#C1443A'
 const ALTURA_BARRAS = 130
 
+/**
+ * Jerarquía de tonos, derivada del primario del tema activo (no un
+ * valor fijo, para que boutique y sastrería se vean correctas):
+ * "pos" (ingresos, y "utilidad bruta total" en la gráfica 3, que ahí
+ * hace de punto de partida) en tono medio; "resta" (costo/gastos) en
+ * tono claro; "utilidad" (la conclusión de cada gráfica) en el
+ * primario a toda fuerza, para que destaque.
+ */
+type TipoBarra = 'pos' | 'resta' | 'utilidad'
+
 interface BarraDato {
   nombre: string
   valor: number
-  tipo: 'pos' | 'resta' | 'total'
+  tipo: TipoBarra
 }
 
 /**
@@ -95,8 +105,16 @@ function GraficaBarras({
   margenPct: number | null
   mensajeVacio?: string
 }) {
-  const colorBarra = { pos: 'color-mix(in srgb, var(--color-primario) 45%, white)', resta: '#EBDCD3', neta: 'var(--color-primario)' } as Record<string, string>
-  const colorTexto = { pos: 'var(--color-texto)', resta: 'var(--color-texto-suave)', neta: 'var(--color-primario)' } as Record<string, string>
+  const colorBarra: Record<TipoBarra, string> = {
+    pos: 'color-mix(in srgb, var(--color-primario) 45%, white)',
+    resta: 'color-mix(in srgb, var(--color-primario) 15%, white)',
+    utilidad: 'var(--color-primario)',
+  }
+  const colorTexto: Record<TipoBarra, string> = {
+    pos: 'var(--color-texto)',
+    resta: 'var(--color-texto-suave)',
+    utilidad: 'var(--color-primario)',
+  }
 
   const rangoPos = Math.max(escalaMax, 1)
   const rangoNeg = Math.max(-escalaMin, 0)
@@ -393,14 +411,14 @@ export function ReportesPage() {
     ? [
         { nombre: 'Ingresos por servicios', valor: datos.servicios.ingresos, tipo: 'pos' },
         { nombre: '(−) Costo de servicios', valor: datos.servicios.costoVentas, tipo: 'resta' },
-        { nombre: '= Utilidad bruta de servicios', valor: datos.servicios.utilidadBruta, tipo: 'total' },
+        { nombre: '= Utilidad bruta de servicios', valor: datos.servicios.utilidadBruta, tipo: 'utilidad' },
       ]
     : []
   const barrasProductos: BarraDato[] = datos
     ? [
         { nombre: 'Ingresos por productos', valor: datos.productos.ingresos, tipo: 'pos' },
         { nombre: '(−) Costo de productos', valor: datos.productos.costoVentas, tipo: 'resta' },
-        { nombre: '= Utilidad bruta de productos', valor: datos.productos.utilidadBruta, tipo: 'total' },
+        { nombre: '= Utilidad bruta de productos', valor: datos.productos.utilidadBruta, tipo: 'utilidad' },
       ]
     : []
   const valoresGrupo12 = [...barrasServicios, ...barrasProductos].map((b) => b.valor)
@@ -409,9 +427,9 @@ export function ReportesPage() {
 
   const barrasResultado: BarraDato[] = datos
     ? [
-        { nombre: 'Utilidad bruta total', valor: datos.utilidadBrutaTotal, tipo: 'total' },
+        { nombre: 'Utilidad bruta total', valor: datos.utilidadBrutaTotal, tipo: 'pos' },
         { nombre: '(−) Gastos de operación', valor: datos.gastosOperacion, tipo: 'resta' },
-        { nombre: '= Utilidad neta', valor: datos.utilidadNeta, tipo: 'total' },
+        { nombre: '= Utilidad neta', valor: datos.utilidadNeta, tipo: 'utilidad' },
       ]
     : []
   const valoresGrupo3 = barrasResultado.map((b) => b.valor)
