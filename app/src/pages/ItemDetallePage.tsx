@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
 import {
+  actualizarVariante,
   cambiarActivoItem,
   cambiarActivoVariante,
   crearVariante,
@@ -94,6 +95,71 @@ function FormularioVariante({
   )
 }
 
+function EditorVariante({
+  variante, itemNombre, negocioId, onGuardada, onCancelar,
+}: { variante: VarianteItem; itemNombre: string; negocioId: string; onGuardada: () => void; onCancelar: () => void }) {
+  const [color, setColor] = useState(variante.color ?? '')
+  const [talla, setTalla] = useState(variante.talla ?? '')
+  const [codigo, setCodigo] = useState(variante.codigo ?? '')
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (!codigo.trim()) {
+      setError('El código es obligatorio para cada variante.')
+      return
+    }
+    setGuardando(true)
+    try {
+      const disponibilidad = await verificarCodigoDisponible(codigo.trim(), { tipo: 'variante', excluirId: variante.id })
+      if (!disponibilidad.disponible) {
+        setError(`Ese código ya lo usa "${disponibilidad.perteneceA}".`)
+        setGuardando(false)
+        return
+      }
+      await actualizarVariante(variante.id, { color: color || null, talla: talla || null, codigo: codigo.trim() })
+      onGuardada()
+    } catch {
+      setError('No se pudo guardar. Intenta de nuevo.')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-black/20 p-3">
+      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
+        Color
+        <input value={color} onChange={(e) => setColor(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-24 ${CAMPO}`} />
+      </label>
+      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
+        Talla
+        <input value={talla} onChange={(e) => setTalla(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-20 ${CAMPO}`} />
+      </label>
+      <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
+        Código *
+        <input value={codigo} onChange={(e) => setCodigo(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-24 ${CAMPO}`} />
+      </label>
+      <button
+        type="button"
+        onClick={async () => setCodigo(await generarCodigoSugerido(negocioId, itemNombre, [color, talla]))}
+        className="min-h-0 rounded-lg border-[1.5px] border-black/15 px-2 py-1.5 text-xs text-[var(--color-texto-suave)]"
+      >
+        Generar
+      </button>
+      <Button type="submit" disabled={guardando} className="min-h-0 px-3 py-1.5 text-sm">
+        {guardando ? 'Guardando...' : 'Guardar'}
+      </Button>
+      <button type="button" onClick={onCancelar} className="text-xs text-[var(--color-texto-suave)]">
+        Cancelar
+      </button>
+      {error && <p className="w-full text-xs text-[var(--color-error)]">{error}</p>}
+    </form>
+  )
+}
+
 export function ItemDetallePage() {
   const { id } = useParams<{ id: string }>()
   const { negocioActivo } = useNegocio()
@@ -104,6 +170,7 @@ export function ItemDetallePage() {
   const [error, setError] = useState<string | null>(null)
   const [mostrarFormularioVariante, setMostrarFormularioVariante] = useState(false)
   const [verInactivas, setVerInactivas] = useState(false)
+  const [editandoId, setEditandoId] = useState<string | null>(null)
 
   async function cargar() {
     if (!id) return
@@ -228,38 +295,54 @@ export function ItemDetallePage() {
               .filter((v) => verInactivas || v.activo)
               .map((v) => (
                 <li key={v.id}>
-                  <Card className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-[var(--color-texto)]">
-                      <span className="font-medium">
-                        {[v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'}
-                      </span>
-                      {!v.activo && <EstadoBadge tipo="neutral" texto="Inactiva" />}
-                      {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
-                      {!v.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
-                      <p className="text-xs text-[var(--color-texto-suave)]">
-                        Código: {v.codigo ?? '—'} · Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
-                      </p>
-                    </div>
+                  {editandoId === v.id ? (
+                    <EditorVariante
+                      variante={v}
+                      itemNombre={item.nombre}
+                      negocioId={negocioActivo.id}
+                      onGuardada={() => {
+                        setEditandoId(null)
+                        cargar()
+                      }}
+                      onCancelar={() => setEditandoId(null)}
+                    />
+                  ) : (
+                    <Card className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-[var(--color-texto)]">
+                        <span className="font-medium">
+                          {[v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'}
+                        </span>
+                        {!v.activo && <EstadoBadge tipo="neutral" texto="Inactiva" />}
+                        {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
+                        {!v.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
+                        <p className="text-xs text-[var(--color-texto-suave)]">
+                          Código: {v.codigo ?? '—'} · Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
+                        </p>
+                      </div>
 
-                    <div className="flex items-center gap-3">
-                      <Link to={`/inventario/productos/${item.id}/variantes/${v.id}`} className="text-xs text-[var(--color-texto-suave)] underline">
-                        Ver movimientos
-                      </Link>
-                      <button
-                        onClick={() => alternarActivoVariante(v)}
-                        className="text-xs text-[var(--color-texto-suave)] underline"
-                      >
-                        {v.activo ? 'Desactivar' : 'Reactivar'}
-                      </button>
-                      <button
-                        onClick={() => eliminarVarianteClick(v)}
-                        className="text-xs underline"
-                        style={{ color: 'var(--color-error)' }}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </Card>
+                      <div className="flex items-center gap-3">
+                        <Link to={`/inventario/productos/${item.id}/variantes/${v.id}`} className="text-xs text-[var(--color-texto-suave)] underline">
+                          Ver movimientos
+                        </Link>
+                        <button onClick={() => setEditandoId(v.id)} className="text-xs text-[var(--color-texto-suave)] underline">
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => alternarActivoVariante(v)}
+                          className="text-xs text-[var(--color-texto-suave)] underline"
+                        >
+                          {v.activo ? 'Desactivar' : 'Reactivar'}
+                        </button>
+                        <button
+                          onClick={() => eliminarVarianteClick(v)}
+                          className="text-xs underline"
+                          style={{ color: 'var(--color-error)' }}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </Card>
+                  )}
                 </li>
               ))}
           </ul>
