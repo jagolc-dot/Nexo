@@ -65,6 +65,107 @@ function IconoDescargar() {
   )
 }
 
+const COLOR_ERROR = '#C1443A'
+const ALTURA_BARRAS = 130
+
+interface BarraDato {
+  nombre: string
+  valor: number
+  tipo: 'pos' | 'resta' | 'total'
+}
+
+/**
+ * Barras con línea base compartible entre gráficas: recibe el
+ * máximo/mínimo del GRUPO de gráficas al que pertenece (no solo el
+ * suyo propio), para que "escalaMax"/"escalaMin" puedan venir
+ * calculados sobre varias gráficas a la vez (Etapa 19 C).
+ */
+function GraficaBarras({
+  titulo,
+  barras,
+  escalaMax,
+  escalaMin,
+  margenPct,
+  mensajeVacio,
+}: {
+  titulo: string
+  barras: BarraDato[]
+  escalaMax: number
+  escalaMin: number
+  margenPct: number | null
+  mensajeVacio?: string
+}) {
+  const colorBarra = { pos: 'color-mix(in srgb, var(--color-primario) 45%, white)', resta: '#EBDCD3', neta: 'var(--color-primario)' } as Record<string, string>
+  const colorTexto = { pos: 'var(--color-texto)', resta: 'var(--color-texto-suave)', neta: 'var(--color-primario)' } as Record<string, string>
+
+  const rangoPos = Math.max(escalaMax, 1)
+  const rangoNeg = Math.max(-escalaMin, 0)
+  const alturaAbajo = rangoNeg > 0 ? (rangoNeg / rangoPos) * ALTURA_BARRAS : 0
+
+  return (
+    <Tarjeta className="min-w-0 p-5">
+      <div className="text-[16.5px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
+        {titulo}
+      </div>
+
+      {mensajeVacio ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center" style={{ height: ALTURA_BARRAS + alturaAbajo + 20 }}>
+          <p className="text-sm text-[var(--color-texto-suave)]">{mensajeVacio}</p>
+        </div>
+      ) : (
+        <div className="mt-4 flex items-stretch gap-3" style={{ height: ALTURA_BARRAS + alturaAbajo + 40 }}>
+          {barras.map((b) => {
+            const negativo = b.valor < 0
+            const alturaBarra = Math.max((Math.abs(b.valor) / rangoPos) * ALTURA_BARRAS, 2)
+            return (
+              <div key={b.nombre} className="flex min-w-0 flex-1 flex-col items-center">
+                <div className="flex w-full flex-1 flex-col items-center justify-end" style={{ height: ALTURA_BARRAS }}>
+                  {!negativo && (
+                    <>
+                      <div className="whitespace-nowrap text-sm font-medium" style={{ color: colorTexto[b.tipo] }}>
+                        ${b.valor.toFixed(0)}
+                      </div>
+                      <div className="mt-1.5 w-[72%] rounded-t-md" style={{ height: alturaBarra, background: colorBarra[b.tipo] }} />
+                    </>
+                  )}
+                </div>
+                {alturaAbajo > 0 && (
+                  <>
+                    <div className="w-full border-t" style={{ borderColor: 'var(--color-texto)' }} />
+                    <div className="flex w-full flex-col items-center" style={{ height: alturaAbajo }}>
+                      {negativo && <div className="w-[72%] rounded-b-md" style={{ height: alturaBarra, background: COLOR_ERROR }} />}
+                    </div>
+                    {negativo && (
+                      <div className="whitespace-nowrap text-sm font-medium" style={{ color: COLOR_ERROR }}>
+                        −${Math.abs(b.valor).toFixed(0)}
+                      </div>
+                    )}
+                  </>
+                )}
+                <div className="mt-2 text-center text-[11.5px] leading-tight text-[var(--color-texto-suave)]">{b.nombre}</div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {!mensajeVacio && margenPct !== null && (
+        <div className="mt-2 flex justify-end">
+          <span
+            className="inline-flex rounded-full px-2.5 py-[3px] text-xs font-medium"
+            style={{
+              background: margenPct < 0 ? 'color-mix(in srgb, var(--color-error) 12%, white)' : 'color-mix(in srgb, var(--color-exito) 12%, white)',
+              color: margenPct < 0 ? 'var(--color-error)' : 'var(--color-exito)',
+            }}
+          >
+            margen {margenPct.toFixed(0)}%
+          </span>
+        </div>
+      )}
+    </Tarjeta>
+  )
+}
+
 interface Operativos {
   pagos: VentasPorMetodo[]
   servicios: ServicioMasVendido[]
@@ -230,6 +331,7 @@ export function ReportesPage() {
   const [rangoPersonalizado, setRangoPersonalizado] = useState({ inicio: hoyEnNegocio(), fin: hoyEnNegocio() })
   const [vista, setVista] = useState<'cascada' | 'documento'>('cascada')
   const [nivel, setNivel] = useState<'resumen' | 'detalle'>('resumen')
+  const [tabMovil, setTabMovil] = useState<'servicios' | 'productos'>('servicios')
   const [datos, setDatos] = useState<EstadoResultados | null>(null)
   const [operativos, setOperativos] = useState<Operativos | null>(null)
   const [inventario, setInventario] = useState<FilaInventario[] | null>(null)
@@ -283,6 +385,42 @@ export function ReportesPage() {
         { tipo: 'linea', l: '(−) Gastos de operación', v: datos.gastosOperacion, suave: true },
       ]
     : []
+
+  // Gráficas 1 y 2 comparten escala: se calcula sobre el conjunto de
+  // ambas, no cada una por su cuenta (Etapa 19 C). La gráfica 3 tiene la
+  // suya propia porque representa una etapa distinta del cálculo.
+  const barrasServicios: BarraDato[] = datos
+    ? [
+        { nombre: 'Ingresos por servicios', valor: datos.servicios.ingresos, tipo: 'pos' },
+        { nombre: '(−) Costo de servicios', valor: datos.servicios.costoVentas, tipo: 'resta' },
+        { nombre: '= Utilidad bruta de servicios', valor: datos.servicios.utilidadBruta, tipo: 'total' },
+      ]
+    : []
+  const barrasProductos: BarraDato[] = datos
+    ? [
+        { nombre: 'Ingresos por productos', valor: datos.productos.ingresos, tipo: 'pos' },
+        { nombre: '(−) Costo de productos', valor: datos.productos.costoVentas, tipo: 'resta' },
+        { nombre: '= Utilidad bruta de productos', valor: datos.productos.utilidadBruta, tipo: 'total' },
+      ]
+    : []
+  const valoresGrupo12 = [...barrasServicios, ...barrasProductos].map((b) => b.valor)
+  const escalaMax12 = valoresGrupo12.length ? Math.max(...valoresGrupo12, 0) : 0
+  const escalaMin12 = valoresGrupo12.length ? Math.min(...valoresGrupo12, 0) : 0
+
+  const barrasResultado: BarraDato[] = datos
+    ? [
+        { nombre: 'Utilidad bruta total', valor: datos.utilidadBrutaTotal, tipo: 'total' },
+        { nombre: '(−) Gastos de operación', valor: datos.gastosOperacion, tipo: 'resta' },
+        { nombre: '= Utilidad neta', valor: datos.utilidadNeta, tipo: 'total' },
+      ]
+    : []
+  const valoresGrupo3 = barrasResultado.map((b) => b.valor)
+  const escalaMax3 = valoresGrupo3.length ? Math.max(...valoresGrupo3, 0) : 0
+  const escalaMin3 = valoresGrupo3.length ? Math.min(...valoresGrupo3, 0) : 0
+
+  const margenServicios = !datos || datos.servicios.ingresos === 0 ? null : (datos.servicios.utilidadBruta / datos.servicios.ingresos) * 100
+  const margenProductos = !datos || datos.productos.ingresos === 0 ? null : (datos.productos.utilidadBruta / datos.productos.ingresos) * 100
+  const margenNeto = ingresosTotales === 0 ? null : ((datos?.utilidadNeta ?? 0) / ingresosTotales) * 100
 
   function exportar(tipo: 'pdf' | 'excel') {
     if (!datos) return
@@ -423,68 +561,77 @@ export function ReportesPage() {
       {!datos && <p className="mt-4 text-sm text-[var(--color-texto-suave)]">Cargando...</p>}
 
       {datos && vista === 'cascada' && (
-        <div className="mt-4 grid grid-cols-1 items-start gap-4 xl:grid-cols-[440px_1fr]">
-          <Tarjeta className="min-w-0 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-2.5">
-              <div className="text-[16.5px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                Estado de Resultados
-              </div>
-              <div className="inline-flex rounded-lg p-0.5" style={{ background: 'var(--color-track-segmentado)' }}>
-                {(['resumen', 'detalle'] as const).map((n) => (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="text-[16.5px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
+              Estado de Resultados
+            </div>
+            <div className="inline-flex rounded-lg p-0.5" style={{ background: 'var(--color-track-segmentado)' }}>
+              {(['resumen', 'detalle'] as const).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setNivel(n)}
+                  className={`rounded-md px-2.5 py-1 text-xs ${
+                    nivel === n ? 'bg-[var(--color-superficie)] font-medium text-[var(--color-texto)] shadow-[0_1px_2px_rgba(74,50,43,.1)]' : 'text-[var(--color-texto-suave)]'
+                  }`}
+                >
+                  {n === 'resumen' ? 'Resumen' : 'Detalle'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {nivel === 'resumen' ? (
+            <div className="mt-4">
+              <div className="mb-3 inline-flex rounded-lg p-0.5 sm:hidden" style={{ background: 'var(--color-track-segmentado)' }}>
+                {(['servicios', 'productos'] as const).map((t) => (
                   <button
-                    key={n}
-                    onClick={() => setNivel(n)}
-                    className={`rounded-md px-2.5 py-1 text-xs ${
-                      nivel === n ? 'bg-[var(--color-superficie)] font-medium text-[var(--color-texto)] shadow-[0_1px_2px_rgba(74,50,43,.1)]' : 'text-[var(--color-texto-suave)]'
+                    key={t}
+                    onClick={() => setTabMovil(t)}
+                    className={`rounded-md px-3 py-1.5 text-xs capitalize ${
+                      tabMovil === t ? 'bg-[var(--color-superficie)] font-medium text-[var(--color-texto)] shadow-[0_1px_2px_rgba(74,50,43,.1)]' : 'text-[var(--color-texto-suave)]'
                     }`}
                   >
-                    {n === 'resumen' ? 'Resumen' : 'Detalle'}
+                    {t}
                   </button>
                 ))}
               </div>
-            </div>
 
-            {nivel === 'resumen' ? (
-              <div className="mt-3">
-                {filas.map((f, i) =>
-                  f.tipo === 'seccion' ? (
-                    <div key={i} className="mt-3 text-[11px] font-medium uppercase tracking-[.1em] text-[var(--color-texto-suave)] first:mt-0">
-                      {f.seccion}
-                    </div>
-                  ) : (
-                    <div
-                      key={i}
-                      className={`flex items-baseline gap-2.5 py-1.5 text-[13.5px] ${f.suave ? 'text-[var(--color-texto-suave)]' : f.total ? 'font-medium text-[var(--color-primario)]' : 'text-[var(--color-texto)]'}`}
-                    >
-                      <span>{f.l}</span>
-                      <span className="flex-1 border-b border-dotted" style={{ borderColor: '#D8C4BA' }} />
-                      <span>${f.v.toFixed(0)}</span>
-                    </div>
-                  ),
-                )}
-                <div className="mt-2 flex items-baseline justify-between gap-2.5 pt-3" style={{ borderTop: '2px double var(--color-texto)' }}>
-                  <span className="text-sm font-medium text-[var(--color-texto)]">= Utilidad neta</span>
-                  <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                    ${(datos?.utilidadNeta ?? 0).toFixed(0)}
-                  </span>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className={tabMovil === 'servicios' ? '' : 'hidden sm:block'}>
+                  <GraficaBarras
+                    titulo="Servicios"
+                    barras={barrasServicios}
+                    escalaMax={escalaMax12}
+                    escalaMin={escalaMin12}
+                    margenPct={margenServicios}
+                    mensajeVacio={datos.servicios.ingresos === 0 ? 'Sin ventas de servicios en este periodo.' : undefined}
+                  />
                 </div>
+                <div className={tabMovil === 'productos' ? '' : 'hidden sm:block'}>
+                  <GraficaBarras
+                    titulo="Productos"
+                    barras={barrasProductos}
+                    escalaMax={escalaMax12}
+                    escalaMin={escalaMin12}
+                    margenPct={margenProductos}
+                    mensajeVacio={datos.productos.ingresos === 0 ? 'Sin ventas de productos en este periodo.' : undefined}
+                  />
+                </div>
+                <GraficaBarras titulo="Resultado del periodo" barras={barrasResultado} escalaMax={escalaMax3} escalaMin={escalaMin3} margenPct={margenNeto} />
               </div>
-            ) : (
+            </div>
+          ) : (
+            <Tarjeta className="mt-4 min-w-0 p-5">
               <DetalleER datos={datos} />
-            )}
-            {nivel === 'resumen' && (
-              <div className="mt-2 flex justify-end">
-                <span
-                  className="inline-flex rounded-full px-2.5 py-[3px] text-xs font-medium"
-                  style={{ background: 'color-mix(in srgb, var(--color-exito) 12%, white)', color: 'var(--color-exito)' }}
-                >
-                  margen {margen.toFixed(0)}%
-                </span>
-              </div>
-            )}
-          </Tarjeta>
+            </Tarjeta>
+          )}
 
-          {esBoutique && operativos && <GrupoOperativos datos={operativos} />}
+          {esBoutique && operativos && (
+            <div className="mt-4">
+              <GrupoOperativos datos={operativos} />
+            </div>
+          )}
         </div>
       )}
 
