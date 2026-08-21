@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
 import { cancelarCita, eliminarCita, listarCitasRango, listarEmpleadas, type Cita } from '../lib/agenda'
 import { obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
@@ -152,8 +152,24 @@ export function AgendaPage() {
   const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null)
   const [historial, setHistorial] = useState<VisitaCliente[] | null>(null)
   const [error, setError] = useState(false)
-  const [mostrarAgendar, setMostrarAgendar] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [mostrarAgendar, setMostrarAgendar] = useState(() => searchParams.get('nueva') === '1')
   const [citaEditando, setCitaEditando] = useState<Cita | null>(null)
+
+  useEffect(() => {
+    // Acceso rápido desde el Dashboard (/agenda?nueva=1): abre el flujo de
+    // agendar de una vez, y limpia el parámetro para que "atrás" no lo
+    // vuelva a disparar.
+    if (searchParams.get('nueva') === '1') {
+      setMostrarAgendar(true)
+      setSearchParams((prev) => {
+        const siguiente = new URLSearchParams(prev)
+        siguiente.delete('nueva')
+        return siguiente
+      }, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const rango = useMemo(() => {
     if (vista === 'dia') return { desde: inicioDia(fechaRef), hasta: sumarDias(inicioDia(fechaRef), 1) }

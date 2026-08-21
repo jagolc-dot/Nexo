@@ -107,17 +107,19 @@ export async function obtenerDashboardBoutique(negocioId: string): Promise<Dashb
       obtenerClientasNuevasVsRecurrentes(negocioId, rangoMes.inicio, rangoMes.fin),
     ])
 
+  const ingresosMes = rMes.servicios.ingresos + rMes.productos.ingresos
+
   return {
     citasHoy,
-    ingresosDia: rHoy.ingresos,
-    ventasHoyCount: rHoy.ventas.length,
+    ingresosDia: rHoy.servicios.ingresos + rHoy.productos.ingresos,
+    ventasHoyCount: rHoy.numVentas,
     utilidadMes: rMes.utilidadNeta,
     utilidadMesAnterior: rMesAnterior.utilidadNeta,
-    ingresosMes: rMes.ingresos,
+    ingresosMes,
     gastosMes: rMes.gastosOperacion,
     clientesActivos,
-    ticketPromedio: rMes.ventas.length === 0 ? 0 : rMes.ingresos / rMes.ventas.length,
-    ingresosMesAnterior: rMesAnterior.ingresos,
+    ticketPromedio: rMes.numVentas === 0 ? 0 : ingresosMes / rMes.numVentas,
+    ingresosMesAnterior: rMesAnterior.servicios.ingresos + rMesAnterior.productos.ingresos,
     clientasNuevas: clientasMes.nuevas,
     clientasRecurrentes: clientasMes.recurrentes,
     tasaCancelacion:
@@ -242,11 +244,13 @@ export async function obtenerDashboardSastreria(negocioId: string): Promise<Dash
     obtenerProductosBajaExistencia(negocioId),
   ])
 
+  const ingresosMes = rMes.servicios.ingresos + rMes.productos.ingresos
+
   return {
-    ventasDia: rHoy.ingresos,
+    ventasDia: rHoy.servicios.ingresos + rHoy.productos.ingresos,
     utilidadMes: rMes.utilidadNeta,
     utilidadMesAnterior: rMesAnterior.utilidadNeta,
-    ticketPromedio: rMes.ventas.length === 0 ? 0 : rMes.ingresos / rMes.ventas.length,
+    ticketPromedio: rMes.numVentas === 0 ? 0 : ingresosMes / rMes.numVentas,
     clientesActivos,
     productosBajaExistencia,
   }

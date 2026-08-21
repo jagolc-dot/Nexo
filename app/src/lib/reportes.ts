@@ -10,7 +10,13 @@ interface VentaConDetalle {
   nombre_ocasional: string | null
   metodo_pago: MetodoPago
   clientes: { nombre: string } | null
-  venta_detalle: Array<{ cantidad: number; costo_unitario: number; item_id: string; items: { nombre: string; tipo: string } | null }>
+  venta_detalle: Array<{
+    cantidad: number
+    precio_unitario: number
+    costo_unitario: number
+    item_id: string
+    items: { nombre: string; tipo: string } | null
+  }>
 }
 
 interface GastoActivo {
@@ -26,7 +32,7 @@ async function ventasConfirmadasEnRango(negocioId: string, inicio: Date, fin: Da
   const { data, error } = await supabase
     .from('ventas')
     .select(
-      'id, fecha, total, cliente_id, nombre_ocasional, metodo_pago, clientes(nombre), venta_detalle(cantidad, costo_unitario, item_id, items(nombre, tipo))',
+      'id, fecha, total, cliente_id, nombre_ocasional, metodo_pago, clientes(nombre), venta_detalle(cantidad, precio_unitario, costo_unitario, item_id, items(nombre, tipo))',
     )
     .eq('negocio_id', negocioId)
     .eq('estado', 'confirmada')
@@ -50,10 +56,18 @@ async function gastosActivosEnRango(negocioId: string, inicio: Date, fin: Date):
   return data as unknown as GastoActivo[]
 }
 
+/**
+ * Un renglón de venta_detalle, no una venta completa: la separación
+ * servicios/productos es por línea (items.tipo), no por el origen de la
+ * venta. Una venta mixta (cita con servicio + producto en el mismo
+ * recibo) aporta un renglón a cada bloque.
+ */
 export interface LineaVentaResultados {
-  id: string
+  ventaId: string
   fecha: string
   cliente: string
+  itemNombre: string
+  cantidad: number
   total: number
   costo: number
   margen: number
@@ -67,18 +81,27 @@ export interface LineaGastoResultados {
   monto: number
 }
 
-export interface EstadoResultados {
+export interface BloqueResultados {
   ingresos: number
   costoVentas: number
   utilidadBruta: number
-  gastosOperacion: number
-  utilidadNeta: number
-  ventas: LineaVentaResultados[]
-  gastos: LineaGastoResultados[]
+  lineas: LineaVentaResultados[]
 }
 
-function costoDeVenta(v: VentaConDetalle): number {
-  return v.venta_detalle.reduce((acc, d) => acc + d.cantidad * d.costo_unitario, 0)
+export interface EstadoResultados {
+  servicios: BloqueResultados
+  productos: BloqueResultados
+  utilidadBrutaTotal: number
+  gastosOperacion: number
+  utilidadNeta: number
+  gastos: LineaGastoResultados[]
+  /** Cantidad de ventas confirmadas en el periodo (para ticket promedio),
+   * no la suma de líneas de servicios + productos. */
+  numVentas: number
+}
+
+function bloqueVacio(): BloqueResultados {
+  return { ingresos: 0, costoVentas: 0, utilidadBruta: 0, lineas: [] }
 }
 
 export async function obtenerEstadoResultados(
@@ -91,17 +114,33 @@ export async function obtenerEstadoResultados(
     gastosActivosEnRango(negocioId, inicio, fin),
   ])
 
-  const ventas: LineaVentaResultados[] = ventasRaw.map((v) => {
-    const costo = costoDeVenta(v)
-    return {
-      id: v.id,
-      fecha: v.fecha,
-      cliente: v.clientes?.nombre ?? v.nombre_ocasional ?? 'Público general',
-      total: v.total,
-      costo,
-      margen: v.total - costo,
+  const servicios = bloqueVacio()
+  const productos = bloqueVacio()
+
+  for (const v of ventasRaw) {
+    const cliente = v.clientes?.nombre ?? v.nombre_ocasional ?? 'Público general'
+    for (const d of v.venta_detalle) {
+      const tipo = d.items?.tipo
+      if (tipo !== 'servicio' && tipo !== 'producto') continue
+      const bloque = tipo === 'servicio' ? servicios : productos
+      const total = d.cantidad * d.precio_unitario
+      const costo = d.cantidad * d.costo_unitario
+      bloque.ingresos += total
+      bloque.costoVentas += costo
+      bloque.lineas.push({
+        ventaId: v.id,
+        fecha: v.fecha,
+        cliente,
+        itemNombre: d.items?.nombre ?? '?',
+        cantidad: d.cantidad,
+        total,
+        costo,
+        margen: total - costo,
+      })
     }
-  })
+  }
+  servicios.utilidadBruta = servicios.ingresos - servicios.costoVentas
+  productos.utilidadBruta = productos.ingresos - productos.costoVentas
 
   const gastos: LineaGastoResultados[] = gastosRaw.map((g) => ({
     id: g.id,
@@ -111,13 +150,11 @@ export async function obtenerEstadoResultados(
     monto: g.monto,
   }))
 
-  const ingresos = ventas.reduce((acc, v) => acc + v.total, 0)
-  const costoVentas = ventas.reduce((acc, v) => acc + v.costo, 0)
-  const utilidadBruta = ingresos - costoVentas
+  const utilidadBrutaTotal = servicios.utilidadBruta + productos.utilidadBruta
   const gastosOperacion = gastos.reduce((acc, g) => acc + g.monto, 0)
-  const utilidadNeta = utilidadBruta - gastosOperacion
+  const utilidadNeta = utilidadBrutaTotal - gastosOperacion
 
-  return { ingresos, costoVentas, utilidadBruta, gastosOperacion, utilidadNeta, ventas, gastos }
+  return { servicios, productos, utilidadBrutaTotal, gastosOperacion, utilidadNeta, gastos, numVentas: ventasRaw.length }
 }
 
 export interface VentasPorMetodo {

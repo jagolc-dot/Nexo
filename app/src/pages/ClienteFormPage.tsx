@@ -115,7 +115,15 @@ export function ClienteFormPage() {
       <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-3.5 overflow-y-auto px-4 py-[18px]">
         <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
           Nombre <span style={{ color: 'var(--color-error)' }}>*</span>
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
+          <input
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            className={CAMPO}
+            style={ESTILO_CAMPO}
+          />
         </label>
 
         <div className="flex gap-3">

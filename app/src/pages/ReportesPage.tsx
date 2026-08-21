@@ -164,29 +164,43 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
   )
 }
 
+function ListaLineas({ titulo, lineas }: { titulo: string; lineas: EstadoResultados['servicios']['lineas'] }) {
+  const [verTodas, setVerTodas] = useState(false)
+  const visibles = verTodas ? lineas : lineas.slice(0, 8)
+
+  return (
+    <div className="mt-4">
+      <Etiqueta>{titulo}</Etiqueta>
+      {lineas.length === 0 && <p className="mt-2 text-sm text-[var(--color-texto-suave)]">Sin movimientos en este periodo.</p>}
+      {visibles.map((l, i) => (
+        <div key={`${l.ventaId}-${i}`} className="flex items-center gap-2.5 border-b py-2.5 text-[13px]" style={{ borderColor: 'var(--color-divisor)' }}>
+          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(l.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}</span>
+          <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">
+            {l.itemNombre}
+            {l.cantidad > 1 && <span className="text-[var(--color-texto-suave)]"> ×{l.cantidad}</span>}
+            <span className="ml-1.5 truncate text-xs text-[var(--color-texto-suave)]">{l.cliente}</span>
+          </span>
+          <span className="shrink-0 font-medium text-[var(--color-texto)]">${l.total.toFixed(0)}</span>
+          <span className="w-24 shrink-0 text-right text-xs text-[var(--color-exito)]">margen ${l.margen.toFixed(0)}</span>
+        </div>
+      ))}
+      {!verTodas && lineas.length > 8 && (
+        <button onClick={() => setVerTodas(true)} className="mt-2.5 text-[12.5px] font-medium text-[var(--color-primario)]">
+          Ver las {lineas.length - 8} restantes
+        </button>
+      )}
+    </div>
+  )
+}
+
 function DetalleER({ datos }: { datos: EstadoResultados }) {
-  const [verTodasVentas, setVerTodasVentas] = useState(false)
   const [verTodosGastos, setVerTodosGastos] = useState(false)
-  const ventasVisibles = verTodasVentas ? datos.ventas : datos.ventas.slice(0, 8)
   const gastosVisibles = verTodosGastos ? datos.gastos : datos.gastos.slice(0, 8)
 
   return (
     <div className="mt-3.5">
-      <Etiqueta>Ingresos · venta por venta</Etiqueta>
-      {datos.ventas.length === 0 && <p className="mt-2 text-sm text-[var(--color-texto-suave)]">Sin ventas en este periodo.</p>}
-      {ventasVisibles.map((v) => (
-        <div key={v.id} className="flex items-center gap-2.5 border-b py-2.5 text-[13px]" style={{ borderColor: 'var(--color-divisor)' }}>
-          <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}</span>
-          <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">{v.cliente}</span>
-          <span className="shrink-0 font-medium text-[var(--color-texto)]">${v.total.toFixed(0)}</span>
-          <span className="w-24 shrink-0 text-right text-xs text-[var(--color-exito)]">margen ${v.margen.toFixed(0)}</span>
-        </div>
-      ))}
-      {!verTodasVentas && datos.ventas.length > 8 && (
-        <button onClick={() => setVerTodasVentas(true)} className="mt-2.5 text-[12.5px] font-medium text-[var(--color-primario)]">
-          Ver las {datos.ventas.length - 8} restantes
-        </button>
-      )}
+      <ListaLineas titulo="Servicios · línea por línea" lineas={datos.servicios.lineas} />
+      <ListaLineas titulo="Productos · línea por línea" lineas={datos.productos.lineas} />
 
       <div className="mt-4">
         <Etiqueta>Gastos · uno por uno</Etiqueta>
@@ -249,38 +263,70 @@ export function ReportesPage() {
 
   if (!negocioActivo) return null
 
-  const ingresos = datos?.ingresos ?? 0
-  const margen = ingresos === 0 ? 0 : ((datos?.utilidadNeta ?? 0) / ingresos) * 100
-  const alturaBase = 130
-  const valorMax = Math.max(ingresos, 1)
-  const barras = datos
+  const ingresosTotales = (datos?.servicios.ingresos ?? 0) + (datos?.productos.ingresos ?? 0)
+  const margen = ingresosTotales === 0 ? 0 : ((datos?.utilidadNeta ?? 0) / ingresosTotales) * 100
+
+  type FilaER =
+    | { tipo: 'seccion'; seccion: string }
+    | { tipo: 'linea'; l: string; v: number; suave?: boolean; total?: boolean }
+  const filas: FilaER[] = datos
     ? [
-        { nombre: 'Ingresos', valor: datos.ingresos, tipo: 'pos' as const },
-        { nombre: '(−) Costo de ventas', valor: datos.costoVentas, tipo: 'resta' as const },
-        { nombre: '= Utilidad bruta', valor: datos.utilidadBruta, tipo: 'pos' as const },
-        { nombre: '(−) Gastos de operación', valor: datos.gastosOperacion, tipo: 'resta' as const },
-        { nombre: '= Utilidad neta', valor: datos.utilidadNeta, tipo: 'neta' as const },
+        { tipo: 'seccion', seccion: 'Servicios' },
+        { tipo: 'linea', l: 'Ingresos por servicios', v: datos.servicios.ingresos },
+        { tipo: 'linea', l: '(−) Costo de servicios', v: datos.servicios.costoVentas, suave: true },
+        { tipo: 'linea', l: '= Utilidad bruta de servicios', v: datos.servicios.utilidadBruta, total: true },
+        { tipo: 'seccion', seccion: 'Productos' },
+        { tipo: 'linea', l: 'Ingresos por productos', v: datos.productos.ingresos },
+        { tipo: 'linea', l: '(−) Costo de productos', v: datos.productos.costoVentas, suave: true },
+        { tipo: 'linea', l: '= Utilidad bruta de productos', v: datos.productos.utilidadBruta, total: true },
+        { tipo: 'linea', l: '= Utilidad bruta total', v: datos.utilidadBrutaTotal, total: true },
+        { tipo: 'linea', l: '(−) Gastos de operación', v: datos.gastosOperacion, suave: true },
       ]
     : []
-  const colorBarra = { pos: 'color-mix(in srgb, var(--color-primario) 45%, white)', resta: '#EBDCD3', neta: 'var(--color-primario)' }
-  const colorTexto = { pos: 'var(--color-texto)', resta: 'var(--color-texto-suave)', neta: 'var(--color-primario)' }
 
   function exportar(tipo: 'pdf' | 'excel') {
     if (!datos) return
     const fn = tipo === 'pdf' ? exportarPDF : exportarExcel
     if (nivel === 'resumen') {
       fn('Estado de Resultados', ['Concepto', 'Monto'], [
-        ['Ingresos', datos.ingresos.toFixed(2)],
-        ['(-) Costo de ventas', datos.costoVentas.toFixed(2)],
-        ['= Utilidad bruta', datos.utilidadBruta.toFixed(2)],
+        ['SERVICIOS', ''],
+        ['Ingresos por servicios', datos.servicios.ingresos.toFixed(2)],
+        ['(-) Costo de servicios', datos.servicios.costoVentas.toFixed(2)],
+        ['= Utilidad bruta de servicios', datos.servicios.utilidadBruta.toFixed(2)],
+        ['PRODUCTOS', ''],
+        ['Ingresos por productos', datos.productos.ingresos.toFixed(2)],
+        ['(-) Costo de productos', datos.productos.costoVentas.toFixed(2)],
+        ['= Utilidad bruta de productos', datos.productos.utilidadBruta.toFixed(2)],
+        ['= Utilidad bruta total', datos.utilidadBrutaTotal.toFixed(2)],
         ['(-) Gastos de operación', datos.gastosOperacion.toFixed(2)],
         ['= Utilidad neta', datos.utilidadNeta.toFixed(2)],
       ])
     } else {
       fn(
-        'Estado de Resultados - Ventas',
-        ['Fecha', 'Cliente', 'Total', 'Costo', 'Margen'],
-        datos.ventas.map((v) => [new Date(v.fecha).toLocaleString('es-MX', OPCIONES_ZONA_NEGOCIO), v.cliente, v.total.toFixed(2), v.costo.toFixed(2), v.margen.toFixed(2)]),
+        'Estado de Resultados - Servicios',
+        ['Fecha', 'Cliente', 'Servicio', 'Cantidad', 'Total', 'Costo', 'Margen'],
+        datos.servicios.lineas.map((l) => [
+          new Date(l.fecha).toLocaleString('es-MX', OPCIONES_ZONA_NEGOCIO),
+          l.cliente,
+          l.itemNombre,
+          l.cantidad,
+          l.total.toFixed(2),
+          l.costo.toFixed(2),
+          l.margen.toFixed(2),
+        ]),
+      )
+      fn(
+        'Estado de Resultados - Productos',
+        ['Fecha', 'Cliente', 'Producto', 'Cantidad', 'Total', 'Costo', 'Margen'],
+        datos.productos.lineas.map((l) => [
+          new Date(l.fecha).toLocaleString('es-MX', OPCIONES_ZONA_NEGOCIO),
+          l.cliente,
+          l.itemNombre,
+          l.cantidad,
+          l.total.toFixed(2),
+          l.costo.toFixed(2),
+          l.margen.toFixed(2),
+        ]),
       )
       fn(
         'Estado de Resultados - Gastos',
@@ -399,19 +445,29 @@ export function ReportesPage() {
             </div>
 
             {nivel === 'resumen' ? (
-              <div className="mt-4 flex items-stretch gap-3" style={{ height: alturaBase + 40 }}>
-                {barras.map((b) => (
-                  <div key={b.nombre} className="flex min-w-0 flex-1 flex-col items-center justify-end">
-                    <div className="whitespace-nowrap text-sm font-medium" style={{ color: colorTexto[b.tipo] }}>
-                      ${b.valor.toFixed(0)}
+              <div className="mt-3">
+                {filas.map((f, i) =>
+                  f.tipo === 'seccion' ? (
+                    <div key={i} className="mt-3 text-[11px] font-medium uppercase tracking-[.1em] text-[var(--color-texto-suave)] first:mt-0">
+                      {f.seccion}
                     </div>
+                  ) : (
                     <div
-                      className="mt-1.5 w-[72%] rounded-t-md"
-                      style={{ height: Math.max((b.valor / valorMax) * alturaBase, 2), background: colorBarra[b.tipo] }}
-                    />
-                    <div className="mt-2 text-center text-[11.5px] leading-tight text-[var(--color-texto-suave)]">{b.nombre}</div>
-                  </div>
-                ))}
+                      key={i}
+                      className={`flex items-baseline gap-2.5 py-1.5 text-[13.5px] ${f.suave ? 'text-[var(--color-texto-suave)]' : f.total ? 'font-medium text-[var(--color-primario)]' : 'text-[var(--color-texto)]'}`}
+                    >
+                      <span>{f.l}</span>
+                      <span className="flex-1 border-b border-dotted" style={{ borderColor: '#D8C4BA' }} />
+                      <span>${f.v.toFixed(0)}</span>
+                    </div>
+                  ),
+                )}
+                <div className="mt-2 flex items-baseline justify-between gap-2.5 pt-3" style={{ borderTop: '2px double var(--color-texto)' }}>
+                  <span className="text-sm font-medium text-[var(--color-texto)]">= Utilidad neta</span>
+                  <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
+                    ${(datos?.utilidadNeta ?? 0).toFixed(0)}
+                  </span>
+                </div>
               </div>
             ) : (
               <DetalleER datos={datos} />
@@ -444,18 +500,22 @@ export function ReportesPage() {
             </div>
 
             <div className="mt-6">
-              {[
-                { l: 'Ingresos', v: datos.ingresos, suave: false },
-                { l: '(−) Costo de ventas', v: datos.costoVentas, suave: true },
-                { l: '= Utilidad bruta', v: datos.utilidadBruta, suave: false },
-                { l: '(−) Gastos de operación', v: datos.gastosOperacion, suave: true },
-              ].map((r) => (
-                <div key={r.l} className={`flex items-baseline gap-2.5 py-2.5 text-sm ${r.suave ? 'text-[var(--color-texto-suave)]' : 'font-medium text-[var(--color-texto)]'}`}>
-                  <span>{r.l}</span>
-                  <span className="flex-1 border-b border-dotted" style={{ borderColor: '#D8C4BA' }} />
-                  <span>${r.v.toFixed(0)}</span>
-                </div>
-              ))}
+              {filas.map((f, i) =>
+                f.tipo === 'seccion' ? (
+                  <div key={i} className="mt-4 text-[11px] font-medium uppercase tracking-[.14em] text-[var(--color-texto-suave)] first:mt-0">
+                    {f.seccion}
+                  </div>
+                ) : (
+                  <div
+                    key={i}
+                    className={`flex items-baseline gap-2.5 py-2.5 text-sm ${f.suave ? 'text-[var(--color-texto-suave)]' : f.total ? 'font-medium text-[var(--color-texto)]' : 'text-[var(--color-texto)]'}`}
+                  >
+                    <span>{f.l}</span>
+                    <span className="flex-1 border-b border-dotted" style={{ borderColor: '#D8C4BA' }} />
+                    <span>${f.v.toFixed(0)}</span>
+                  </div>
+                ),
+              )}
               <div className="mt-2.5 flex items-baseline justify-between gap-2.5 pt-4" style={{ borderTop: '3px double var(--color-texto)' }}>
                 <span className="text-[15px] font-medium text-[var(--color-texto)]">= Utilidad neta</span>
                 <span className="text-[28px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>

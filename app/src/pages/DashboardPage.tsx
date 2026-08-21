@@ -128,6 +128,48 @@ function Encabezado({ nombre, negocioNombre, tam = 26 }: { nombre: string; negoc
   )
 }
 
+function IconoCalendarioMas() {
+  return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+      <path d="M12 13v5" />
+      <path d="M9.5 15.5h5" />
+    </svg>
+  )
+}
+function IconoCarritoMas() {
+  return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.5 4.5h2l2.3 11.2a1.8 1.8 0 0 0 1.76 1.4h7.3a1.8 1.8 0 0 0 1.76-1.42L20.5 8.5H6.2" />
+      <circle cx="9.5" cy="20" r="1.3" />
+      <circle cx="17" cy="20" r="1.3" />
+    </svg>
+  )
+}
+
+function AccionesRapidas({ nuevaCita }: { nuevaCita: boolean }) {
+  return (
+    <div className="mt-3.5 flex flex-wrap gap-2.5">
+      {nuevaCita && (
+        <Link to="/agenda?nueva=1" className={claseBoton('primario', '!min-h-11 flex-1 gap-1.5 px-4 text-[13.5px] sm:flex-none')}>
+          <IconoCalendarioMas />
+          Nueva cita
+        </Link>
+      )}
+      <Link
+        to="/ventas/nueva"
+        className={claseBoton(nuevaCita ? 'secundario' : 'primario', '!min-h-11 flex-1 gap-1.5 px-4 text-[13.5px] sm:flex-none')}
+      >
+        <IconoCarritoMas />
+        Nueva venta
+      </Link>
+    </div>
+  )
+}
+
 function BloqueEsqueleto({ className = '' }: { className?: string }) {
   return <div className={`animar-brillo rounded bg-[var(--color-esqueleto)] ${className}`} />
 }
@@ -253,6 +295,7 @@ function ContenidoBoutique({ data, nombre, negocioNombre }: { data: DashboardBou
   return (
     <div className="p-4 md:p-[22px] lg:p-7">
       <Encabezado nombre={nombre} negocioNombre={negocioNombre} />
+      <AccionesRapidas nuevaCita />
 
       <div className="mt-[18px] grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0">
@@ -375,6 +418,7 @@ function ContenidoSastreria({ data, nombre, negocioNombre }: { data: DashboardSa
   return (
     <div className="p-4 md:p-[22px] lg:p-7">
       <Encabezado nombre={nombre} negocioNombre={negocioNombre} />
+      <AccionesRapidas nuevaCita={false} />
 
       <div className="mt-[18px] grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0">

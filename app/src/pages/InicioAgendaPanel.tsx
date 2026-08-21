@@ -516,7 +516,15 @@ export function InicioAgendaPanel({ onListo, editando }: { onListo: () => void; 
               <div className="flex flex-col gap-3.5">
                 <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
                   Nombre <span style={{ color: 'var(--color-error)' }}>*</span>
-                  <input value={nuevoNombre} onChange={(e) => setNuevoNombre(e.target.value)} className={CAMPO} style={ESTILO_CAMPO} />
+                  <input
+                    value={nuevoNombre}
+                    onChange={(e) => setNuevoNombre(e.target.value)}
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className={CAMPO}
+                    style={ESTILO_CAMPO}
+                  />
                 </label>
                 <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
                   Teléfono

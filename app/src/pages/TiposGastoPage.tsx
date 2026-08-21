@@ -105,6 +105,9 @@ export function TiposGastoPage() {
             placeholder="Nombre del tipo de gasto"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             className="min-h-11 min-w-0 flex-1 rounded-[10px] border px-3 text-[13.5px] text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]"
             style={{ borderColor: 'var(--color-borde-campo)' }}
           />

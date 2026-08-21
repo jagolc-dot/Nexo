@@ -257,6 +257,9 @@ export function VentaNuevaPage() {
                   placeholder="Nombre"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   className={CAMPO_SM}
                 />
                 <input

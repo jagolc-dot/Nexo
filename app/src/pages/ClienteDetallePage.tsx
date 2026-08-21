@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { cambiarActivoCliente, obtenerCliente, obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
+import { cambiarActivoCliente, obtenerCliente, obtenerHistorialDetalladoCliente, type HistorialDetalladoCliente } from '../lib/clientes'
 import type { Cliente } from '../types'
 import { claseBoton } from '../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
@@ -33,13 +33,13 @@ export function ClienteDetallePage() {
   const navigate = useNavigate()
 
   const [cliente, setCliente] = useState<Cliente | null>(null)
-  const [historial, setHistorial] = useState<VisitaCliente[] | null>(null)
+  const [historial, setHistorial] = useState<HistorialDetalladoCliente | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function cargar() {
     if (!id) return
     try {
-      const [c, h] = await Promise.all([obtenerCliente(id), obtenerHistorialCliente(id)])
+      const [c, h] = await Promise.all([obtenerCliente(id), obtenerHistorialDetalladoCliente(id)])
       setCliente(c)
       setHistorial(h)
     } catch {
@@ -55,8 +55,6 @@ export function ClienteDetallePage() {
   if (error) return <p className="p-4 text-sm text-[var(--color-error)]">{error}</p>
   if (!cliente || !historial) return <p className="p-4 text-sm text-[var(--color-texto-suave)]">Cargando...</p>
 
-  const confirmadas = historial.filter((v) => v.estado === 'confirmada')
-  const gastoTotal = confirmadas.reduce((acc, v) => acc + v.total, 0)
   const telefonoLimpio = cliente.telefono?.replace(/\D/g, '') ?? ''
   const [redPlataforma, ...redResto] = (cliente.contacto_red_social ?? '').split(' ')
   const redEsPlataforma = /instagram|facebook|tiktok/i.test(redPlataforma)
@@ -152,43 +150,54 @@ export function ClienteDetallePage() {
         <div className="flex min-w-0 flex-col gap-4">
           <div className="grid grid-cols-3 gap-3">
             <Tarjeta className="min-w-0 px-4 py-3.5">
-              <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Visitas</div>
+              <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Visitas · Compras</div>
               <div className="mt-1 text-[22px] text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                {confirmadas.length}
+                {historial.visitas.length} <span className="text-[15px] text-[var(--color-texto-suave)]">· {historial.comprasCount}</span>
               </div>
             </Tarjeta>
             <Tarjeta className="min-w-0 px-4 py-3.5">
               <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Gasto acumulado</div>
               <div className="mt-1 text-[22px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                ${gastoTotal.toFixed(0)}
+                ${historial.gastoTotal.toFixed(0)}
               </div>
             </Tarjeta>
             <Tarjeta className="min-w-0 px-4 py-3.5">
               <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Última visita</div>
               <div className="mt-1 text-[22px] text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                {confirmadas[0] ? new Date(confirmadas[0].fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO }) : '—'}
+                {historial.visitas[0] ? new Date(historial.visitas[0].fecha_hora).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO }) : '—'}
               </div>
             </Tarjeta>
           </div>
 
           <Tarjeta className="px-5 pb-2 pt-1.5">
             <div className="py-2.5 text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Historial de visitas</div>
-            {historial.length === 0 && <p className="pb-4 text-sm text-[var(--color-texto-suave)]">Sin visitas todavía.</p>}
-            {historial.map((v, i) => (
-              <div key={v.id} className={`flex items-center gap-3 py-2.5 ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: 'var(--color-divisor)' }}>
+            {historial.visitas.length === 0 && <p className="pb-4 text-sm text-[var(--color-texto-suave)]">Sin visitas todavía.</p>}
+            {historial.visitas.map((v, i) => (
+              <div key={v.cita_id} className={`flex items-center gap-3 py-2.5 ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: 'var(--color-divisor)' }}>
                 <span className="w-16 shrink-0 text-[12.5px] text-[var(--color-texto-suave)]">
-                  {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
+                  {new Date(v.fecha_hora).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[13.5px] text-[var(--color-texto)]">
-                  {v.items}
-                  {v.estado === 'cancelada' && <span className="ml-2 text-xs text-[var(--color-error)]">Cancelada</span>}
+                  {v.servicios || '—'}
+                  {v.forma_una && <span className="ml-2 text-xs text-[var(--color-texto-suave)]">{v.forma_una}</span>}
                 </span>
-                <span
-                  className="shrink-0 text-[13px] font-medium"
-                  style={v.estado === 'cancelada' ? { color: 'var(--color-texto-suave)', textDecoration: 'line-through' } : { color: 'var(--color-texto)' }}
-                >
-                  ${v.total.toFixed(0)}
+                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">${v.monto.toFixed(0)}</span>
+              </div>
+            ))}
+          </Tarjeta>
+
+          <Tarjeta className="px-5 pb-2 pt-1.5">
+            <div className="py-2.5 text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Productos adquiridos</div>
+            {historial.productos.length === 0 && <p className="pb-4 text-sm text-[var(--color-texto-suave)]">Sin productos comprados todavía.</p>}
+            {historial.productos.map((p, i) => (
+              <div key={i} className={`flex items-center gap-3 py-2.5 ${i > 0 ? 'border-t' : ''}`} style={{ borderColor: 'var(--color-divisor)' }}>
+                <span className="w-16 shrink-0 text-[12.5px] text-[var(--color-texto-suave)]">
+                  {new Date(p.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}
                 </span>
+                <span className="min-w-0 flex-1 truncate text-[13.5px] text-[var(--color-texto)]">
+                  {p.nombre} ×{p.cantidad}
+                </span>
+                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">${p.monto.toFixed(0)}</span>
               </div>
             ))}
           </Tarjeta>

@@ -53,11 +53,11 @@ function FormularioVariante({ itemId, onCreada }: { itemId: string; onCreada: ()
     >
       <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
         Color
-        <input value={color} onChange={(e) => setColor(e.target.value)} className={`w-24 ${CAMPO}`} />
+        <input value={color} onChange={(e) => setColor(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-24 ${CAMPO}`} />
       </label>
       <label className="flex flex-col gap-1 text-xs text-[var(--color-texto-suave)]">
         Talla
-        <input value={talla} onChange={(e) => setTalla(e.target.value)} className={`w-20 ${CAMPO}`} />
+        <input value={talla} onChange={(e) => setTalla(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} className={`w-20 ${CAMPO}`} />
       </label>
       <Button type="submit" disabled={enviando} className="min-h-0 px-3 py-1.5 text-sm">
         Agregar variante
