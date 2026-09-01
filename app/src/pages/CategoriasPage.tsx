@@ -91,8 +91,9 @@ export function CategoriasPage() {
       await crearCategoria(negocioActivo!.id, nombre, tipoNuevo)
       setNombre('')
       cargar()
-    } catch {
-      setError('No se pudo crear la categoría (puede que ya exista con ese nombre).')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo crear la categoría (puede que ya exista con ese nombre).')
     } finally {
       setEnviando(false)
     }
@@ -114,8 +115,9 @@ export function CategoriasPage() {
       await actualizarCategoria(cat.id, { nombre: nombreEdicion.trim() })
       setEditandoId(null)
       cargar()
-    } catch {
-      setError('No se pudo renombrar (puede que ya exista una categoría con ese nombre).')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo renombrar (puede que ya exista una categoría con ese nombre).')
     }
   }
 

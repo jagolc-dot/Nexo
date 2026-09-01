@@ -53,8 +53,9 @@ export function TiposGastoPage() {
       await crearTipoGasto(negocioActivo!.id, nombre, categoria)
       setNombre('')
       cargar()
-    } catch {
-      setError('No se pudo crear el tipo de gasto.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo crear el tipo de gasto.')
     } finally {
       setEnviando(false)
     }

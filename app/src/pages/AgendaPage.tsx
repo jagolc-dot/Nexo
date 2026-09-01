@@ -246,8 +246,9 @@ export function AgendaPage() {
       await cancelarCita(cita.id)
       setCitaSeleccionada(null)
       cargar()
-    } catch {
-      alert('No se pudo cancelar la cita.')
+    } catch (err) {
+      console.error(err)
+      alert(err instanceof Error ? err.message : 'No se pudo cancelar la cita.')
     }
   }
 
@@ -258,6 +259,7 @@ export function AgendaPage() {
       setCitaSeleccionada(null)
       cargar()
     } catch (err) {
+      console.error(err)
       alert(err instanceof Error ? err.message : 'No se pudo eliminar la cita.')
     }
   }

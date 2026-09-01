@@ -42,8 +42,9 @@ export function ClienteDetallePage() {
       const [c, h] = await Promise.all([obtenerCliente(id), obtenerHistorialDetalladoCliente(id)])
       setCliente(c)
       setHistorial(h)
-    } catch {
-      setError('No se pudo cargar el cliente.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cargar el cliente.')
     }
   }
 

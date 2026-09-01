@@ -4,6 +4,7 @@ export interface Negocio {
   tipo: string | null
   tema: string | null
   logo_url: string | null
+  usa_variantes: boolean
 }
 
 export interface AccesoNegocio {

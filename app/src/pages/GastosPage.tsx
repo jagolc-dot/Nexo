@@ -67,8 +67,9 @@ export function GastosPage() {
     try {
       await cancelarGasto(gasto.id)
       cargar()
-    } catch {
-      setError('No se pudo cancelar el gasto.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cancelar el gasto.')
     }
   }
 

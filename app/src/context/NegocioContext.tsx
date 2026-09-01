@@ -33,7 +33,7 @@ export function NegocioProvider({ children }: { children: ReactNode }) {
 
     supabase
       .from('usuarios_negocio')
-      .select('rol, negocio:negocios(id, nombre, tipo, tema, logo_url)')
+      .select('rol, negocio:negocios(id, nombre, tipo, tema, logo_url, usa_variantes)')
       .eq('usuario_id', user.id)
       .then(({ data, error }) => {
         if (cancelado) return

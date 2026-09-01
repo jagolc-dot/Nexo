@@ -97,6 +97,7 @@ export function CompraFormPage() {
       )
       navigate('/inventario/compras', { replace: true })
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : 'No se pudo registrar la compra.')
     } finally {
       setEnviando(false)

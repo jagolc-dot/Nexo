@@ -5,6 +5,11 @@ export async function actualizarTemaNegocio(negocioId: string, tema: string): Pr
   if (error) throw error
 }
 
+export async function actualizarUsaVariantesNegocio(negocioId: string, usaVariantes: boolean): Promise<void> {
+  const { error } = await supabase.from('negocios').update({ usa_variantes: usaVariantes }).eq('id', negocioId)
+  if (error) throw error
+}
+
 export async function subirLogoNegocio(negocioId: string, archivo: File): Promise<string> {
   const extension = archivo.name.split('.').pop() ?? 'jpg'
   const ruta = `${negocioId}/logo-${Date.now()}.${extension}`

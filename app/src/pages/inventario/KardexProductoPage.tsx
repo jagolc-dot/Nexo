@@ -79,6 +79,7 @@ export function KardexProductoPage() {
       setPrevisualizacion(null)
       cargar()
     } catch (err) {
+      console.error(err)
       alert(err instanceof Error ? err.message : 'No se pudo aplicar el recosteo.')
     } finally {
       setAplicandoRecosteo(false)

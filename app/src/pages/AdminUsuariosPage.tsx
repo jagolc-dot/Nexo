@@ -51,8 +51,9 @@ function ModalRestablecer({ usuario, onCerrar, onListo }: { usuario: UsuarioAdmi
     try {
       await resetearPassword(usuario.usuario_id, password)
       onListo()
-    } catch {
-      setError('No se pudo actualizar la contraseña.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo actualizar la contraseña.')
     } finally {
       setEnviando(false)
     }

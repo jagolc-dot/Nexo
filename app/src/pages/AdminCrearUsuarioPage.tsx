@@ -77,6 +77,7 @@ export function AdminCrearUsuarioPage() {
       })
       navigate('/admin/usuarios', { replace: true })
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : 'No se pudo crear el usuario.')
     } finally {
       setEnviando(false)

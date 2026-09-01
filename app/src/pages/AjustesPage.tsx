@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useNegocio } from '../context/NegocioContext'
 import { supabase } from '../lib/supabaseClient'
-import { subirLogoNegocio, actualizarTemaNegocio } from '../lib/negocios'
+import { subirLogoNegocio, actualizarTemaNegocio, actualizarUsaVariantesNegocio } from '../lib/negocios'
 import { GIRO_POR_TEMA, TEMAS_DISPONIBLES } from '../lib/negociosConfig'
 import { claseBoton } from '../components/ui/Button'
 import { Logo } from '../components/ui/Logo'
+import { Toggle } from '../components/ui/Toggle'
 
 function Tarjeta({ children }: { children: React.ReactNode }) {
   return <div className="rounded-xl bg-[var(--color-superficie)] p-5 shadow-[0_1px_3px_rgba(74,50,43,.07)]">{children}</div>
@@ -125,6 +126,7 @@ export function AjustesPage() {
   const [mostrarPassword, setMostrarPassword] = useState(false)
   const [subiendoLogo, setSubiendoLogo] = useState(false)
   const [cambiandoTema, setCambiandoTema] = useState(false)
+  const [cambiandoVariantes, setCambiandoVariantes] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   if (!negocioActivo) return null
@@ -141,8 +143,9 @@ export function AjustesPage() {
     try {
       const url = await subirLogoNegocio(negocioActivo.id, archivo)
       actualizarNegocioActivo({ logo_url: url })
-    } catch {
-      setError('No se pudo subir el logo. Intenta con otra imagen.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo subir el logo. Intenta con otra imagen.')
     } finally {
       setSubiendoLogo(false)
       if (inputLogoRef.current) inputLogoRef.current.value = ''
@@ -155,10 +158,26 @@ export function AjustesPage() {
     try {
       await actualizarTemaNegocio(negocioActivo.id, tema)
       actualizarNegocioActivo({ tema })
-    } catch {
-      setError('No se pudo cambiar el tema.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar el tema.')
     } finally {
       setCambiandoTema(false)
+    }
+  }
+
+  async function alternarUsaVariantes() {
+    if (!negocioActivo) return
+    const nuevoValor = !negocioActivo.usa_variantes
+    setCambiandoVariantes(true)
+    try {
+      await actualizarUsaVariantesNegocio(negocioActivo.id, nuevoValor)
+      actualizarNegocioActivo({ usa_variantes: nuevoValor })
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar la configuración de variantes.')
+    } finally {
+      setCambiandoVariantes(false)
     }
   }
 
@@ -242,6 +261,17 @@ export function AjustesPage() {
               })}
             </div>
             <p className="mt-2 text-xs text-[var(--color-texto-suave)]">El tema se aplica a toda la app de este negocio; la estructura no cambia.</p>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-3.5 border-t pt-3.5" style={{ borderColor: 'var(--color-divisor)' }}>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-medium text-[var(--color-texto)]">Productos con variantes (color/talla)</div>
+              <p className="mt-0.5 text-xs text-[var(--color-texto-suave)]">
+                Actívalo si este negocio vende productos en distintos colores o tallas (ej. ropa). Si está apagado, Catálogo trata todo producto como una unidad simple.
+              </p>
+            </div>
+            <Toggle activo={negocioActivo.usa_variantes} onClick={alternarUsaVariantes} ariaLabel="Productos con variantes" />
+            {cambiandoVariantes && <span className="shrink-0 text-xs text-[var(--color-texto-suave)]">Guardando...</span>}
           </div>
         </Tarjeta>
 

@@ -81,8 +81,9 @@ export function ClienteFormPage() {
         notas: notas || null,
       })
       navigate(`/clientes/${cliente.id}`, { replace: true })
-    } catch {
-      setError('No se pudo guardar. Intenta de nuevo.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo guardar. Intenta de nuevo.')
     } finally {
       setEnviando(false)
     }
@@ -95,8 +96,9 @@ export function ClienteFormPage() {
     try {
       await cambiarActivoCliente(id, false)
       navigate(`/clientes/${id}`, { replace: true })
-    } catch {
-      setError('No se pudo desactivar.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo desactivar.')
       setDesactivando(false)
     }
   }

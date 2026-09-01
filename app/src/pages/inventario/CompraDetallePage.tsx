@@ -47,6 +47,7 @@ export function CompraDetallePage() {
       await cancelarCompra(id)
       cargar()
     } catch (err) {
+      console.error(err)
       alert(err instanceof Error ? err.message : 'No se pudo cancelar la compra.')
     } finally {
       setCancelando(false)
@@ -61,8 +62,9 @@ export function CompraDetallePage() {
       await actualizarCompra(id, { proveedor: proveedor || null, folio: folio || null, fecha, notas: notas || null })
       setEditando(false)
       cargar()
-    } catch {
-      alert('No se pudo guardar. Intenta de nuevo.')
+    } catch (err) {
+      console.error(err)
+      alert(err instanceof Error ? err.message : 'No se pudo guardar. Intenta de nuevo.')
     } finally {
       setGuardando(false)
     }

@@ -77,8 +77,9 @@ export function GastoFormPage() {
         fecha_gasto: fechaGasto,
       })
       navigate('/gastos', { replace: true })
-    } catch {
-      setError('No se pudo guardar el gasto.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el gasto.')
     } finally {
       setEnviando(false)
     }

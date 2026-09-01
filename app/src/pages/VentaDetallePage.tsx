@@ -51,8 +51,9 @@ export function VentaDetallePage() {
     try {
       await cancelarVenta(id)
       cargar()
-    } catch {
-      setError('No se pudo cancelar la venta.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cancelar la venta.')
     } finally {
       setCancelando(false)
     }

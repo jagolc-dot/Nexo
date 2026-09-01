@@ -56,8 +56,9 @@ function FormularioVariante({
       setTalla('')
       setCodigo('')
       onCreada()
-    } catch {
-      setError('No se pudo agregar la variante.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo agregar la variante.')
     } finally {
       setEnviando(false)
     }
@@ -121,8 +122,9 @@ function EditorVariante({
       }
       await actualizarVariante(variante.id, { color: color || null, talla: talla || null, codigo: codigo.trim() })
       onGuardada()
-    } catch {
-      setError('No se pudo guardar. Intenta de nuevo.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo guardar. Intenta de nuevo.')
     } finally {
       setGuardando(false)
     }
@@ -180,8 +182,9 @@ export function ItemDetallePage() {
       if (itemCargado.tiene_variantes) {
         setVariantes(await listarVariantes(id))
       }
-    } catch {
-      setError('No se pudo cargar el ítem.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo cargar el ítem.')
     }
   }
 
@@ -218,6 +221,7 @@ export function ItemDetallePage() {
       await eliminarVariante(variante.id)
       await cargar()
     } catch (err) {
+      console.error(err)
       alert(err instanceof Error ? err.message : 'No se pudo eliminar la variante.')
     }
   }

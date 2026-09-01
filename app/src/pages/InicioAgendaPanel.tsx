@@ -233,8 +233,9 @@ export function InicioAgendaPanel({ onListo, editando }: { onListo: () => void; 
       setClienteId(cliente.id)
       setError(null)
       return true
-    } catch {
-      setError('No se pudo crear la clienta.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo crear la clienta.')
       return false
     }
   }
@@ -255,6 +256,7 @@ export function InicioAgendaPanel({ onListo, editando }: { onListo: () => void; 
       }
       onListo()
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : `No se pudo ${esEdicion ? 'guardar los cambios' : 'agendar la cita'}.`)
     } finally {
       setEnviando(false)

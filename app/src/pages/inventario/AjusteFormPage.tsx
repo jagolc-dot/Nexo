@@ -85,6 +85,7 @@ export function AjusteFormPage() {
       )
       navigate('/inventario', { replace: true })
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : 'No se pudo registrar el ajuste.')
     } finally {
       setEnviando(false)

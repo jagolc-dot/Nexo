@@ -168,8 +168,9 @@ export function VentaNuevaPage() {
       setNuevoNombre('')
       setNuevoTelefono('')
       setNuevoRedSocial('')
-    } catch {
-      setError('No se pudo crear el cliente.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo crear el cliente.')
     }
   }
 
@@ -197,6 +198,7 @@ export function VentaNuevaPage() {
       setClienteId('')
       setNombreOcasional('')
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : 'No se pudo registrar la venta.')
     } finally {
       setEnviando(false)

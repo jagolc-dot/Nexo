@@ -167,8 +167,9 @@ export function ItemFormPage() {
       } else {
         navigate('/catalogo', { replace: true })
       }
-    } catch {
-      setError('No se pudo guardar. Intenta de nuevo.')
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'No se pudo guardar. Intenta de nuevo.')
     } finally {
       setEnviando(false)
     }
@@ -188,8 +189,9 @@ export function ItemFormPage() {
         setActivoActual(true)
         setDesactivando(false)
       }
-    } catch {
-      setError(`No se pudo ${activoActual ? 'desactivar' : 'reactivar'}.`)
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : `No se pudo ${activoActual ? 'desactivar' : 'reactivar'}.`)
       setDesactivando(false)
     }
   }
@@ -205,6 +207,7 @@ export function ItemFormPage() {
       await eliminarItem(id)
       navigate('/catalogo', { replace: true })
     } catch (err) {
+      console.error(err)
       setError(err instanceof Error ? err.message : 'No se pudo eliminar.')
       setEliminando(false)
     }
@@ -369,7 +372,7 @@ export function ItemFormPage() {
           </label>
         )}
 
-        {!esServicio && !esEdicion && (
+        {!esServicio && !esEdicion && negocioActivo.usa_variantes && (
           <>
             <label className="flex items-center gap-2 text-sm text-[var(--color-texto-suave)]">
               <input type="checkbox" checked={manejaVariantes} onChange={(e) => setManejaVariantes(e.target.checked)} />
@@ -388,7 +391,7 @@ export function ItemFormPage() {
 
       <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
         <button onClick={handleSubmit} disabled={enviando} className={claseBoton('primario', 'w-full !min-h-12')}>
-          {enviando ? 'Guardando...' : esEdicion ? 'Guardar servicio' : 'Guardar'}
+          {enviando ? 'Guardando...' : esServicio ? 'Guardar servicio' : 'Guardar producto'}
         </button>
         {esEdicion && (
           <>
@@ -413,7 +416,7 @@ export function ItemFormPage() {
             </button>
             <p className="mt-2 text-center text-xs text-[var(--color-texto-suave)]">
               {activoActual
-                ? `Un ${esServicio ? 'servicio desactivado deja' : 'producto desactivado deja'} de ofrecerse al agendar; su historial no se toca.`
+                ? `Un ${esServicio ? 'servicio desactivado deja de ofrecerse al agendar' : 'producto desactivado deja de ofrecerse al registrar ventas'}; su historial no se toca.`
                 : `Al reactivar, ${esServicio ? 'el servicio' : 'el producto'} vuelve a ofrecerse tal como estaba — su existencia y costo promedio no se reinician.`}
             </p>
             <button
