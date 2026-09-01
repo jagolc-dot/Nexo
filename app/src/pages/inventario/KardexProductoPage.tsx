@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient'
 import type { Item, MovimientoInventario, TipoMovimiento } from '../../types'
 import { Button } from '../../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO } from '../../lib/tiempoNegocio'
+import { formatearCantidad, formatearMoneda, formatearMonedaPrecisa } from '../../lib/formato'
 
 const ETIQUETA_TIPO: Record<TipoMovimiento, string> = {
   compra: 'Compra',
@@ -133,13 +134,13 @@ export function KardexProductoPage() {
                 <tbody>
                   <tr>
                     <td className="py-1 text-[var(--color-texto-suave)]">Existencia</td>
-                    <td className="py-1 text-[var(--color-texto)]">{previsualizacion.existencia_actual}</td>
-                    <td className="py-1 font-medium text-[var(--color-texto)]">{previsualizacion.existencia_recalculada}</td>
+                    <td className="py-1 text-[var(--color-texto)]">{formatearCantidad(previsualizacion.existencia_actual)}</td>
+                    <td className="py-1 font-medium text-[var(--color-texto)]">{formatearCantidad(previsualizacion.existencia_recalculada)}</td>
                   </tr>
                   <tr>
                     <td className="py-1 text-[var(--color-texto-suave)]">Costo promedio</td>
-                    <td className="py-1 text-[var(--color-texto)]">${previsualizacion.costo_actual.toFixed(4)}</td>
-                    <td className="py-1 font-medium text-[var(--color-texto)]">${previsualizacion.costo_recalculado.toFixed(4)}</td>
+                    <td className="py-1 text-[var(--color-texto)]">{formatearMonedaPrecisa(previsualizacion.costo_actual)}</td>
+                    <td className="py-1 font-medium text-[var(--color-texto)]">{formatearMonedaPrecisa(previsualizacion.costo_recalculado)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -197,11 +198,11 @@ export function KardexProductoPage() {
                     {m.tipo === 'ajuste' && m.referencia_id ? (motivosAjuste[m.referencia_id] ?? '—') : '—'}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">
-                    {m.cantidad > 0 ? '+' : ''}{m.cantidad}
+                    {m.cantidad > 0 ? '+' : m.cantidad < 0 ? '−' : ''}{formatearCantidad(Math.abs(m.cantidad))}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${m.costo_unitario.toFixed(4)}</td>
-                  <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">{m.existencia_resultante}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${m.costo_promedio_resultante.toFixed(4)}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(m.costo_unitario)}</td>
+                  <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">{formatearCantidad(m.existencia_resultante)}</td>
+                  <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(m.costo_promedio_resultante)}</td>
                 </tr>
               ))}
             </tbody>

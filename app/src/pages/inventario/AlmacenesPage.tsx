@@ -5,6 +5,7 @@ import { listarProductosInventario, obtenerAlmacen, type ProductoInventario } fr
 import type { Almacen } from '../../types'
 import { Card } from '../../components/ui/Card'
 import { claseBoton } from '../../components/ui/Button'
+import { formatearCantidad, formatearMoneda } from '../../lib/formato'
 
 function valorProducto(p: ProductoInventario): number {
   if (!p.tiene_variantes) return p.stock * p.costo_promedio
@@ -66,7 +67,7 @@ export function AlmacenesPage() {
               <span aria-hidden className="text-[var(--color-texto-suave)]">→</span>
             </div>
             <div className="mt-1 text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-              ${valorTotal.toFixed(0)}
+              {formatearMoneda(valorTotal)}
             </div>
             <div className="text-xs text-[var(--color-texto-suave)]">
               valor total del inventario · abrir para ver productos, kardex y ajustes
@@ -82,11 +83,11 @@ export function AlmacenesPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-[var(--color-texto-suave)]">Unidades totales</dt>
-                <dd className="font-medium text-[var(--color-texto)]">{unidadesTotales}</dd>
+                <dd className="font-medium text-[var(--color-texto)]">{formatearCantidad(unidadesTotales)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-[var(--color-texto-suave)]">Productos en cero</dt>
-                <dd className="font-medium text-[var(--color-texto)]">{enCero}</dd>
+                <dd className="font-medium text-[var(--color-texto)]">{formatearCantidad(enCero)}</dd>
               </div>
             </dl>
           </Card>

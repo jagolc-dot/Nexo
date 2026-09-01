@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { obtenerInventarioActual, type FilaInventario } from '../../lib/reportes'
 import { TablaReporte } from './TablaReporte'
+import type { FormatoColumna } from '../../lib/exportar'
 
 export function InventarioActualView({ negocioId }: { negocioId: string }) {
   const [datos, setDatos] = useState<FilaInventario[] | null>(null)
@@ -17,14 +18,16 @@ export function InventarioActualView({ negocioId }: { negocioId: string }) {
     f.color ?? '—',
     f.talla ?? '—',
     f.existencia,
-    f.costo_promedio.toFixed(2),
+    f.costo_promedio,
   ])
+  const formatos: FormatoColumna[] = ['texto', 'texto', 'texto', 'cantidad', 'moneda']
 
   return (
     <TablaReporte
       titulo="Inventario actual"
       columnas={['Producto', 'Color', 'Talla', 'Existencia', 'Costo promedio']}
       filas={filas}
+      formatos={formatos}
     />
   )
 }

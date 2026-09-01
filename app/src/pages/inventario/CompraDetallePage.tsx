@@ -5,6 +5,7 @@ import type { Compra } from '../../types'
 import { Button } from '../../components/ui/Button'
 import { EstadoBadge } from '../../components/ui/EstadoBadge'
 import { formatearFechaSolo } from '../../lib/tiempoNegocio'
+import { formatearCantidad, formatearMoneda } from '../../lib/formato'
 
 const CAMPO =
   'flex min-h-11 w-full items-center rounded-[10px] border bg-[var(--color-superficie)] px-3 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
@@ -141,10 +142,10 @@ export function CompraDetallePage() {
             {partidas.map((p) => (
               <tr key={p.id} className="border-t border-black/10">
                 <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.nombre}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.cantidad}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${p.costo_total_partida.toFixed(2)}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">${p.flete_asignado.toFixed(4)}</td>
-                <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">${p.costo_unitario_final.toFixed(4)}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearCantidad(p.cantidad)}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(p.costo_total_partida)}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(p.flete_asignado)}</td>
+                <td className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto)]">{formatearMoneda(p.costo_unitario_final)}</td>
               </tr>
             ))}
           </tbody>
@@ -155,9 +156,9 @@ export function CompraDetallePage() {
       </p>
 
       <div className="mt-3 max-w-[720px] text-right text-sm text-[var(--color-texto)]">
-        <div>Subtotal: ${compra.subtotal.toFixed(2)}</div>
-        <div>Envío: ${compra.costo_envio.toFixed(2)}</div>
-        <div className="font-medium">Total: ${compra.total.toFixed(2)}</div>
+        <div>Subtotal: {formatearMoneda(compra.subtotal)}</div>
+        <div>Envío: {formatearMoneda(compra.costo_envio)}</div>
+        <div className="font-medium">Total: {formatearMoneda(compra.total)}</div>
       </div>
 
       {compra.estado === 'confirmada' && (

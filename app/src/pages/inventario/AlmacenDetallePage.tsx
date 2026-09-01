@@ -6,6 +6,7 @@ import { listarCategorias } from '../../lib/catalogo'
 import type { CategoriaItem } from '../../types'
 import { claseBoton } from '../../components/ui/Button'
 import { TablaReporte } from '../../components/reportes/TablaReporte'
+import type { FormatoColumna } from '../../lib/exportar'
 
 export function AlmacenDetallePage() {
   const { negocioActivo } = useNegocio()
@@ -42,7 +43,7 @@ export function AlmacenDetallePage() {
   const filas: (string | number)[][] = []
   for (const p of filtrados) {
     if (!p.tiene_variantes) {
-      filas.push([p.codigo ?? '—', p.nombre, p.categoria ?? '—', p.unidad ?? '—', p.stock, p.costo_promedio.toFixed(2), (p.stock * p.costo_promedio).toFixed(2)])
+      filas.push([p.codigo ?? '—', p.nombre, p.categoria ?? '—', p.unidad ?? '—', p.stock, p.costo_promedio, p.stock * p.costo_promedio])
       continue
     }
     for (const v of p.variantes) {
@@ -53,11 +54,12 @@ export function AlmacenDetallePage() {
         p.categoria ?? '—',
         p.unidad ?? '—',
         v.existencia,
-        v.costo_promedio.toFixed(2),
-        (v.existencia * v.costo_promedio).toFixed(2),
+        v.costo_promedio,
+        v.existencia * v.costo_promedio,
       ])
     }
   }
+  const formatosTabla: FormatoColumna[] = ['texto', 'texto', 'texto', 'texto', 'cantidad', 'moneda', 'moneda']
 
   return (
     <div className="p-4 md:p-[22px] lg:p-7">
@@ -117,6 +119,7 @@ export function AlmacenDetallePage() {
               titulo="Productos en inventario"
               columnas={['Código', 'Producto', 'Categoría', 'Unidad', 'Existencia', 'Costo promedio', 'Valor total']}
               filas={filas}
+              formatos={formatosTabla}
             />
           </>
         )}

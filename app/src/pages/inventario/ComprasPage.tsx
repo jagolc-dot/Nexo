@@ -6,6 +6,7 @@ import type { Compra } from '../../types'
 import { claseBoton } from '../../components/ui/Button'
 import { EstadoBadge } from '../../components/ui/EstadoBadge'
 import { formatearFechaSolo } from '../../lib/tiempoNegocio'
+import { formatearMoneda } from '../../lib/formato'
 
 export function ComprasPage() {
   const { negocioActivo } = useNegocio()
@@ -60,7 +61,7 @@ export function ComprasPage() {
                   </div>
                 </div>
                 {c.estado === 'cancelada' && <EstadoBadge tipo="neutral" texto="Cancelada" />}
-                <div className="shrink-0 text-right text-sm font-medium text-[var(--color-texto)]">${c.total.toFixed(2)}</div>
+                <div className="shrink-0 text-right text-sm font-medium text-[var(--color-texto)]">{formatearMoneda(c.total)}</div>
               </Link>
             ))}
           </div>
