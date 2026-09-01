@@ -127,11 +127,11 @@ export function CompraDetallePage() {
         </p>
       )}
 
-      <div className="mt-4 max-w-[720px] overflow-x-auto rounded-xl border border-black/10">
+      <div className="mt-4 max-w-[920px] overflow-x-auto rounded-xl border border-black/10">
         <table className="w-full text-left text-sm">
           <thead className="bg-[var(--color-fondo)]">
             <tr>
-              {['Producto', 'Cantidad', 'Costo partida', 'Flete asignado', 'Costo unitario final'].map((c) => (
+              {['Código', 'Producto', 'Categoría', 'Unidad', 'Cantidad comprada', 'Costo total partida', 'Flete asignado', 'Costo unitario final'].map((c) => (
                 <th key={c} className="whitespace-nowrap px-3 py-2 font-medium text-[var(--color-texto-suave)]">
                   {c}
                 </th>
@@ -141,7 +141,10 @@ export function CompraDetallePage() {
           <tbody>
             {partidas.map((p) => (
               <tr key={p.id} className="border-t border-black/10">
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.codigo ?? '—'}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.nombre}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.categoria ?? '—'}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{p.unidad ?? '—'}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearCantidad(p.cantidad)}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(p.costo_total_partida)}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">{formatearMoneda(p.flete_asignado)}</td>

@@ -74,29 +74,44 @@ export async function listarCompras(negocioId: string): Promise<Compra[]> {
 
 export interface PartidaCompraConNombre extends CompraPartida {
   nombre: string
+  codigo: string | null
+  categoria: string | null
+  unidad: string | null
 }
 
 export async function obtenerCompraConPartidas(compraId: string): Promise<{ compra: Compra; partidas: PartidaCompraConNombre[] }> {
   const [{ data: compra, error: e1 }, { data: partidas, error: e2 }] = await Promise.all([
     supabase.from('compras').select('*').eq('id', compraId).single(),
-    supabase.from('compra_partidas').select('*, items(nombre), variantes_item(color, talla, items(nombre))').eq('compra_id', compraId),
+    supabase
+      .from('compra_partidas')
+      .select(
+        '*, items(nombre, codigo, unidad, categorias_item(nombre)), variantes_item(codigo, color, talla, items(nombre, unidad, categorias_item(nombre)))',
+      )
+      .eq('compra_id', compraId),
   ])
   if (e1) throw e1
   if (e2) throw e2
 
+  type ItemFila = { nombre: string; codigo?: string | null; unidad: string | null; categorias_item: { nombre: string } | null }
   type Fila = CompraPartida & {
-    items: { nombre: string } | null
-    variantes_item: { color: string | null; talla: string | null; items: { nombre: string } } | null
+    items: ItemFila | null
+    variantes_item: { codigo: string | null; color: string | null; talla: string | null; items: ItemFila } | null
   }
 
   return {
     compra: compra as Compra,
-    partidas: (partidas as unknown as Fila[]).map((p) => ({
-      ...p,
-      nombre: p.items
-        ? p.items.nombre
-        : `${p.variantes_item?.items.nombre} (${[p.variantes_item?.color, p.variantes_item?.talla].filter(Boolean).join(' / ')})`,
-    })),
+    partidas: (partidas as unknown as Fila[]).map((p) => {
+      const it = p.items ?? p.variantes_item?.items ?? null
+      return {
+        ...p,
+        nombre: p.items
+          ? p.items.nombre
+          : `${p.variantes_item?.items.nombre} (${[p.variantes_item?.color, p.variantes_item?.talla].filter(Boolean).join(' / ')})`,
+        codigo: p.items ? p.items.codigo ?? null : p.variantes_item?.codigo ?? null,
+        categoria: it?.categorias_item?.nombre ?? null,
+        unidad: it?.unidad ?? null,
+      }
+    }),
   }
 }
 
