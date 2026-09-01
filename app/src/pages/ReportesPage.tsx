@@ -17,7 +17,8 @@ import {
   type TasaCitas,
   type VentasPorMetodo,
 } from '../lib/reportes'
-import { exportarExcel, exportarPDF } from '../lib/exportar'
+import { exportarExcel, exportarPDF, type FormatoColumna } from '../lib/exportar'
+import { formatearCantidad, formatearMoneda } from '../lib/formato'
 import { claseBoton } from '../components/ui/Button'
 import { TablaReporte } from '../components/reportes/TablaReporte'
 
@@ -141,7 +142,7 @@ function GraficaBarras({
                   {!negativo && (
                     <>
                       <div className="whitespace-nowrap text-sm font-medium" style={{ color: colorTexto[b.tipo] }}>
-                        ${b.valor.toFixed(0)}
+                        {formatearMoneda(b.valor, { decimales: 0 })}
                       </div>
                       <div className="mt-1.5 w-[72%] rounded-t-md" style={{ height: alturaBarra, background: colorBarra[b.tipo] }} />
                     </>
@@ -155,7 +156,7 @@ function GraficaBarras({
                     </div>
                     {negativo && (
                       <div className="whitespace-nowrap text-sm font-medium" style={{ color: COLOR_ERROR }}>
-                        −${Math.abs(b.valor).toFixed(0)}
+                        {formatearMoneda(b.valor, { decimales: 0, signo: true })}
                       </div>
                     )}
                   </>
@@ -207,7 +208,7 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
           <div key={p.metodo_pago} className="mt-2.5">
             <div className="flex justify-between gap-2 text-[12.5px] capitalize text-[var(--color-texto)]">
               <span>{p.metodo_pago}</span>
-              <span className="font-medium">${p.total.toFixed(0)}</span>
+              <span className="font-medium">{formatearMoneda(p.total)}</span>
             </div>
             <Barra pct={totalPagos === 0 ? 0 : (p.total / totalPagos) * 100} color="var(--color-primario)" />
           </div>
@@ -221,7 +222,7 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
           <div key={s.nombre} className="mt-2.5 flex items-baseline gap-2">
             <span className="w-3 text-xs font-medium text-[var(--color-acento)]">{i + 1}</span>
             <span className="min-w-0 flex-1 truncate text-[13px] text-[var(--color-texto)]">{s.nombre}</span>
-            <span className="text-xs font-medium text-[var(--color-texto-suave)]">{s.cantidad}</span>
+            <span className="text-xs font-medium text-[var(--color-texto-suave)]">{formatearCantidad(s.cantidad)}</span>
           </div>
         ))}
       </Tarjeta>
@@ -238,7 +239,7 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
               {c.nombre.charAt(0).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1 truncate text-[13px] text-[var(--color-texto)]">{c.nombre}</span>
-            <span className="shrink-0 text-xs text-[var(--color-texto-suave)]">{c.visitas} visitas</span>
+            <span className="shrink-0 text-xs text-[var(--color-texto-suave)]">{formatearCantidad(c.visitas)} visitas</span>
           </div>
         ))}
       </Tarjeta>
@@ -250,7 +251,7 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
           <div key={g.categoria} className="mt-2.5">
             <div className="flex justify-between gap-2 text-[12.5px] text-[var(--color-texto)]">
               <span>{g.categoria}</span>
-              <span className="font-medium">${g.total.toFixed(0)}</span>
+              <span className="font-medium">{formatearMoneda(g.total)}</span>
             </div>
             <Barra pct={totalGastosCat === 0 ? 0 : (g.total / totalGastosCat) * 100} color="var(--color-secundario)" />
           </div>
@@ -262,13 +263,13 @@ function GrupoOperativos({ datos }: { datos: Operativos }) {
         <div className="mt-2.5 flex flex-wrap items-baseline gap-4">
           <div>
             <span className="text-[22px]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-              {datos.citas.completadas}
+              {formatearCantidad(datos.citas.completadas)}
             </span>{' '}
             <span className="text-[12.5px] font-medium text-[var(--color-exito)]">completadas</span>
           </div>
           <div>
             <span className="text-[22px]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-              {datos.citas.canceladas}
+              {formatearCantidad(datos.citas.canceladas)}
             </span>{' '}
             <span className="text-[12.5px] font-medium text-[var(--color-error)]">canceladas</span>
           </div>
@@ -296,11 +297,11 @@ function ListaLineas({ titulo, lineas }: { titulo: string; lineas: EstadoResulta
           <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{new Date(l.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })}</span>
           <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">
             {l.itemNombre}
-            {l.cantidad > 1 && <span className="text-[var(--color-texto-suave)]"> ×{l.cantidad}</span>}
+            {l.cantidad > 1 && <span className="text-[var(--color-texto-suave)]"> ×{formatearCantidad(l.cantidad)}</span>}
             <span className="ml-1.5 truncate text-xs text-[var(--color-texto-suave)]">{l.cliente}</span>
           </span>
-          <span className="shrink-0 font-medium text-[var(--color-texto)]">${l.total.toFixed(0)}</span>
-          <span className="w-24 shrink-0 text-right text-xs text-[var(--color-exito)]">margen ${l.margen.toFixed(0)}</span>
+          <span className="shrink-0 font-medium text-[var(--color-texto)]">{formatearMoneda(l.total)}</span>
+          <span className="w-28 shrink-0 text-right text-xs text-[var(--color-exito)]">margen {formatearMoneda(l.margen)}</span>
         </div>
       ))}
       {!verTodas && lineas.length > 8 && (
@@ -330,7 +331,7 @@ function DetalleER({ datos }: { datos: EstadoResultados }) {
           <span className="w-12 shrink-0 text-xs text-[var(--color-texto-suave)]">{formatearFechaSolo(g.fecha_gasto)}</span>
           <span className="min-w-0 flex-1 truncate text-[var(--color-texto)]">{g.concepto}</span>
           <span className="shrink-0 text-xs text-[var(--color-texto-suave)]">{g.categoria}</span>
-          <span className="w-16 shrink-0 text-right font-medium text-[var(--color-texto)]">${g.monto.toFixed(0)}</span>
+          <span className="w-[92px] shrink-0 text-right font-medium text-[var(--color-texto)]">{formatearMoneda(g.monto)}</span>
         </div>
       ))}
       {!verTodosGastos && datos.gastos.length > 8 && (
@@ -444,20 +445,22 @@ export function ReportesPage() {
     if (!datos) return
     const fn = tipo === 'pdf' ? exportarPDF : exportarExcel
     if (nivel === 'resumen') {
+      const formatos: FormatoColumna[] = ['texto', 'moneda']
       fn('Estado de Resultados', ['Concepto', 'Monto'], [
         ['SERVICIOS', ''],
-        ['Ingresos por servicios', datos.servicios.ingresos.toFixed(2)],
-        ['(-) Costo de servicios', datos.servicios.costoVentas.toFixed(2)],
-        ['= Utilidad bruta de servicios', datos.servicios.utilidadBruta.toFixed(2)],
+        ['Ingresos por servicios', datos.servicios.ingresos],
+        ['(-) Costo de servicios', datos.servicios.costoVentas],
+        ['= Utilidad bruta de servicios', datos.servicios.utilidadBruta],
         ['PRODUCTOS', ''],
-        ['Ingresos por productos', datos.productos.ingresos.toFixed(2)],
-        ['(-) Costo de productos', datos.productos.costoVentas.toFixed(2)],
-        ['= Utilidad bruta de productos', datos.productos.utilidadBruta.toFixed(2)],
-        ['= Utilidad bruta total', datos.utilidadBrutaTotal.toFixed(2)],
-        ['(-) Gastos de operación', datos.gastosOperacion.toFixed(2)],
-        ['= Utilidad neta', datos.utilidadNeta.toFixed(2)],
-      ])
+        ['Ingresos por productos', datos.productos.ingresos],
+        ['(-) Costo de productos', datos.productos.costoVentas],
+        ['= Utilidad bruta de productos', datos.productos.utilidadBruta],
+        ['= Utilidad bruta total', datos.utilidadBrutaTotal],
+        ['(-) Gastos de operación', datos.gastosOperacion],
+        ['= Utilidad neta', datos.utilidadNeta],
+      ], formatos)
     } else {
+      const formatosLineas: FormatoColumna[] = ['texto', 'texto', 'texto', 'cantidad', 'moneda', 'moneda', 'moneda']
       fn(
         'Estado de Resultados - Servicios',
         ['Fecha', 'Cliente', 'Servicio', 'Cantidad', 'Total', 'Costo', 'Margen'],
@@ -466,10 +469,11 @@ export function ReportesPage() {
           l.cliente,
           l.itemNombre,
           l.cantidad,
-          l.total.toFixed(2),
-          l.costo.toFixed(2),
-          l.margen.toFixed(2),
+          l.total,
+          l.costo,
+          l.margen,
         ]),
+        formatosLineas,
       )
       fn(
         'Estado de Resultados - Productos',
@@ -479,15 +483,17 @@ export function ReportesPage() {
           l.cliente,
           l.itemNombre,
           l.cantidad,
-          l.total.toFixed(2),
-          l.costo.toFixed(2),
-          l.margen.toFixed(2),
+          l.total,
+          l.costo,
+          l.margen,
         ]),
+        formatosLineas,
       )
       fn(
         'Estado de Resultados - Gastos',
         ['Fecha', 'Concepto', 'Categoría', 'Monto'],
-        datos.gastos.map((g) => [formatearFechaSolo(g.fecha_gasto), g.concepto, g.categoria, g.monto.toFixed(2)]),
+        datos.gastos.map((g) => [formatearFechaSolo(g.fecha_gasto), g.concepto, g.categoria, g.monto]),
+        ['texto', 'texto', 'texto', 'moneda'],
       )
     }
   }
@@ -677,14 +683,14 @@ export function ReportesPage() {
                   >
                     <span>{f.l}</span>
                     <span className="flex-1 border-b border-dotted" style={{ borderColor: '#D8C4BA' }} />
-                    <span>${f.v.toFixed(0)}</span>
+                    <span>{formatearMoneda(f.v)}</span>
                   </div>
                 ),
               )}
               <div className="mt-2.5 flex items-baseline justify-between gap-2.5 pt-4" style={{ borderTop: '3px double var(--color-texto)' }}>
                 <span className="text-[15px] font-medium text-[var(--color-texto)]">= Utilidad neta</span>
                 <span className="text-[28px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                  ${datos.utilidadNeta.toFixed(0)}
+                  {formatearMoneda(datos.utilidadNeta)}
                 </span>
               </div>
               <div className="mt-1.5 flex justify-end">
@@ -710,7 +716,8 @@ export function ReportesPage() {
           <TablaReporte
             titulo="Inventario actual"
             columnas={['Producto', 'Color', 'Talla', 'Existencia', 'Costo promedio']}
-            filas={inventario.map((f) => [f.item, f.color ?? '—', f.talla ?? '—', f.existencia, f.costo_promedio.toFixed(2)])}
+            filas={inventario.map((f) => [f.item, f.color ?? '—', f.talla ?? '—', f.existencia, f.costo_promedio])}
+            formatos={['texto', 'texto', 'texto', 'cantidad', 'moneda']}
           />
         </div>
       )}
