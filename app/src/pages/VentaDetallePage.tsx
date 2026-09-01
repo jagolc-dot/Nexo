@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { cancelarVenta, obtenerEmpleadaDeVenta, obtenerVenta, type VentaConLineas } from '../lib/ventas'
 import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
+import { formatearCantidad, formatearMoneda } from '../lib/formato'
 
 function IconoVolver() {
   return (
@@ -117,7 +118,7 @@ export function VentaDetallePage() {
               {servicios.map((s, i) => (
                 <div key={i} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
                   <span className="text-[var(--color-texto)]">{s.items?.nombre}</span>
-                  <span className="text-[var(--color-texto-suave)]">${(s.precio_unitario * s.cantidad).toFixed(0)}</span>
+                  <span className="text-[var(--color-texto-suave)]">{formatearMoneda(s.precio_unitario * s.cantidad)}</span>
                 </div>
               ))}
             </>
@@ -129,9 +130,9 @@ export function VentaDetallePage() {
               {productos.map((p, i) => (
                 <div key={i} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
                   <span className="text-[var(--color-texto)]">
-                    {p.items?.nombre} × {p.cantidad}
+                    {p.items?.nombre} × {formatearCantidad(p.cantidad)}
                   </span>
-                  <span className="text-[var(--color-texto-suave)]">${(p.precio_unitario * p.cantidad).toFixed(0)}</span>
+                  <span className="text-[var(--color-texto-suave)]">{formatearMoneda(p.precio_unitario * p.cantidad)}</span>
                 </div>
               ))}
             </>
@@ -140,7 +141,7 @@ export function VentaDetallePage() {
           <div className="mt-3.5 flex justify-between gap-2 border-t pt-3 text-[15px] font-medium text-[var(--color-texto)]" style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
             <span>Total</span>
             <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-              ${venta.total.toFixed(0)}
+              {formatearMoneda(venta.total)}
             </span>
           </div>
         </div>

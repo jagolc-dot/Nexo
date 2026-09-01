@@ -5,6 +5,7 @@ import { listarVentas, type VentaConConceptos } from '../lib/ventas'
 import { calcularRango, type Periodo } from '../lib/periodos'
 import { claseBoton } from '../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
+import { formatearMoneda } from '../lib/formato'
 
 const PERIODOS: { valor: Periodo; etiqueta: string }[] = [
   { valor: 'hoy', etiqueta: 'Hoy' },
@@ -90,7 +91,7 @@ export function VentasHistorialPage() {
           <>
             <div className="mt-3.5 flex items-baseline gap-2.5">
               <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                ${totalPeriodo.toFixed(0)}
+                {formatearMoneda(totalPeriodo)}
               </span>
               <span className="text-[12.5px] text-[var(--color-texto-suave)]">
                 {confirmadas.length} venta{confirmadas.length === 1 ? '' : 's'} {periodo === 'hoy' ? 'hoy' : periodo === 'semana' ? 'esta semana' : 'este mes'}
@@ -124,10 +125,10 @@ export function VentasHistorialPage() {
                     </div>
                     <div className="hidden w-24 shrink-0 text-[12.5px] text-[var(--color-texto-suave)] sm:block">{v.metodo_pago}</div>
                     <div
-                      className="w-[70px] shrink-0 text-right text-sm font-medium"
+                      className="w-[92px] shrink-0 text-right text-sm font-medium"
                       style={cancelada ? { color: '#9C9C97', textDecoration: 'line-through' } : { color: 'var(--color-texto)' }}
                     >
-                      ${v.total.toFixed(0)}
+                      {formatearMoneda(v.total)}
                     </div>
                     <span
                       className="inline-flex min-w-[88px] shrink-0 justify-center rounded-full px-2.5 py-[3px] text-[11.5px] font-medium"

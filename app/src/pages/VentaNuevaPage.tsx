@@ -10,6 +10,7 @@ import {
 import type { Cliente, LineaVenta, MetodoPago } from '../types'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
+import { formatearCantidad, formatearMoneda } from '../lib/formato'
 
 const METODOS: MetodoPago[] = ['efectivo', 'tarjeta', 'transferencia']
 const CAMPO =
@@ -104,7 +105,7 @@ export function VentaNuevaPage() {
         return
       }
       if (cantidadNum > varianteSeleccionada.existencia) {
-        setErrorLinea(`Solo hay ${varianteSeleccionada.existencia} en existencia.`)
+        setErrorLinea(`Solo hay ${formatearCantidad(varianteSeleccionada.existencia)} en existencia.`)
         return
       }
       setLineas((prev) => [
@@ -123,7 +124,7 @@ export function VentaNuevaPage() {
       ])
     } else {
       if (existenciaSinVariante != null && cantidadNum > existenciaSinVariante) {
-        setErrorLinea(`Solo hay ${existenciaSinVariante} en existencia.`)
+        setErrorLinea(`Solo hay ${formatearCantidad(existenciaSinVariante)} en existencia.`)
         return
       }
       setLineas((prev) => [
@@ -315,7 +316,7 @@ export function VentaNuevaPage() {
             {variantesDisponibles.map((v) => (
               <option key={v.id} value={v.id}>
                 {[v.color, v.talla].filter(Boolean).join(' / ') || 'Sin color/talla'} (existencia:{' '}
-                {v.existencia})
+                {formatearCantidad(v.existencia)})
               </option>
             ))}
           </select>
@@ -323,7 +324,7 @@ export function VentaNuevaPage() {
 
         {itemSeleccionado && !itemSeleccionado.tiene_variantes && (
           <p className="text-xs text-[var(--color-texto-suave)]">
-            {existenciaSinVariante === 0 ? 'Sin existencia disponible.' : `Existencia: ${existenciaSinVariante}`}
+            {existenciaSinVariante === 0 ? 'Sin existencia disponible.' : `Existencia: ${formatearCantidad(existenciaSinVariante ?? 0)}`}
           </p>
         )}
 
@@ -371,7 +372,7 @@ export function VentaNuevaPage() {
                     {l.variante_descripcion && ` (${l.variante_descripcion})`} × {l.cantidad}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span>${(l.cantidad * l.precio_unitario).toFixed(2)}</span>
+                    <span>{formatearMoneda(l.cantidad * l.precio_unitario)}</span>
                     <button onClick={() => quitarLinea(i)} className="text-xs text-[var(--color-error)]">
                       Quitar
                     </button>
@@ -381,7 +382,7 @@ export function VentaNuevaPage() {
             ))}
           </ul>
           <p className="text-right text-sm font-medium text-[var(--color-texto)]">
-            Total: ${total.toFixed(2)}
+            Total: {formatearMoneda(total)}
           </p>
         </section>
       )}
