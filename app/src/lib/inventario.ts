@@ -66,8 +66,14 @@ export async function listarKardex(destino: { itemId: string } | { varianteId: s
   return data as MovimientoInventario[]
 }
 
-export async function listarCompras(negocioId: string): Promise<Compra[]> {
-  const { data, error } = await supabase.from('compras').select('*').eq('negocio_id', negocioId).order('fecha', { ascending: false })
+export async function listarCompras(
+  negocioId: string,
+  filtros: { desde?: string; hasta?: string } = {},
+): Promise<Compra[]> {
+  let q = supabase.from('compras').select('*').eq('negocio_id', negocioId).order('fecha', { ascending: false })
+  if (filtros.desde) q = q.gte('fecha', filtros.desde)
+  if (filtros.hasta) q = q.lte('fecha', filtros.hasta)
+  const { data, error } = await q
   if (error) throw error
   return data as Compra[]
 }
