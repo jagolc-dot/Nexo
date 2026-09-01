@@ -5,6 +5,7 @@ import { crearVenta, listarItemsVendibles, type ItemConVariantes } from '../lib/
 import type { LineaVenta, MetodoPago } from '../types'
 import { claseBoton } from '../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO, hoyEnNegocio, fechaISOEnNegocio } from '../lib/tiempoNegocio'
+import { formatearMoneda } from '../lib/formato'
 
 const NOMBRES_PASO = ['Precios', 'Agregar productos', 'Recibo']
 const METODOS: { valor: MetodoPago; etiqueta: string }[] = [
@@ -254,7 +255,7 @@ export function FinalizarCitaPage() {
                   <div key={s.item_id}>
                     <div className="mb-1.5 flex justify-between gap-2">
                       <div className="text-[12.5px] font-medium text-[var(--color-texto)]">{s.items?.nombre}</div>
-                      <div className="text-[11.5px] text-[var(--color-texto-suave)]">cotizado: ${s.precio.toFixed(0)}</div>
+                      <div className="text-[11.5px] text-[var(--color-texto-suave)]">cotizado: {formatearMoneda(s.precio)}</div>
                     </div>
                     <div className={CAMPO} style={ESTILO_CAMPO}>
                       <span className="font-normal text-[var(--color-texto-suave)]">$</span>
@@ -324,7 +325,7 @@ export function FinalizarCitaPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-[var(--color-texto)]">{item.nombre}</div>
-                        <div className="text-xs text-[var(--color-texto-suave)]">${(item.precio_base ?? 0).toFixed(0)}</div>
+                        <div className="text-xs text-[var(--color-texto-suave)]">{formatearMoneda(item.precio_base ?? 0)}</div>
                       </div>
                       {linea ? (
                         <div className="flex items-center overflow-hidden rounded-lg border" style={{ borderColor: '#E0CCC2' }}>
@@ -370,7 +371,7 @@ export function FinalizarCitaPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-[var(--color-texto)]">{item.nombre}</div>
-                        <div className="text-xs text-[var(--color-texto-suave)]">${(item.precio_base ?? 0).toFixed(0)}</div>
+                        <div className="text-xs text-[var(--color-texto-suave)]">{formatearMoneda(item.precio_base ?? 0)}</div>
                       </div>
                       {linea ? (
                         <div className="flex items-center overflow-hidden rounded-lg border" style={{ borderColor: '#E0CCC2' }}>
@@ -454,7 +455,7 @@ export function FinalizarCitaPage() {
             {cita.cita_servicios.map((s, i) => (
               <div key={i} className="mt-1.5 flex justify-between gap-2 text-[13.5px]">
                 <span className="text-[var(--color-texto)]">{s.items?.nombre}</span>
-                <span className="text-[var(--color-texto-suave)]">${precioServicio(s).toFixed(0)}</span>
+                <span className="text-[var(--color-texto-suave)]">{formatearMoneda(precioServicio(s))}</span>
               </div>
             ))}
 
@@ -500,7 +501,7 @@ export function FinalizarCitaPage() {
               <div className="flex justify-between gap-2 text-[15px] font-medium text-[var(--color-texto)]">
                 <span>Total</span>
                 <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                  ${totalRecibo.toFixed(0)}
+                  {formatearMoneda(totalRecibo)}
                 </span>
               </div>
               <p className="mt-1 text-xs text-[var(--color-texto-suave)]">Se genera una sola venta con todos los conceptos.</p>
@@ -533,7 +534,7 @@ export function FinalizarCitaPage() {
             <span>
               {cita.cita_servicios.length} servicio{cita.cita_servicios.length === 1 ? '' : 's'}
             </span>
-            <span>${totalServicios.toFixed(0)} total</span>
+            <span>{formatearMoneda(totalServicios)} total</span>
           </div>
         )}
         {error && <p className="mb-2.5 text-sm text-[var(--color-error)]">{error}</p>}

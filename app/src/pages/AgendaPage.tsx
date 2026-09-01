@@ -6,7 +6,7 @@ import { obtenerHistorialCliente, type VisitaCliente } from '../lib/clientes'
 import type { Empleada } from '../types'
 import { Button, claseBoton } from '../components/ui/Button'
 import { EstadoBadge, type TipoEstado } from '../components/ui/EstadoBadge'
-import { formatearDuracion } from '../lib/formato'
+import { formatearDuracion, formatearMoneda } from '../lib/formato'
 import { InicioAgendaPanel } from './InicioAgendaPanel'
 import { formatoFechaISO } from '../lib/periodos'
 import {
@@ -505,7 +505,7 @@ export function AgendaPage() {
       <div className="mt-2 flex justify-between gap-2 text-[13.5px]">
         <span className="text-[var(--color-texto)]">{nombre}</span>
         <span className="whitespace-nowrap text-[var(--color-texto-suave)]">
-          ${precio.toFixed(0)} · {formatearDuracion(duracion)}
+          {formatearMoneda(precio)} · {formatearDuracion(duracion)}
         </span>
       </div>
     )
@@ -568,7 +568,7 @@ export function AgendaPage() {
         <div className="mt-2.5 flex justify-between gap-2 border-t pt-2.5 text-[13px] font-medium" style={{ borderColor: 'var(--color-divisor-fuerte)' }}>
           <span>Total</span>
           <span>
-            {formatearDuracion(duracionCita(c))} · ${total.toFixed(0)}
+            {formatearDuracion(duracionCita(c))} · {formatearMoneda(total)}
           </span>
         </div>
 
@@ -601,7 +601,7 @@ export function AgendaPage() {
               <span>
                 {new Date(v.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', ...OPCIONES_ZONA_NEGOCIO })} · {v.items}
               </span>
-              <span>${v.total.toFixed(0)}</span>
+              <span>{formatearMoneda(v.total)}</span>
             </div>
           ))
         )}

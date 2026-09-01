@@ -10,6 +10,7 @@ import {
 } from '../lib/dashboard'
 import { claseBoton } from '../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO, hoyEnNegocio } from '../lib/tiempoNegocio'
+import { formatearCantidad, formatearMoneda } from '../lib/formato'
 
 type Estado = 'cargando' | 'normal' | 'vacio' | 'error'
 
@@ -26,8 +27,7 @@ function nombreMesAnterior(): string {
 }
 
 function moneda(n: number): string {
-  const abs = Math.abs(n).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
-  return `${n < 0 ? '−' : ''}$${abs}`
+  return formatearMoneda(n, { signo: true })
 }
 
 function Etiqueta({ children }: { children: ReactNode }) {
@@ -462,7 +462,7 @@ function ContenidoSastreria({ data, nombre, negocioNombre }: { data: DashboardSa
                   {p.variante && <span className="text-[var(--color-texto-suave)]"> ({p.variante})</span>}
                 </span>
                 <span className={p.existencia === 0 ? 'text-[var(--color-error)]' : 'text-[var(--color-advertencia)]'}>
-                  {p.existencia === 0 ? 'Agotado' : `Quedan ${p.existencia}`}
+                  {p.existencia === 0 ? 'Agotado' : `Quedan ${formatearCantidad(p.existencia)}`}
                 </span>
               </div>
             ))
