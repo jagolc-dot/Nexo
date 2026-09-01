@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNegocio } from '../context/NegocioContext'
 import { listarCategorias, listarItems } from '../lib/catalogo'
-import { formatearDuracion } from '../lib/formato'
+import { formatearDuracion, formatearMoneda } from '../lib/formato'
 import { Toggle } from '../components/ui/Toggle'
 import type { CategoriaItem, Item, TipoItem } from '../types'
 import { claseBoton } from '../components/ui/Button'
@@ -116,7 +116,7 @@ export function CatalogoPage() {
                   <div className="mt-3.5 flex items-baseline justify-between gap-2">
                     {item.precio_base != null ? (
                       <span className="text-[18px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                        ${item.precio_base.toFixed(0)}
+                        {formatearMoneda(item.precio_base)}
                       </span>
                     ) : (
                       <span />

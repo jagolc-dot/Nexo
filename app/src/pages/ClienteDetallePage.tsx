@@ -4,6 +4,7 @@ import { cambiarActivoCliente, obtenerCliente, obtenerHistorialDetalladoCliente,
 import type { Cliente } from '../types'
 import { claseBoton } from '../components/ui/Button'
 import { OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
+import { formatearMoneda } from '../lib/formato'
 
 function IconoVolver() {
   return (
@@ -159,7 +160,7 @@ export function ClienteDetallePage() {
             <Tarjeta className="min-w-0 px-4 py-3.5">
               <div className="text-[11.5px] font-medium uppercase tracking-[.07em] text-[var(--color-texto-suave)]">Gasto acumulado</div>
               <div className="mt-1 text-[22px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                ${historial.gastoTotal.toFixed(0)}
+                {formatearMoneda(historial.gastoTotal)}
               </div>
             </Tarjeta>
             <Tarjeta className="min-w-0 px-4 py-3.5">
@@ -182,7 +183,7 @@ export function ClienteDetallePage() {
                   {v.servicios || '—'}
                   {v.forma_una && <span className="ml-2 text-xs text-[var(--color-texto-suave)]">{v.forma_una}</span>}
                 </span>
-                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">${v.monto.toFixed(0)}</span>
+                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">{formatearMoneda(v.monto)}</span>
               </div>
             ))}
           </Tarjeta>
@@ -198,7 +199,7 @@ export function ClienteDetallePage() {
                 <span className="min-w-0 flex-1 truncate text-[13.5px] text-[var(--color-texto)]">
                   {p.nombre} ×{p.cantidad}
                 </span>
-                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">${p.monto.toFixed(0)}</span>
+                <span className="shrink-0 text-[13px] font-medium text-[var(--color-texto)]">{formatearMoneda(p.monto)}</span>
               </div>
             ))}
           </Tarjeta>

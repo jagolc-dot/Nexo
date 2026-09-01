@@ -4,6 +4,7 @@ import { useNegocio } from '../context/NegocioContext'
 import { listarClientes, obtenerResumenVentasPorCliente, type ResumenCliente } from '../lib/clientes'
 import type { Cliente } from '../types'
 import { claseBoton } from '../components/ui/Button'
+import { formatearMoneda } from '../lib/formato'
 
 function IconoBuscar() {
   return (
@@ -188,7 +189,7 @@ export function ClientesPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <div className="text-[13px] font-medium text-[var(--color-texto)]">${(r?.gasto ?? 0).toFixed(0)}</div>
+                      <div className="text-[13px] font-medium text-[var(--color-texto)]">{formatearMoneda(r?.gasto ?? 0)}</div>
                       <div className="mt-0.5 text-xs text-[var(--color-texto-suave)]">
                         {r?.visitas ?? 0} visita{(r?.visitas ?? 0) === 1 ? '' : 's'}
                       </div>

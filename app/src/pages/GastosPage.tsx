@@ -6,6 +6,7 @@ import { calcularRango } from '../lib/periodos'
 import type { Categoria, Gasto } from '../types'
 import { claseBoton } from '../components/ui/Button'
 import { formatearFechaSolo, hoyEnNegocio, OPCIONES_ZONA_NEGOCIO } from '../lib/tiempoNegocio'
+import { formatearMoneda } from '../lib/formato'
 
 type PeriodoGasto = 'semana' | 'mes' | 'año'
 const PERIODOS: { valor: PeriodoGasto; etiqueta: string }[] = [
@@ -139,7 +140,7 @@ export function GastosPage() {
           <>
             <div className="mt-3.5 flex items-baseline gap-2.5">
               <span className="text-[20px] text-[var(--color-primario)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
-                ${totalPeriodo.toFixed(0)}
+                {formatearMoneda(totalPeriodo)}
               </span>
               <span className="text-[12.5px] text-[var(--color-texto-suave)]">
                 {activos.length} gasto{activos.length === 1 ? '' : 's'} en {NOMBRES_MES[Number(hoyEnNegocio().split('-')[1]) - 1]}
@@ -169,10 +170,10 @@ export function GastosPage() {
                       {g.categoria}
                     </span>
                     <div
-                      className="w-20 shrink-0 text-right text-sm font-medium"
+                      className="w-[92px] shrink-0 text-right text-sm font-medium"
                       style={cancelado ? { color: '#9C9C97', textDecoration: 'line-through' } : { color: 'var(--color-texto)' }}
                     >
-                      ${g.monto.toFixed(0)}
+                      {formatearMoneda(g.monto)}
                     </div>
                     {!cancelado && (
                       <button onClick={() => cancelar(g)} aria-label="Cancelar gasto" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[var(--color-texto-suave)] hover:bg-[var(--color-hover-nav)]">

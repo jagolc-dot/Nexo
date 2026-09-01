@@ -13,7 +13,7 @@ import {
   verificarCodigoDisponible,
 } from '../lib/catalogo'
 import type { Item, VarianteItem } from '../types'
-import { formatearDuracion } from '../lib/formato'
+import { formatearCantidad, formatearDuracion, formatearMoneda } from '../lib/formato'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { EstadoBadge } from '../components/ui/EstadoBadge'
@@ -239,7 +239,7 @@ export function ItemDetallePage() {
             <p className="text-sm text-[var(--color-texto-suave)]">{item.categorias_item.nombre}</p>
           )}
           {item.precio_base != null && (
-            <p className="text-sm text-[var(--color-texto)]">${item.precio_base.toFixed(2)}</p>
+            <p className="text-sm text-[var(--color-texto)]">{formatearMoneda(item.precio_base)}</p>
           )}
           {item.duracion_minutos != null && (
             <p className="text-sm text-[var(--color-texto)]">{formatearDuracion(item.duracion_minutos)}</p>
@@ -260,7 +260,7 @@ export function ItemDetallePage() {
           <h2 className="text-sm font-medium text-[var(--color-texto)]">Inventario</h2>
           <Card className="p-3">
             <p className="text-sm text-[var(--color-texto)]">
-              Código: {item.codigo ?? '—'} · Existencia: {item.stock} · Costo promedio: ${item.costo_promedio.toFixed(2)}
+              Código: {item.codigo ?? '—'} · Existencia: {formatearCantidad(item.stock)} · Costo promedio: {formatearMoneda(item.costo_promedio)}
               {item.stock === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
               {!item.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
             </p>
@@ -320,7 +320,7 @@ export function ItemDetallePage() {
                         {v.existencia === 0 && <EstadoBadge tipo="advertencia" texto="Agotado" />}
                         {!v.codigo && <EstadoBadge tipo="advertencia" texto="Sin código" />}
                         <p className="text-xs text-[var(--color-texto-suave)]">
-                          Código: {v.codigo ?? '—'} · Existencia: {v.existencia} · Costo promedio: ${v.costo_promedio.toFixed(2)}
+                          Código: {v.codigo ?? '—'} · Existencia: {formatearCantidad(v.existencia)} · Costo promedio: {formatearMoneda(v.costo_promedio)}
                         </p>
                       </div>
 
