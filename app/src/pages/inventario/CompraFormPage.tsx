@@ -4,6 +4,8 @@ import { useNegocio } from '../../context/NegocioContext'
 import { confirmarCompra, listarProductosInventario, obtenerAlmacen, type ProductoInventario } from '../../lib/inventario'
 import { hoyEnNegocio } from '../../lib/tiempoNegocio'
 import { Button } from '../../components/ui/Button'
+import { CampoMoneda } from '../../components/ui/CampoMoneda'
+import { formatearMonedaPrecisa } from '../../lib/formato'
 
 const CAMPO =
   'flex min-h-11 w-full items-center rounded-[10px] border bg-[var(--color-superficie)] px-3 text-sm text-[var(--color-texto)] outline-none focus:border-[var(--color-primario)]'
@@ -62,9 +64,9 @@ export function CompraFormPage() {
     setError(null)
 
     if (!almacenId) return
-    const partidasValidas = partidas.filter((p) => p.itemId && p.cantidad && p.costoPartida)
+    const partidasValidas = partidas.filter((p) => p.itemId && Number(p.cantidad) > 0 && Number(p.costoPartida) > 0)
     if (partidasValidas.length === 0) {
-      setError('Agrega al menos una partida con producto, cantidad y costo.')
+      setError('Agrega al menos una partida con producto, cantidad y costo mayores a cero.')
       return
     }
     for (const p of partidasValidas) {
@@ -73,6 +75,11 @@ export function CompraFormPage() {
         setError(`Selecciona la variante de "${producto.nombre}".`)
         return
       }
+    }
+    const envio = Number(costoEnvio)
+    if (costoEnvio && (Number.isNaN(envio) || envio < 0)) {
+      setError('El costo de envío no es un número válido.')
+      return
     }
 
     setEnviando(true)
@@ -84,7 +91,7 @@ export function CompraFormPage() {
         folio || null,
         fecha,
         notas || null,
-        costoEnvio ? Number(costoEnvio) : 0,
+        costoEnvio ? envio : 0,
         partidasValidas.map((p) => {
           const producto = productos.find((x) => x.id === p.itemId)
           return {
@@ -165,14 +172,14 @@ export function CompraFormPage() {
               )}
               <label className="flex w-24 flex-col gap-1.5 text-xs text-[var(--color-texto-suave)]">
                 Cantidad
-                <input type="number" min="1" value={p.cantidad} onChange={(e) => actualizarPartida(i, { cantidad: e.target.value })} className={CAMPO} style={ESTILO_CAMPO} />
+                <input type="number" min="1" step="1" value={p.cantidad} onChange={(e) => actualizarPartida(i, { cantidad: e.target.value })} className={CAMPO} style={ESTILO_CAMPO} />
               </label>
-              <label className="flex w-32 flex-col gap-1.5 text-xs text-[var(--color-texto-suave)]">
+              <label className="flex w-36 flex-col gap-1.5 text-xs text-[var(--color-texto-suave)]">
                 Costo total
-                <input type="number" step="0.01" min="0" value={p.costoPartida} onChange={(e) => actualizarPartida(i, { costoPartida: e.target.value })} className={CAMPO} style={ESTILO_CAMPO} />
+                <CampoMoneda valor={p.costoPartida} onChange={(v) => actualizarPartida(i, { costoPartida: v })} />
               </label>
               {costoUnitario !== null && (
-                <span className="pb-3 text-xs text-[var(--color-texto-suave)]">unitario: ${costoUnitario.toFixed(4)}</span>
+                <span className="pb-3 text-xs text-[var(--color-texto-suave)]">unitario: {formatearMonedaPrecisa(costoUnitario)}</span>
               )}
               {partidas.length > 1 && (
                 <button type="button" onClick={() => quitarPartida(i)} className="pb-3 text-xs" style={{ color: 'var(--color-error)' }}>
@@ -182,23 +189,13 @@ export function CompraFormPage() {
             </div>
           )
         })}
-        <button type="button" onClick={agregarPartida} className="self-start text-xs text-[var(--color-texto-suave)] underline">
+        <Button type="button" variante="secundario" onClick={agregarPartida} className="self-start">
           + Agregar partida
-        </button>
+        </Button>
 
         <label className="flex max-w-[240px] flex-col gap-1.5 text-xs font-medium text-[var(--color-texto)]">
           Costo de envío (opcional)
-          <div className={CAMPO} style={ESTILO_CAMPO}>
-            <span className="mr-1 font-normal text-[var(--color-texto-suave)]">$</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={costoEnvio}
-              onChange={(e) => setCostoEnvio(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent font-medium outline-none"
-            />
-          </div>
+          <CampoMoneda valor={costoEnvio} onChange={setCostoEnvio} />
         </label>
         <p className="-mt-2 text-xs text-[var(--color-texto-suave)]">
           El envío se prorratea entre las partidas en proporción a su costo.
