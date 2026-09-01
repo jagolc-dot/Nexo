@@ -1,13 +1,25 @@
-import { exportarExcel, exportarPDF } from '../../lib/exportar'
+import { exportarExcel, exportarPDF, type FormatoColumna } from '../../lib/exportar'
+import { formatearCantidad, formatearMoneda } from '../../lib/formato'
+
+function celda(c: string | number, formato: FormatoColumna) {
+  if (typeof c === 'number') {
+    if (formato === 'moneda') return formatearMoneda(c)
+    if (formato === 'cantidad') return formatearCantidad(c)
+    return String(c)
+  }
+  return c
+}
 
 export function TablaReporte({
   titulo,
   columnas,
   filas,
+  formatos = [],
 }: {
   titulo: string
   columnas: string[]
   filas: (string | number)[][]
+  formatos?: FormatoColumna[]
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -15,13 +27,13 @@ export function TablaReporte({
         <h3 className="text-sm font-medium text-[var(--color-texto)]">{titulo}</h3>
         <div className="flex gap-2">
           <button
-            onClick={() => exportarPDF(titulo, columnas, filas)}
+            onClick={() => exportarPDF(titulo, columnas, filas, formatos)}
             className="min-h-11 rounded-lg border-[1.5px] border-[var(--color-secundario)] px-2 text-xs text-[var(--color-texto)]"
           >
             PDF
           </button>
           <button
-            onClick={() => exportarExcel(titulo, columnas, filas)}
+            onClick={() => exportarExcel(titulo, columnas, filas, formatos)}
             className="min-h-11 rounded-lg border-[1.5px] border-[var(--color-secundario)] px-2 text-xs text-[var(--color-texto)]"
           >
             Excel
@@ -52,7 +64,7 @@ export function TablaReporte({
               <tr key={i} className="border-t border-black/10">
                 {fila.map((c, j) => (
                   <td key={j} className="whitespace-nowrap px-3 py-2 text-[var(--color-texto)]">
-                    {c}
+                    {celda(c, formatos[j] ?? 'texto')}
                   </td>
                 ))}
               </tr>
