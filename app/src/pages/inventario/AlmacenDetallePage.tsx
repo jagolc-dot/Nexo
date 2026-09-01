@@ -65,6 +65,9 @@ export function AlmacenDetallePage() {
         <div className="flex-1 text-[22px] font-medium text-[var(--color-texto)]" style={{ fontFamily: 'var(--fuente-titulos)' }}>
           Almacén
         </div>
+        <Link to="/inventario/compras" className={claseBoton('secundario', '!min-h-10 px-3.5 text-[13px]')}>
+          Historial de compras
+        </Link>
         <Link to="/inventario/ajuste" className={claseBoton('secundario', '!min-h-10 px-3.5 text-[13px]')}>
           Ajuste de inventario
         </Link>
